@@ -1,0 +1,32 @@
+# signal_red sits in two palettes on purpose: one Color row, many palettes, is
+# the whole point of the join table and the basis of the reverse lookup.
+
+brand_signal_red:
+  palette: brand
+  color: signal_red
+  position: 0
+
+brand_ink_black:
+  palette: brand
+  color: ink_black
+  position: 1
+
+brand_paper_white:
+  palette: brand
+  color: paper_white
+  position: 2
+
+autumn_ochre_first:
+  palette: autumn
+  color: autumn_ochre
+  position: 0
+
+autumn_signal_red:
+  palette: autumn
+  color: signal_red
+  position: 1
+
+press_process_cyan:
+  palette: press
+  color: process_cyan
+  position: 0

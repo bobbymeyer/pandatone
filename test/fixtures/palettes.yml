@@ -1,0 +1,16 @@
+brand:
+  name: Brand Core
+  tags: [ "brand", "active" ]
+
+autumn:
+  name: Autumn 2026
+  tags: [ "seasonal", "active" ]
+
+press:
+  name: Press Check
+  tags: [ "print" ]
+
+# Deliberately empty. Guards the zero-colour rendering and serialisation paths.
+empty:
+  name: Unfilled
+  tags: [ ]
