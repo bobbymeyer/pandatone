@@ -50,7 +50,12 @@
 
 .strip .swatch { flex: 1 1 0; }
 
-.swatch--large { aspect-ratio: 1 / 1; }
+/* height:auto defeats the base .swatch height:100%, so the square comes from
+   the capped width and the aspect ratio rather than from the grid row. */
+.swatch--large {
+  aspect-ratio: 1 / 1;
+  height: auto;
+}
 
 /* --- Palette index ----------------------------------------------------- */
 
@@ -186,14 +191,31 @@
   grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
   column-gap: var(--gutter);
   row-gap: var(--space-3);
+  align-items: start;
 }
 
-.color-detail > .swatch,
-.lookup-result > .swatch { grid-column: 1 / span 5; }
-
-/* Column six is left standing empty. */
+/* Two columns: the values read on the left, the swatch sits against the right
+   edge. Both are placed on row one explicitly, because sparse auto-placement
+   drops a definite-column item onto the next row whenever it starts left of
+   the previous item, which would stack these instead of pairing them.
+   Column seven is left standing empty. */
 .color-detail__body,
-.lookup-result__body { grid-column: 7 / span 6; }
+.lookup-result__body {
+  grid-column: 1 / span 6;
+  grid-row: 1;
+}
+
+/* Capped rather than filling its span. Five columns square is 533px on a
+   1440px screen, which pushed the values it describes, and the palettes
+   below them, off the bottom of the window before you could read either. */
+.color-detail > .swatch,
+.lookup-result > .swatch {
+  grid-column: 8 / span 5;
+  grid-row: 1;
+  justify-self: end;
+  width: 100%;
+  max-width: 22rem;
+}
 
 .color-detail__body .page-title { margin-bottom: var(--space-1); }
 
@@ -222,7 +244,13 @@
   .color-detail > .swatch,
   .lookup-result > .swatch,
   .color-detail__body,
-  .lookup-result__body { grid-column: 1 / -1; }
+  .lookup-result__body {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .color-detail > .swatch,
+  .lookup-result > .swatch { justify-self: start; }
 }
 
 /* --- Filters and tags --------------------------------------------------- */
