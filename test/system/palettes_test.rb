@@ -133,6 +133,79 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "#FF00FF"
   end
 
+  # --- Adding an existing swatch -----------------------------------------
+  #
+  # One colour row shared across palettes is the whole point of the join
+  # table, so reaching for a colour already in the library has to be at least
+  # as easy as typing a new one.
+
+  test "offers the library when adding a swatch" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_text "From the library"
+    assert_selector "#color_#{colors(:signal_red).id}"
+    assert_selector "#color_#{colors(:deep_indigo).id}"
+  end
+
+  test "leaves out colours the palette already holds" do
+    visit new_palette_color_path(palettes(:brand))
+
+    assert_no_selector "#color_#{colors(:signal_red).id}"
+    assert_no_selector "#color_#{colors(:ink_black).id}"
+    assert_selector "#color_#{colors(:deep_indigo).id}"
+  end
+
+  test "adds an existing colour without making a second copy of it" do
+    assert_no_difference "Color.count" do
+      assert_difference "PaletteColor.count", 1 do
+        visit new_palette_color_path(palettes(:press))
+
+        within "#color_#{colors(:signal_red).id}" do
+          click_on "Add"
+        end
+      end
+    end
+
+    assert_text "signal-red"
+    assert_equal [ "process-cyan", "signal-red" ], palettes(:press).reload.colors.map(&:name)
+  end
+
+  test "an added colour keeps its place in the palettes it already belonged to" do
+    visit new_palette_color_path(palettes(:press))
+
+    within "#color_#{colors(:signal_red).id}" do
+      click_on "Add"
+    end
+
+    assert_equal [ "signal-red", "ink-black", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
+  end
+
+  test "searches the library when adding a swatch" do
+    visit new_palette_color_path(palettes(:press))
+
+    fill_in "Search", with: "ink"
+    click_on "Filter"
+
+    assert_selector "#color_#{colors(:ink_black).id}"
+    assert_no_selector "#color_#{colors(:signal_red).id}"
+  end
+
+  test "says so when the library has nothing left to offer" do
+    palette = Palette.create!(name: "Everything")
+    Color.find_each { |color| palette.palette_colors.create!(color: color) }
+
+    visit new_palette_color_path(palette)
+
+    assert_text "already in this palette"
+  end
+
+  test "still offers a new colour alongside the library" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_text "Or enter a new colour"
+    assert_selector "#swatch_name"
+  end
+
   test "offers all four ways of entering a colour" do
     visit new_palette_color_path(palettes(:press))
 

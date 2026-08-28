@@ -95,6 +95,22 @@
   margin-bottom: var(--space-2);
 }
 
+/* The picker renders its swatch bare rather than wrapped in a link, so it
+   needs the sizing the link would otherwise carry. height:auto defeats the
+   base .swatch height:100%. */
+.color-card__swatch {
+  aspect-ratio: 3 / 2;
+  height: auto;
+  margin-bottom: var(--space-2);
+}
+
+.color-card form.button_to { margin-top: var(--space-2); }
+
+.library-picker h2,
+.new-color h2 { margin-bottom: var(--space-2); }
+
+.library-picker .filter-form { margin-bottom: var(--space-3); }
+
 .color-card__name {
   font-size: var(--size-3);
   font-weight: 700;

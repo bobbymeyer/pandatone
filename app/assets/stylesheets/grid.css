@@ -46,6 +46,8 @@ main.grid {
 .form,
 .empty,
 .memberships,
+.library-picker,
+.new-color,
 .lookup-result,
 .color-detail { grid-column: 1 / -1; }
 

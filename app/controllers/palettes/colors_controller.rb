@@ -3,20 +3,24 @@ module Palettes
     before_action :set_palette
 
     def new
+      @available = available_colors
     end
 
+    # Two ways to fill a swatch: reach for a colour already in the library, or
+    # describe a new one. Both end up appending to the same palette, so they
+    # share one route and one transaction.
     def create
-      spec = swatch_spec
+      spec = params[:color_id].present? ? { id: params[:color_id] } : swatch_spec
 
       if spec.nil?
         @palette.errors.add(:colors, "need a name and some values")
-        return render :new, status: :unprocessable_content
+        return render_new
       end
 
       if PaletteComposition.new(@palette, attributes: {}, append: [ spec ]).save
         redirect_to @palette
       else
-        render :new, status: :unprocessable_content
+        render_new
       end
     end
 
@@ -30,6 +34,17 @@ module Palettes
     private
       def set_palette
         @palette = Palette.friendly_find(params[:palette_id])
+      end
+
+      # Offering a colour the palette already holds would only produce a
+      # uniqueness error, so it is left out rather than shown and refused.
+      def available_colors
+        Color.where.not(id: @palette.color_ids).order(:name).name_matching(params[:q])
+      end
+
+      def render_new
+        @available = available_colors
+        render :new, status: :unprocessable_content
       end
   end
 end
