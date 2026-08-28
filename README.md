@@ -44,7 +44,8 @@ The UI is for a human curating the library; the API is for machines.
   palette page where swatches are reordered, removed and added in place.
 - **Colours** — the whole library as swatches, filtered by tag and name, each
   showing the palettes it sits in; a colour page with both spaces, its tags
-  and its member palettes.
+  and its member palettes, editable from there. Editing a colour changes it
+  in every palette that holds it, which the edit form says before you commit.
 - **Lookup** — paste a hex or an RGB triple and find every palette holding it.
 
 ## API
@@ -64,6 +65,7 @@ missing records return `404` with `{"error": "Not found"}`.
 | GET    | `/colors`                   | Filters: `?tag=`, `?hex=RRGGBB`, `?palette=name-or-id`     |
 | GET    | `/colors/:id`               | Includes a `palettes` array: the reverse lookup            |
 | POST   | `/colors`                   | Creates a standalone colour                                |
+| PATCH  | `/colors/:id`               | Edits a colour. It is shared, so this changes every palette holding it |
 
 A colour is serialised as:
 

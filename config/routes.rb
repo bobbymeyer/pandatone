@@ -7,7 +7,7 @@ Rails.application.routes.draw do
         get :colors, on: :member
       end
 
-      resources :colors, only: %i[ index show create ]
+      resources :colors, only: %i[ index show create update ]
     end
   end
 
@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     resources :colors, only: %i[ new create destroy ], controller: "palettes/colors"
   end
 
-  resources :colors, only: %i[ index show ]
+  resources :colors, only: %i[ index show edit update ]
   resource :lookup, only: :show
 
   get "up" => "rails/health#show", as: :rails_health_check

@@ -23,6 +23,10 @@
     <% if @color.tags.any? %>
       <p class="tags"><%= @color.tags.join(" · ") %></p>
     <% end %>
+
+    <p class="page-actions">
+      <%= link_to "Edit colour", edit_color_path(@color), class: "button" %>
+    </p>
   </div>
 </article>
 

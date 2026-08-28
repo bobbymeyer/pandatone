@@ -1,25 +1,27 @@
-<%# The colour entry row. All four panels are rendered so the form works with
+<%# locals: (color: nil) %>
+<%# The colour entry row, shared by the new-palette form, the add-a-swatch
+    form and the edit-a-colour form. Pass a colour to prefill it. All four panels are rendered so the form works with
     JavaScript off; CSS :has() shows only the one whose mode is selected, and
     the Stimulus controller paints a live preview as you type. The server
     reads only the chosen mode's fields, so the hidden ones are inert. %>
 <div class="swatch-entry__fields"
      data-controller="swatch-preview"
-     data-swatch-preview-mode-value="<%= swatch_input_mode %>">
+     data-swatch-preview-mode-value="<%= swatch_input_mode(color) %>">
   <div class="field">
     <%= label_tag "swatch_name", "Swatch name" %>
-    <%= text_field_tag "swatch[name]", submitted_swatch[:name], id: "swatch_name", autocomplete: "off" %>
+    <%= text_field_tag "swatch[name]", swatch_field_value(:name, color), id: "swatch_name", autocomplete: "off" %>
   </div>
 
   <div class="field">
     <%= label_tag "swatch_tags", "Swatch tags" %>
-    <%= text_field_tag "swatch[tags]", submitted_swatch[:tags], id: "swatch_tags", autocomplete: "off" %>
+    <%= text_field_tag "swatch[tags]", swatch_field_value(:tags, color), id: "swatch_tags", autocomplete: "off" %>
   </div>
 
   <fieldset class="mode-toggle">
     <legend>Enter as</legend>
     <% { "rgb" => "RGB", "cmyk" => "CMYK", "hex" => "Hex", "picker" => "Picker" }.each do |mode, label| %>
       <span class="radio">
-        <%= radio_button_tag "swatch[input_mode]", mode, swatch_input_mode == mode,
+        <%= radio_button_tag "swatch[input_mode]", mode, swatch_input_mode(color) == mode,
               id: "swatch_input_mode_#{mode}",
               data: { swatch_preview_target: "mode", action: "change->swatch-preview#redraw" } %>
         <%= label_tag "swatch_input_mode_#{mode}", label %>
@@ -31,7 +33,7 @@
     <% %w[ r g b ].each do |channel| %>
       <div class="field field--channel">
         <%= label_tag "swatch_#{channel}", channel.upcase %>
-        <%= number_field_tag "swatch[#{channel}]", submitted_swatch[channel], id: "swatch_#{channel}",
+        <%= number_field_tag "swatch[#{channel}]", swatch_field_value(channel, color), id: "swatch_#{channel}",
               min: 0, max: 255, step: 1,
               data: { swatch_preview_target: "rgb", action: "input->swatch-preview#redraw" } %>
       </div>
@@ -42,7 +44,7 @@
     <% %w[ c m y k ].each do |channel| %>
       <div class="field field--channel">
         <%= label_tag "swatch_#{channel}", channel.upcase %>
-        <%= number_field_tag "swatch[#{channel}]", submitted_swatch[channel], id: "swatch_#{channel}",
+        <%= number_field_tag "swatch[#{channel}]", swatch_field_value(channel, color), id: "swatch_#{channel}",
               min: 0, max: 100, step: 0.1,
               data: { swatch_preview_target: "cmyk", action: "input->swatch-preview#redraw" } %>
       </div>
@@ -52,7 +54,7 @@
   <div class="entry-panel" data-mode="hex">
     <div class="field">
       <%= label_tag "swatch_hex", "Hex value" %>
-      <%= text_field_tag "swatch[hex]", submitted_swatch[:hex], id: "swatch_hex",
+      <%= text_field_tag "swatch[hex]", swatch_field_value(:hex, color), id: "swatch_hex",
             autocomplete: "off", placeholder: "#E30613",
             data: { swatch_preview_target: "hex", action: "input->swatch-preview#redraw" } %>
     </div>
@@ -61,7 +63,7 @@
   <div class="entry-panel" data-mode="picker">
     <div class="field field--picker">
       <%= label_tag "swatch_picker", "Pick a colour" %>
-      <%= color_field_tag "swatch[picker]", submitted_swatch[:picker].presence || "#000000",
+      <%= color_field_tag "swatch[picker]", swatch_field_value(:picker, color).presence || "#000000",
             id: "swatch_picker",
             data: { swatch_preview_target: "picker", action: "input->swatch-preview#redraw" } %>
     </div>

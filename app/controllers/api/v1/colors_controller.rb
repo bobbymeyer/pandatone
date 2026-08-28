@@ -24,6 +24,16 @@ module Api
         end
       end
 
+      def update
+        color = Color.find(params[:id])
+
+        if color.update(color_attributes)
+          render json: ColorSerializer.one(color, palettes: true)
+        else
+          render_invalid(color)
+        end
+      end
+
       private
         def color_attributes
           attributes = color_params.permit(:name, :source_space, :r, :g, :b, :c, :m, :y, :k, tags: []).to_h

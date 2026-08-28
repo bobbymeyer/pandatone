@@ -82,6 +82,113 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "paper-white"
   end
 
+  # --- Edit --------------------------------------------------------------
+
+  test "edits a colour name and tags" do
+    visit color_path(colors(:deep_indigo))
+    click_on "Edit colour"
+
+    fill_in "Swatch name", with: "night-indigo"
+    fill_in "Swatch tags", with: "Cool, brand"
+    click_on "Save colour"
+
+    assert_text "night-indigo"
+    assert_text "cool · brand"
+  end
+
+  test "prefills the edit form with what is stored" do
+    visit edit_color_path(colors(:signal_red))
+
+    assert_equal "signal-red", find_field("Swatch name").value
+    assert_equal "brand, primary", find_field("Swatch tags").value
+    assert_equal "227", find_field("R").value
+    assert find("#swatch_input_mode_rgb", visible: :all).checked?
+  end
+
+  test "opens a cmyk sourced colour in cmyk" do
+    visit edit_color_path(colors(:process_cyan))
+
+    assert find("#swatch_input_mode_cmyk", visible: :all).checked?
+    assert_equal "100.0", find_field("C").value
+  end
+
+  test "edits a colour by its rgb values" do
+    visit edit_color_path(colors(:deep_indigo))
+
+    fill_in "R", with: "227"
+    fill_in "G", with: "6"
+    fill_in "B", with: "19"
+    click_on "Save colour"
+
+    assert_text "#E30613"
+  end
+
+  test "edits a colour by hex" do
+    visit edit_color_path(colors(:deep_indigo))
+
+    choose "Hex"
+    fill_in "Hex value", with: "#C4842C"
+    click_on "Save colour"
+
+    assert_text "#C4842C"
+    assert_text "Authored in RGB"
+  end
+
+  test "switches a colour from rgb to cmyk" do
+    visit edit_color_path(colors(:deep_indigo))
+
+    choose "CMYK"
+    fill_in "C", with: "0"
+    fill_in "M", with: "0"
+    fill_in "Y", with: "100"
+    fill_in "K", with: "0"
+    click_on "Save colour"
+
+    assert_text "Authored in CMYK"
+    assert_text "#FFFF00"
+  end
+
+  test "reports a validation error without losing what was typed" do
+    visit edit_color_path(colors(:deep_indigo))
+
+    fill_in "Swatch name", with: ""
+    fill_in "R", with: "999"
+    click_on "Save colour"
+
+    assert_text "must be less than or equal to 255"
+    assert_equal "999", find_field("R").value
+    assert_equal 43, colors(:deep_indigo).reload.r
+  end
+
+  test "editing a shared colour changes it in every palette holding it" do
+    visit edit_color_path(colors(:signal_red))
+
+    fill_in "R", with: "0"
+    fill_in "G", with: "0"
+    fill_in "B", with: "0"
+    click_on "Save colour"
+
+    visit palette_path(palettes(:brand))
+    assert_selector "#palette_color_#{palette_colors(:brand_signal_red).id} .swatch[style*='#000000']"
+
+    visit palette_path(palettes(:autumn))
+    assert_selector "#palette_color_#{palette_colors(:autumn_signal_red).id} .swatch[style*='#000000']"
+  end
+
+  test "warns that a shared colour is shared" do
+    visit edit_color_path(colors(:signal_red))
+
+    assert_text "2 palettes"
+  end
+
+  test "reaches the edit form from a palette swatch" do
+    visit palette_path(palettes(:brand))
+    click_on "signal-red"
+    click_on "Edit colour"
+
+    assert_equal "signal-red", find_field("Swatch name").value
+  end
+
   # --- Show --------------------------------------------------------------
 
   test "shows a colour in both spaces with the palettes that hold it" do

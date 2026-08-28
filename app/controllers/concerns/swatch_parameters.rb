@@ -24,16 +24,23 @@ module SwatchParameters
     # posts a value, so asking whether every field is blank would make an
     # untouched form look filled in.
     def swatch_spec
-      return nil if params[:swatch].blank?
+      return nil if params[:swatch].blank? || swatch_blank?
 
-      values = swatch_values
-      return nil if permitted_swatch[:name].blank? && values.values.all?(&:blank?)
+      swatch_attributes
+    end
 
+    # Editing always writes what the row says; only adding a swatch treats an
+    # untouched row as "no swatch wanted".
+    def swatch_attributes
       {
         name: permitted_swatch[:name],
         tags: permitted_swatch[:tags],
         source_space: swatch_input_mode == Color::CMYK ? Color::CMYK : Color::RGB
-      }.merge(values)
+      }.merge(swatch_values)
+    end
+
+    def swatch_blank?
+      permitted_swatch[:name].blank? && swatch_values.values.all?(&:blank?)
     end
 
     def swatch_values
@@ -45,14 +52,19 @@ module SwatchParameters
       end
     end
 
-    def swatch_input_mode
+    # What was just submitted wins, so a validation error keeps you in the
+    # panel you were using; otherwise a colour being edited opens in the space
+    # it was authored in.
+    def swatch_input_mode(color = nil)
       mode = params.dig(:swatch, :input_mode)
+      return mode if INPUT_MODES.include?(mode)
 
-      INPUT_MODES.include?(mode) ? mode : Color::RGB
+      source = color&.source_space
+      INPUT_MODES.include?(source) ? source : Color::RGB
     end
 
     def permitted_swatch
-      @permitted_swatch ||= params[:swatch].permit(:name, :tags, :input_mode, :hex, :picker, *CHANNELS)
+      @permitted_swatch ||= (params[:swatch] || ActionController::Parameters.new).permit(:name, :tags, :input_mode, :hex, :picker, *CHANNELS)
     end
 
     def submitted_swatch

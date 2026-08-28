@@ -158,6 +158,78 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_not_empty json["errors"]["source_space"]
   end
 
+  # --- Update ------------------------------------------------------------
+  #
+  # A colour is shared, so being unable to correct one after it is stored
+  # means living with the mistake in every palette that holds it.
+
+  test "updates a colour name and tags" do
+    patch api_v1_color_url(colors(:deep_indigo)), as: :json,
+      params: { color: { name: "night-indigo", tags: [ "Cool", "brand" ] } }
+
+    assert_response :success
+    assert_equal "night-indigo", json["name"]
+    assert_equal [ "cool", "brand" ], json["tags"]
+  end
+
+  test "updates rgb values and rederives cmyk" do
+    patch api_v1_color_url(colors(:signal_red)), as: :json,
+      params: { color: { r: 43, g: 74, b: 138 } }
+
+    assert_response :success
+    assert_equal "#2B4A8A", json["hex"]
+    assert_equal({ "c" => 68.8, "m" => 46.4, "y" => 0.0, "k" => 45.9 }, json["cmyk"])
+  end
+
+  test "switching source space to cmyk rederives rgb" do
+    patch api_v1_color_url(colors(:signal_red)), as: :json,
+      params: { color: { source_space: "cmyk", c: 0, m: 0, y: 100, k: 0 } }
+
+    assert_response :success
+    assert_equal "cmyk", json["source_space"]
+    assert_equal({ "r" => 255, "g" => 255, "b" => 0 }, json["rgb"])
+  end
+
+  test "leaves palette membership alone when a colour changes" do
+    patch api_v1_color_url(colors(:signal_red)), as: :json, params: { color: { name: "renamed" } }
+
+    assert_response :success
+    assert_equal [ "Autumn 2026", "Brand Core" ], json["palettes"].map { |p| p["name"] }
+  end
+
+  test "editing a shared colour changes it in every palette holding it" do
+    patch api_v1_color_url(colors(:signal_red)), as: :json, params: { color: { r: 0, g: 0, b: 0 } }
+
+    get colors_api_v1_palette_url(palettes(:brand))
+    assert_equal "#000000", json.find { |c| c["id"] == colors(:signal_red).id }["hex"]
+
+    get colors_api_v1_palette_url(palettes(:autumn))
+    assert_equal "#000000", json.find { |c| c["id"] == colors(:signal_red).id }["hex"]
+  end
+
+  test "rejects an invalid update and changes nothing" do
+    color = colors(:signal_red)
+
+    patch api_v1_color_url(color), as: :json, params: { color: { r: 999 } }
+
+    assert_response :unprocessable_content
+    assert_not_empty json["errors"]["r"]
+    assert_equal 227, color.reload.r
+  end
+
+  test "rejects a blank name on update" do
+    patch api_v1_color_url(colors(:signal_red)), as: :json, params: { color: { name: "" } }
+
+    assert_response :unprocessable_content
+    assert_includes json["errors"]["name"], "can't be blank"
+  end
+
+  test "returns 404 when updating an unknown colour" do
+    patch api_v1_color_url(999_999), as: :json, params: { color: { name: "x" } }
+
+    assert_response :not_found
+  end
+
   private
     def json
       JSON.parse(response.body)
