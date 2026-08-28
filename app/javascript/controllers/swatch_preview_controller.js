@@ -1,44 +1,50 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Live preview for the colour entry row, and the RGB/CMYK toggle.
+// Live preview for the colour entry row.
 //
-// The conversion here is a deliberate duplicate of the server's ColorSpace:
-// it exists only to paint a preview while you type. The value that gets
-// stored is always the one the server computes.
+// Which panel is visible is CSS's job, not this controller's: :has() on the
+// checked radio handles it, so the right fields show even with scripting off.
+// This only paints the preview.
+//
+// The conversion here is a deliberate duplicate of the server's ColorSpace.
+// It exists to show you what you are typing; the value that gets stored is
+// always the one the server computes.
 export default class extends Controller {
-  static targets = ["space", "rgb", "cmyk", "rgbFields", "cmykFields", "preview", "hex"]
-  static values = { source: String }
+  static targets = ["mode", "rgb", "cmyk", "hex", "picker", "preview", "readout"]
+  static values = { mode: String }
 
   connect() {
-    this.spaceChanged()
-  }
-
-  spaceChanged() {
-    const cmyk = this.source === "cmyk"
-    this.rgbFieldsTarget.hidden = cmyk
-    this.cmykFieldsTarget.hidden = !cmyk
     this.redraw()
   }
 
   redraw() {
-    const rgb = this.source === "cmyk" ? this.cmykToRgb() : this.rgbFromFields()
+    const rgb = this.currentRgb()
     const hex = rgb ? this.toHex(rgb) : ""
 
     this.previewTarget.style.backgroundColor = hex || "transparent"
-    this.hexTarget.textContent = hex
+    this.readoutTarget.textContent = hex
   }
 
-  get source() {
-    const checked = this.spaceTargets.find((input) => input.checked)
-    return checked ? checked.value : this.sourceValue
+  currentRgb() {
+    switch (this.mode) {
+      case "cmyk":   return this.fromCmyk()
+      case "hex":    return this.parseHex(this.hasHexTarget ? this.hexTarget.value : "")
+      case "picker": return this.parseHex(this.hasPickerTarget ? this.pickerTarget.value : "")
+      default:       return this.fromRgb()
+    }
   }
 
-  rgbFromFields() {
+  get mode() {
+    const checked = this.modeTargets.find((input) => input.checked)
+    return checked ? checked.value : this.modeValue
+  }
+
+  fromRgb() {
     const [r, g, b] = this.rgbTargets.map((field) => this.clamp(field.value, 255))
     return [r, g, b].every((channel) => channel !== null) ? { r, g, b } : null
   }
 
-  cmykToRgb() {
+  fromCmyk() {
     const [c, m, y, k] = this.cmykTargets.map((field) => this.clamp(field.value, 100))
     if ([c, m, y, k].some((channel) => channel === null)) return null
 
@@ -47,6 +53,18 @@ export default class extends Controller {
       r: Math.round(255 * (1 - c / 100) * key),
       g: Math.round(255 * (1 - m / 100) * key),
       b: Math.round(255 * (1 - y / 100) * key)
+    }
+  }
+
+  parseHex(value) {
+    let digits = String(value).trim().replace(/^#/, "")
+    if (digits.length === 3) digits = digits.split("").map((d) => d + d).join("")
+    if (!/^[0-9a-f]{6}$/i.test(digits)) return null
+
+    return {
+      r: parseInt(digits.slice(0, 2), 16),
+      g: parseInt(digits.slice(2, 4), 16),
+      b: parseInt(digits.slice(4, 6), 16)
     }
   }
 

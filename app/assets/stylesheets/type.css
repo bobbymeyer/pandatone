@@ -67,7 +67,7 @@ h3 {
 /* The micro register: labels, tags, meta. Set open and upper against the
    tight display sizes, which is most of the contrast in the app. */
 .field label,
-.space-toggle legend,
+.mode-toggle legend,
 .channels dt,
 .masthead__nav a,
 .button,

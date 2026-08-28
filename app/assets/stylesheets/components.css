@@ -345,22 +345,47 @@
   margin-top: var(--space-2);
 }
 
-.space-toggle {
+.mode-toggle {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2);
 }
 
-.space-toggle legend { color: var(--ink-quiet); float: left; }
+.mode-toggle legend { color: var(--ink-quiet); float: left; }
 
 .radio { display: inline-flex; align-items: baseline; gap: var(--space-1); }
 
-.channels-entry {
+.entry-panel {
   display: flex;
   gap: var(--space-2);
 }
 
+/* Show only the panel whose mode is selected. Written as "hide the others"
+   rather than "show the chosen one" so that a browser without :has() falls
+   back to showing every panel, which still works, rather than to showing
+   none, which would leave no way to enter a colour at all. */
+.swatch-entry__fields:has(#swatch_input_mode_rgb:checked) .entry-panel:not([data-mode="rgb"]),
+.swatch-entry__fields:has(#swatch_input_mode_cmyk:checked) .entry-panel:not([data-mode="cmyk"]),
+.swatch-entry__fields:has(#swatch_input_mode_hex:checked) .entry-panel:not([data-mode="hex"]),
+.swatch-entry__fields:has(#swatch_input_mode_picker:checked) .entry-panel:not([data-mode="picker"]) {
+  display: none;
+}
+
 .field--channel { width: 5rem; }
+
+.field--picker { width: max-content; }
+
+/* The system picker. Stripped back to a plain block of colour so it reads as
+   a swatch rather than as a browser control. */
+.field--picker input {
+  width: calc(var(--baseline) * 9);
+  height: calc(var(--baseline) * 5);
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
 
 .preview {
   display: flex;

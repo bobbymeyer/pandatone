@@ -144,6 +144,50 @@ class ColorTest < ActiveSupport::TestCase
     assert_equal "#00FFFF", colors(:process_cyan).hex
   end
 
+  # --- Hex as an input path ----------------------------------------------
+  #
+  # hex is derived for reading, but it is also how a colour arrives from a hex
+  # field or the system colour picker, both of which are RGB sources.
+
+  test "sets rgb channels from an assigned hex" do
+    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#E30613")
+
+    assert_equal [ 227, 6, 19 ], [ color.r, color.g, color.b ]
+    assert_equal "#E30613", color.hex
+  end
+
+  test "derives cmyk from an assigned hex" do
+    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#E30613")
+
+    assert_in_delta 97.4, color.m.to_f
+    assert_in_delta 11.0, color.k.to_f
+  end
+
+  test "accepts hex without a hash, in any case, and in shorthand" do
+    assert_equal "#E30613", Color.new(source_space: "rgb", hex: "e30613").hex
+    assert_equal "#FFCC00", Color.new(source_space: "rgb", hex: "#fc0").hex
+  end
+
+  test "rejects a hex it cannot read" do
+    color = Color.new(name: "bad hex", source_space: "rgb", hex: "nope")
+
+    assert_not color.valid?
+    assert_includes color.errors[:hex], "is not a colour we can read"
+  end
+
+  test "does not complain about a hex that was never given" do
+    color = Color.new(name: "plain", source_space: "rgb", r: 1, g: 2, b: 3)
+
+    assert_predicate color, :valid?
+    assert_empty color.errors[:hex]
+  end
+
+  test "an assigned hex wins over separately assigned rgb channels" do
+    color = Color.create!(name: "both", source_space: "rgb", r: 0, g: 0, b: 0, hex: "#E30613")
+
+    assert_equal [ 227, 6, 19 ], [ color.r, color.g, color.b ]
+  end
+
   # --- Tags --------------------------------------------------------------
 
   test "normalizes tags on save" do

@@ -20,6 +20,7 @@ class Color < ApplicationRecord
     numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 255 }
   validates :c, :m, :y, :k, presence: true,
     numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  validate :assigned_hex_must_be_readable
 
   scope :by_hex, ->(hex) {
     rgb = ColorSpace.parse_hex(hex)
@@ -34,6 +35,16 @@ class Color < ApplicationRecord
 
   def hex
     ColorSpace.to_hex(r, g, b)
+  end
+
+  # hex is derived for reading, but it is also an input path: a hex field and
+  # the system colour picker both hand back a hex string, and both are RGB
+  # sources. Assigning it sets the RGB channels; nothing stores the string.
+  def hex=(value)
+    @assigned_hex = value
+    rgb = ColorSpace.parse_hex(value)
+
+    assign_attributes(rgb) if rgb
   end
 
   def rgb
@@ -51,6 +62,12 @@ class Color < ApplicationRecord
   end
 
   private
+    def assigned_hex_must_be_readable
+      return if @assigned_hex.blank? || ColorSpace.parse_hex(@assigned_hex)
+
+      errors.add(:hex, "is not a colour we can read")
+    end
+
     # The source space is the truth; the other one is redrawn from it on every
     # write, so the two can never drift apart.
     def derive_companion_space
