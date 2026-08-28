@@ -36,6 +36,17 @@ recorded rather than inferred.
 There is no `active` boolean anywhere. An active palette is one tagged
 `active`. Tags are normalised to stripped, downcased, deduped strings.
 
+## Screens
+
+The UI is for a human curating the library; the API is for machines.
+
+- **Palettes** — the index as strips of swatches, filtered by tag and name; a
+  palette page where swatches are reordered, removed and added in place.
+- **Colours** — the whole library as swatches, filtered by tag and name, each
+  showing the palettes it sits in; a colour page with both spaces, its tags
+  and its member palettes.
+- **Lookup** — paste a hex or an RGB triple and find every palette holding it.
+
 ## API
 
 Everything lives under `/api/v1`. Collections are bare JSON arrays; there is

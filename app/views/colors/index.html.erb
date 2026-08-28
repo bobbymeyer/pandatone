@@ -1,0 +1,37 @@
+<% content_for :title, "Colours" %>
+
+<header class="page-head">
+  <h1 class="page-title">Colours</h1>
+  <p class="page-lede">
+    Every swatch in the library, including those no palette has claimed yet.
+  </p>
+</header>
+
+<section class="filters">
+  <%= form_with url: colors_path, method: :get, class: "filter-form" do %>
+    <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+    <div class="field">
+      <%= label_tag :q, "Search" %>
+      <%= text_field_tag :q, params[:q], autocomplete: "off" %>
+    </div>
+    <%= submit_tag "Filter", name: nil, class: "button" %>
+  <% end %>
+
+  <ul class="tag-filter">
+    <li><%= link_to "All", colors_path(q: params[:q]), class: class_names("tag", active: params[:tag].blank?) %></li>
+    <% @tags.each do |tag| %>
+      <li>
+        <%= link_to tag, colors_path(tag: tag, q: params[:q]),
+              class: class_names("tag", active: params[:tag] == tag) %>
+      </li>
+    <% end %>
+  </ul>
+</section>
+
+<% if @colors.empty? %>
+  <p class="empty">No colours match.</p>
+<% else %>
+  <ul class="color-list">
+    <%= render partial: "colors/card", collection: @colors, as: :color %>
+  </ul>
+<% end %>

@@ -1,0 +1,21 @@
+<li class="color-card" id="<%= dom_id(color) %>">
+  <%= link_to color, class: "swatch-link" do %>
+    <%# Shares its transition name with the swatch on the colour's own page. %>
+    <%= swatch_tag color.hex, transition_name: "color-#{color.id}" %>
+  <% end %>
+
+  <h2 class="color-card__name"><%= link_to color.name, color, class: "swatch-name" %></h2>
+  <p class="hex"><%= color.hex %></p>
+
+  <p class="color-card__palettes">
+    <% if color.palettes.empty? %>
+      No palettes
+    <% else %>
+      <%= color.palettes.map(&:name).join(" · ") %>
+    <% end %>
+  </p>
+
+  <% if color.tags.any? %>
+    <p class="tags"><%= color.tags.join(" · ") %></p>
+  <% end %>
+</li>

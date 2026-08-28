@@ -1,6 +1,89 @@
 require "application_system_test_case"
 
 class ColorsTest < ApplicationSystemTestCase
+  # --- Index -------------------------------------------------------------
+
+  test "lists every colour in the library as a swatch" do
+    visit colors_path
+
+    assert_selector ".color-card", count: 6
+
+    within "#color_#{colors(:signal_red).id}" do
+      assert_text "signal-red"
+      assert_text "#E30613"
+      assert_selector ".swatch[style*='#E30613']"
+    end
+  end
+
+  test "shows on the index which palettes each colour sits in" do
+    visit colors_path
+
+    within "#color_#{colors(:signal_red).id}" do
+      assert_text "Brand Core"
+      assert_text "Autumn 2026"
+    end
+  end
+
+  test "says on the index when a colour sits in no palette" do
+    visit colors_path
+
+    within "#color_#{colors(:deep_indigo).id}" do
+      assert_text "No palettes"
+    end
+  end
+
+  test "filters the colour index by tag" do
+    visit colors_path
+
+    click_on "print"
+
+    assert_text "process-cyan"
+    assert_no_text "signal-red"
+  end
+
+  test "searches the colour index by name" do
+    visit colors_path
+
+    fill_in "Search", with: "ink"
+    click_on "Filter"
+
+    assert_text "ink-black"
+    assert_no_text "signal-red"
+  end
+
+  test "says so when the colour search matches nothing" do
+    visit colors_path
+
+    fill_in "Search", with: "nothing-matches-this"
+    click_on "Filter"
+
+    assert_text "No colours"
+  end
+
+  test "reaches a colour from the index" do
+    visit colors_path
+
+    within "#color_#{colors(:autumn_ochre).id}" do
+      click_on "autumn-ochre"
+    end
+
+    assert_text "#C4842C"
+    assert_text "Autumn 2026"
+  end
+
+  test "combines the colour tag filter with a search" do
+    visit colors_path
+
+    click_on "brand"
+    fill_in "Search", with: "ink"
+    click_on "Filter"
+
+    assert_text "ink-black"
+    assert_no_text "paper-white"
+  end
+
+  # --- Show --------------------------------------------------------------
+
   test "shows a colour in both spaces with the palettes that hold it" do
     visit color_path(colors(:signal_red))
 

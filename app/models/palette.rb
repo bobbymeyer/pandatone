@@ -1,5 +1,6 @@
 class Palette < ApplicationRecord
   include Taggable
+  include NameSearchable
 
   has_many :palette_colors, -> { order(:position) }, dependent: :destroy, inverse_of: :palette
   has_many :colors, through: :palette_colors
@@ -16,15 +17,6 @@ class Palette < ApplicationRecord
 
     where("palettes.id = :id OR LOWER(palettes.name) = :name",
       id: Integer(key, exception: false), name: key.downcase)
-  }
-
-  # Substring search for the index. Wildcards are escaped so a stray % in the
-  # search box does not quietly match everything.
-  scope :name_matching, ->(term) {
-    term = term.to_s.strip
-    next all if term.blank?
-
-    where("LOWER(palettes.name) LIKE ?", "%#{sanitize_sql_like(term.downcase)}%")
   }
 
   scope :containing_hex, ->(hex) {

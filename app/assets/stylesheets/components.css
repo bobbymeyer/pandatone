@@ -75,6 +75,36 @@
   color: var(--ink-quiet);
 }
 
+/* --- Colour index ------------------------------------------------------ */
+
+.color-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  column-gap: var(--gutter);
+  row-gap: var(--space-4);
+}
+
+.color-card .swatch-link {
+  display: block;
+  aspect-ratio: 3 / 2;
+  margin-bottom: var(--space-2);
+}
+
+.color-card__name {
+  font-size: var(--size-3);
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: var(--space-1);
+}
+
+.color-card__palettes {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--keyline);
+  font-size: var(--size-2);
+  color: var(--ink-quiet);
+}
+
 /* --- Palette show ------------------------------------------------------ */
 
 .page-actions {

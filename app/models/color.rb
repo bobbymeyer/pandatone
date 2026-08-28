@@ -3,6 +3,7 @@
 # reverse lookup ("which palettes contain this swatch") answerable.
 class Color < ApplicationRecord
   include Taggable
+  include NameSearchable
 
   RGB = "rgb".freeze
   CMYK = "cmyk".freeze

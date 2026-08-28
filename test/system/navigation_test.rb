@@ -34,6 +34,29 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
+  # The colour index and the colour page share a transition name per colour,
+  # so a swatch morphs across that navigation too.
+  test "a colour swatch keeps its transition name from the index to its page" do
+    color = colors(:signal_red)
+
+    visit colors_path
+    card_swatch = find("#color_#{color.id} .swatch")
+    assert_match(/view-transition-name:\s*color-#{color.id}\b/, card_swatch[:style])
+
+    visit color_path(color)
+    detail_swatch = find(".color-detail > .swatch")
+    assert_match(/view-transition-name:\s*color-#{color.id}\b/, detail_swatch[:style])
+  end
+
+  test "transition names are unique on the colour index" do
+    visit colors_path
+
+    names = all(".swatch").map { |swatch| swatch[:style][/view-transition-name:\s*([\w-]+)/, 1] }
+
+    assert_equal 6, names.compact.size
+    assert_equal names.uniq, names
+  end
+
   test "moves between every screen" do
     visit root_path
     assert_text "Palettes"
@@ -43,6 +66,9 @@ class NavigationTest < ApplicationSystemTestCase
 
     click_on "signal-red"
     assert_text "#E30613"
+
+    click_on "Colours"
+    assert_text "signal-red"
 
     click_on "Lookup"
     assert_text "Hex or RGB"

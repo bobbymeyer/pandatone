@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     resources :colors, only: %i[ new create destroy ], controller: "palettes/colors"
   end
 
-  resources :colors, only: :show
+  resources :colors, only: %i[ index show ]
   resource :lookup, only: :show
 
   get "up" => "rails/health#show", as: :rails_health_check
