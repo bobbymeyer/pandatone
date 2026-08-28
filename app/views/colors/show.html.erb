@@ -23,18 +23,21 @@
     <% if @color.tags.any? %>
       <p class="tags"><%= @color.tags.join(" · ") %></p>
     <% end %>
-
-    <section class="memberships">
-      <h2>Palettes</h2>
-      <% if @palettes.empty? %>
-        <p class="empty">No palettes hold this colour yet.</p>
-      <% else %>
-        <ul class="link-list">
-          <% @palettes.each do |palette| %>
-            <li><%= link_to palette.name, palette %></li>
-          <% end %>
-        </ul>
-      <% end %>
-    </section>
   </div>
 </article>
+
+<%# Each palette is drawn as its own strip rather than named in a list: the
+    point of the reverse lookup is seeing what company a swatch keeps, which a
+    row of names cannot show. Same partial as the palette index, so a strip
+    looks and morphs the same wherever it appears. %>
+<section class="memberships">
+  <h2>Palettes</h2>
+
+  <% if @palettes.empty? %>
+    <p class="empty">No palettes hold this colour yet.</p>
+  <% else %>
+    <ul class="palette-list">
+      <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>
+    </ul>
+  <% end %>
+</section>

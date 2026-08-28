@@ -16,6 +16,6 @@
     <% if palette.tags.any? %>
       <span class="tags"><%= palette.tags.join(" · ") %></span>
     <% end %>
-    <span class="count"><%= pluralize(palette.colors.size, "swatch", plural: "swatches") %></span>
+    <span class="count"><%= pluralize(palette.palette_colors.size, "swatch", plural: "swatches") %></span>
   </p>
 </li>

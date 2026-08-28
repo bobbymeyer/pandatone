@@ -103,6 +103,35 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "approximate"
   end
 
+  # A name alone does not tell you what the palette is. Rendering each one as
+  # its own strip shows the company the colour keeps.
+  test "shows each related palette as a strip of its swatches" do
+    visit color_path(colors(:signal_red))
+
+    within "#palette_#{palettes(:brand).id}" do
+      assert_text "Brand Core"
+      assert_selector ".swatch", count: 3
+      assert_selector ".swatch[style*='#111111']"
+    end
+
+    within "#palette_#{palettes(:autumn).id}" do
+      assert_text "Autumn 2026"
+      assert_selector ".swatch", count: 2
+      assert_selector ".swatch[style*='#C4842C']"
+    end
+  end
+
+  test "links from a colour through to a palette that holds it" do
+    visit color_path(colors(:signal_red))
+
+    within "#palette_#{palettes(:brand).id}" do
+      click_on "Brand Core"
+    end
+
+    assert_selector ".swatch-grid"
+    assert_text "paper-white"
+  end
+
   test "shows a colour that belongs to no palette" do
     visit color_path(colors(:deep_indigo))
 

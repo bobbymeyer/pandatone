@@ -45,6 +45,7 @@ main.grid {
 .reorder-form,
 .form,
 .empty,
+.memberships,
 .lookup-result,
 .color-detail { grid-column: 1 / -1; }
 

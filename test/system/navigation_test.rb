@@ -73,6 +73,17 @@ class NavigationTest < ApplicationSystemTestCase
     assert_no_selector "link[href*='fonts.gstatic.com']", visible: false
   end
 
+  # The colour page now carries its own swatch plus a strip per palette that
+  # holds it, and the colour appears inside each of those strips.
+  test "transition names are unique on a colour page" do
+    visit color_path(colors(:signal_red))
+
+    names = all(".swatch").map { |swatch| swatch[:style][/view-transition-name:\s*([\w-]+)/, 1] }
+
+    assert_equal 6, names.compact.size
+    assert_equal names.uniq, names
+  end
+
   test "moves between every screen" do
     visit root_path
     assert_text "Palettes"

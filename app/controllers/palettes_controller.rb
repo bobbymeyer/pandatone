@@ -2,7 +2,7 @@ class PalettesController < ApplicationController
   before_action :set_palette, only: %i[ show edit update destroy reorder ]
 
   def index
-    @palettes = Palette.order(:name).name_matching(params[:q]).includes(:colors)
+    @palettes = Palette.order(:name).name_matching(params[:q]).includes(palette_colors: :color)
     @palettes = @palettes.tagged(params[:tag]) if params[:tag].present?
     @tags = Palette.all_tags
   end

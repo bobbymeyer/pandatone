@@ -7,6 +7,6 @@ class ColorsController < ApplicationController
 
   def show
     @color = Color.find(params[:id])
-    @palettes = @color.palettes.reorder(:name)
+    @palettes = @color.palettes.reorder(:name).includes(palette_colors: :color)
   end
 end

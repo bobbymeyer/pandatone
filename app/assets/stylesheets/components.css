@@ -198,7 +198,6 @@
 .color-detail__body .page-title { margin-bottom: var(--space-1); }
 
 .provenance,
-.memberships,
 .lookup-result__body h2 { margin-top: var(--space-3); }
 
 .provenance {
@@ -207,6 +206,8 @@
   padding-top: var(--space-2);
   border-top: 1px solid var(--keyline);
 }
+
+.memberships h2 { margin-bottom: var(--space-2); }
 
 .link-list {
   display: flex;
