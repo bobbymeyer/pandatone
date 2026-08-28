@@ -40,7 +40,8 @@ main.grid {
 .page-head { grid-column: 1 / span 8; }
 .filters,
 .palette-list,
-.swatch-grid-form,
+.swatch-grid,
+.reorder-form,
 .form,
 .empty,
 .lookup-result,

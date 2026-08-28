@@ -20,36 +20,41 @@
 <% if @palette.palette_colors.empty? %>
   <p class="empty">No swatches yet.</p>
 <% else %>
-  <%= form_with url: reorder_palette_path(@palette), method: :patch, class: "swatch-grid-form" do %>
-    <ol class="swatch-grid">
-      <% @palette.palette_colors.each do |membership| %>
-        <% color = membership.color %>
-        <li class="swatch-detail" id="<%= dom_id(membership) %>">
-          <%= link_to color, class: "swatch-link" do %>
-            <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}" %>
+  <%# The position fields reference the reorder form by id rather than sitting
+      inside it, so that each swatch can carry its own delete form without
+      nesting one form in another. Both work with JavaScript off. %>
+  <ol class="swatch-grid">
+    <% @palette.palette_colors.each do |membership| %>
+      <% color = membership.color %>
+      <li class="swatch-detail" id="<%= dom_id(membership) %>">
+        <%= link_to color, class: "swatch-link" do %>
+          <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}" %>
+        <% end %>
+
+        <h3><%= link_to color.name, color, class: "swatch-name" %></h3>
+        <p class="hex"><%= color.hex %></p>
+
+        <dl class="channels">
+          <% channel_pairs(color).each do |space, values| %>
+            <dt><%= space %></dt>
+            <dd><%= values %></dd>
           <% end %>
+        </dl>
 
-          <h3><%= link_to color.name, color, class: "swatch-name" %></h3>
-          <p class="hex"><%= color.hex %></p>
+        <div class="swatch-detail__controls">
+          <%= label_tag "position_#{membership.id}", "Position", class: "visually-hidden" %>
+          <%= number_field_tag "positions[#{membership.id}]", membership.position,
+                id: "position_#{membership.id}", min: 0, class: "position-field",
+                form: "reorder_form" %>
+          <%= button_to "Remove", palette_color_path(@palette, color),
+                method: :delete, class: "button button--quiet" %>
+        </div>
+      </li>
+    <% end %>
+  </ol>
 
-          <dl class="channels">
-            <% channel_pairs(color).each do |space, values| %>
-              <dt><%= space %></dt>
-              <dd><%= values %></dd>
-            <% end %>
-          </dl>
-
-          <div class="swatch-detail__controls">
-            <%= label_tag "position_#{membership.id}", "Position", class: "visually-hidden" %>
-            <%= number_field_tag "positions[#{membership.id}]", membership.position,
-                  id: "position_#{membership.id}", min: 0, class: "position-field" %>
-            <%= link_to "Remove", palette_color_path(@palette, color),
-                  data: { turbo_method: :delete }, class: "link-quiet" %>
-          </div>
-        </li>
-      <% end %>
-    </ol>
-
+  <%= form_with url: reorder_palette_path(@palette), method: :patch,
+        id: "reorder_form", class: "reorder-form" do %>
     <%= submit_tag "Save order", name: nil, class: "button" %>
   <% end %>
 <% end %>

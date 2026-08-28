@@ -129,7 +129,7 @@
   color: inherit;
 }
 
-.swatch-grid-form > .button { margin-top: var(--space-4); }
+.reorder-form { margin-top: calc(var(--space-4) * -1 + var(--space-5)); }
 
 .channels {
   display: grid;
