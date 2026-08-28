@@ -31,9 +31,9 @@ module Taggable
     # serves a JSON API body and a text field in a form.
     def normalize_tags(value)
       list = case value
-             when nil    then []
-             when String then value.split(",")
-             else             value
+      when nil    then []
+      when String then value.split(",")
+      else             value
       end
 
       list.map { |tag| tag.to_s.strip.downcase }.reject(&:blank?).uniq

@@ -1,0 +1,57 @@
+/* The measuring system. Everything else in the app derives its spacing from
+   the values declared here: there are no ad-hoc margins anywhere in the other
+   files, only these steps. Changing --baseline reproportions the whole app. */
+
+:root {
+  --columns: 12;
+  --gutter: 1.5rem;
+  --baseline: 0.5rem;
+
+  /* A tight progression on the baseline unit, so vertical rhythm and
+     horizontal rhythm are measured in the same currency. */
+  --space-1: var(--baseline);
+  --space-2: calc(var(--baseline) * 2);
+  --space-3: calc(var(--baseline) * 3);
+  --space-4: calc(var(--baseline) * 5);
+  --space-5: calc(var(--baseline) * 8);
+  --space-6: calc(var(--baseline) * 13);
+
+  --page-max: 82rem;
+  --measure: 32rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+
+main.grid {
+  row-gap: var(--space-5);
+  padding-block: var(--space-5) var(--space-6);
+  align-content: start;
+}
+
+/* The field is asymmetric on purpose: heads and prose sit in the left eight
+   columns and stop there, leaving a standing column of air on the right. */
+.page-head { grid-column: 1 / span 8; }
+.filters,
+.palette-list,
+.swatch-grid-form,
+.form,
+.empty,
+.lookup-result,
+.color-detail { grid-column: 1 / -1; }
+
+@media (max-width: 60rem) {
+  :root { --columns: 6; }
+
+  .page-head { grid-column: 1 / -1; }
+}
+
+@media (max-width: 34rem) {
+  :root { --columns: 2; --gutter: 1rem; }
+}

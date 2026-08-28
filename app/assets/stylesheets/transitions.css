@@ -1,0 +1,34 @@
+/* View transitions.
+ *
+ * Turbo drives these from the <meta name="view-transition"> tag in the
+ * layout; the at-rule below covers a plain cross-document navigation with
+ * JavaScript off. The signature move is the swatch morph: a swatch on the
+ * palette index and the same swatch on the palette page share a
+ * view-transition-name, so the browser animates one into the other instead
+ * of crossfading the page under it. Those names are set per element in
+ * SwatchesHelper, since they depend on the record. */
+
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+/* The morph runs slightly longer than the crossfade so the swatch stays
+   readable as it travels. */
+::view-transition-group(*) {
+  animation-duration: 240ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
