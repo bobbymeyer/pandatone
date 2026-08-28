@@ -7,45 +7,59 @@
 
 <%= render "shared/errors", record: @palette %>
 
-<section class="library-picker">
-  <h2>From the library</h2>
+<%# The switch is CSS, not JavaScript: :has() on the checked radio, the same
+    way the RGB/CMYK/hex/picker panels work. These radios are deliberately
+    outside every form on the page — they choose what you see, they are not
+    part of what gets submitted. The server decides which one starts checked,
+    so a rejected submission comes back on the panel you were using. %>
+<div class="add-swatch">
+  <fieldset class="source-toggle">
+    <legend>Add</legend>
+    <% { "new" => "New colour", "library" => "Existing swatch" }.each do |source, label| %>
+      <span class="radio">
+        <%= radio_button_tag :source, source, swatch_source == source, id: "swatch_source_#{source}" %>
+        <%= label_tag "swatch_source_#{source}", label %>
+      </span>
+    <% end %>
+  </fieldset>
 
-  <%= form_with url: new_palette_color_path(@palette), method: :get, class: "filter-form" do %>
-    <div class="field">
-      <%= label_tag :q, "Search" %>
-      <%= text_field_tag :q, params[:q], autocomplete: "off" %>
-    </div>
-    <%= submit_tag "Filter", name: nil, class: "button" %>
-  <% end %>
+  <section class="new-color" data-source="new">
+    <%= form_with url: palette_colors_path(@palette), class: "form" do %>
+      <%= render "shared/swatch_fields" %>
+      <%= submit_tag "Add swatch", name: nil, class: "button button--primary" %>
+    <% end %>
+  </section>
 
-  <% if @available.empty? %>
-    <p class="empty">
-      <%= params[:q].present? ? "No colours match." : "Every colour in the library is already in this palette." %>
-    </p>
-  <% else %>
-    <ul class="color-list">
-      <% @available.each do |color| %>
-        <li class="color-card" id="<%= dom_id(color) %>">
-          <%# Not a link: you are picking here, not browsing away. %>
-          <%= swatch_tag color.hex, class: "color-card__swatch" %>
+  <section class="library-picker" data-source="library">
+    <%= form_with url: new_palette_color_path(@palette), method: :get, class: "filter-form" do %>
+      <%= hidden_field_tag :source, "library" %>
+      <div class="field">
+        <%= label_tag :q, "Search" %>
+        <%= text_field_tag :q, params[:q], autocomplete: "off" %>
+      </div>
+      <%= submit_tag "Filter", name: nil, class: "button" %>
+    <% end %>
 
-          <h3 class="color-card__name"><%= color.name %></h3>
-          <p class="hex"><%= color.hex %></p>
+    <% if @available.empty? %>
+      <p class="empty">
+        <%= params[:q].present? ? "No colours match." : "Every colour in the library is already in this palette." %>
+      </p>
+    <% else %>
+      <ul class="color-list">
+        <% @available.each do |color| %>
+          <li class="color-card" id="<%= dom_id(color) %>">
+            <%# Not a link: you are picking here, not browsing away. %>
+            <%= swatch_tag color.hex, class: "color-card__swatch" %>
 
-          <%= button_to "Add", palette_colors_path(@palette),
-                params: { color_id: color.id },
-                class: "button", aria: { label: "Add #{color.name}" } %>
-        </li>
-      <% end %>
-    </ul>
-  <% end %>
-</section>
+            <h3 class="color-card__name"><%= color.name %></h3>
+            <p class="hex"><%= color.hex %></p>
 
-<section class="new-color">
-  <h2>Or enter a new colour</h2>
-
-  <%= form_with url: palette_colors_path(@palette), class: "form" do %>
-    <%= render "shared/swatch_fields" %>
-    <%= submit_tag "Add swatch", name: nil, class: "button button--primary" %>
-  <% end %>
-</section>
+            <%= button_to "Add", palette_colors_path(@palette),
+                  params: { color_id: color.id },
+                  class: "button", aria: { label: "Add #{color.name}" } %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  </section>
+</div>

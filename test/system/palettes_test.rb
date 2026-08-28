@@ -139,12 +139,46 @@ class PalettesTest < ApplicationSystemTestCase
   # table, so reaching for a colour already in the library has to be at least
   # as easy as typing a new one.
 
-  test "offers the library when adding a swatch" do
+  test "opens on the new colour form" do
     visit new_palette_color_path(palettes(:press))
 
-    assert_text "From the library"
+    assert find("#swatch_source_new", visible: :all).checked?
+    assert_not find("#swatch_source_library", visible: :all).checked?
+  end
+
+  test "offers a switch to the existing library" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_text "Existing swatch"
     assert_selector "#color_#{colors(:signal_red).id}"
     assert_selector "#color_#{colors(:deep_indigo).id}"
+  end
+
+  test "opens on the library when asked for it" do
+    visit new_palette_color_path(palettes(:press), source: "library")
+
+    assert find("#swatch_source_library", visible: :all).checked?
+    assert_not find("#swatch_source_new", visible: :all).checked?
+  end
+
+  test "stays on the library after searching it" do
+    visit new_palette_color_path(palettes(:press), source: "library")
+
+    fill_in "Search", with: "ink"
+    click_on "Filter"
+
+    assert find("#swatch_source_library", visible: :all).checked?
+  end
+
+  test "stays on the new colour form when it is rejected" do
+    visit new_palette_color_path(palettes(:press))
+
+    fill_in "Swatch name", with: "impossible"
+    fill_in "R", with: "999"
+    click_on "Add swatch"
+
+    assert_text "must be less than or equal to 255"
+    assert find("#swatch_source_new", visible: :all).checked?
   end
 
   test "leaves out colours the palette already holds" do
@@ -181,7 +215,7 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "searches the library when adding a swatch" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "library")
 
     fill_in "Search", with: "ink"
     click_on "Filter"
@@ -202,7 +236,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "still offers a new colour alongside the library" do
     visit new_palette_color_path(palettes(:press))
 
-    assert_text "Or enter a new colour"
+    assert_text "New colour"
     assert_selector "#swatch_name"
   end
 

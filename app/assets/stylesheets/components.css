@@ -106,9 +106,6 @@
 
 .color-card form.button_to { margin-top: var(--space-2); }
 
-.library-picker h2,
-.new-color h2 { margin-bottom: var(--space-2); }
-
 .library-picker .filter-form { margin-bottom: var(--space-3); }
 
 .color-card__name {
@@ -361,14 +358,25 @@
   margin-top: var(--space-2);
 }
 
-.mode-toggle {
+.mode-toggle,
+.source-toggle {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2);
 }
 
-.mode-toggle legend { color: var(--ink-quiet); float: left; }
+.mode-toggle legend,
+.source-toggle legend { color: var(--ink-quiet); float: left; }
+
+/* Show only the chosen source. Written as "hide the other" so a browser
+   without :has() falls back to showing both, which is still usable. */
+.add-swatch:has(#swatch_source_new:checked) [data-source="library"],
+.add-swatch:has(#swatch_source_library:checked) [data-source="new"] {
+  display: none;
+}
+
+.add-swatch > section { margin-top: var(--space-3); }
 
 .radio { display: inline-flex; align-items: baseline; gap: var(--space-1); }
 

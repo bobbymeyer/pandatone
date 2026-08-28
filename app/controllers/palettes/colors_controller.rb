@@ -46,5 +46,14 @@ module Palettes
         @available = available_colors
         render :new, status: :unprocessable_content
       end
+
+      # Which panel the page opens on. A rejected submission comes back on the
+      # panel it came from rather than resetting to the default.
+      def swatch_source
+        return "library" if params[:color_id].present?
+
+        params[:source] == "library" ? "library" : "new"
+      end
+      helper_method :swatch_source
   end
 end
