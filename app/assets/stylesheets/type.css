@@ -1,9 +1,20 @@
 /* One family, five sizes, two weights. Hierarchy comes from size, weight and
    where a thing sits on the grid — never from a box drawn around it. */
 
+/* Archivo, shipped with the app rather than fetched from a font CDN: this is
+   a local tool and should render correctly with no third party reachable.
+   One variable file covers the whole weight axis, so the two weights the
+   type scale uses cost a single request. Latin subset only. */
+@font-face {
+  font-family: "Archivo";
+  src: url("archivo-variable-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font: "Helvetica Now Display", "Neue Haas Grotesk Display", "Helvetica Neue",
-          Helvetica, Arial, sans-serif;
+  --font: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --size-1: 0.6875rem;
   --size-2: 0.8125rem;

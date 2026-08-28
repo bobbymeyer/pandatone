@@ -57,6 +57,22 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
+  test "leads the nav with colours" do
+    visit root_path
+
+    assert_equal [ "Colours", "Palettes", "Lookup" ], all(".masthead__nav a").map(&:text)
+  end
+
+  # The typeface ships with the app. This is a local tool, so it should not
+  # need a third party to be reachable in order to render correctly.
+  test "self hosts the typeface" do
+    visit root_path
+
+    assert_selector "link[rel='preload'][as='font'][href*='archivo']", visible: false
+    assert_no_selector "link[href*='fonts.googleapis.com']", visible: false
+    assert_no_selector "link[href*='fonts.gstatic.com']", visible: false
+  end
+
   test "moves between every screen" do
     visit root_path
     assert_text "Palettes"

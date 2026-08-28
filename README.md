@@ -106,7 +106,9 @@ fixtures. No authentication — this is a local, single-user tool.
 The CSS is hand-written plain CSS in the spirit of the Swiss International
 Typographic Style, organised by concern (`grid`, `base`, `type`,
 `components`, `transitions`). There is no framework and no utility-class
-system in this repository. All spacing derives from the custom properties in
+system in this repository. The typeface is Archivo, shipped in
+`app/assets/fonts` as a single variable Latin subset rather than pulled from
+a font CDN, so the app renders correctly with nothing external reachable. All spacing derives from the custom properties in
 `grid.css`; the interface is near-monochrome so that the swatches are the only
 colour on the page.
 
