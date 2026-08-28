@@ -1,0 +1,12 @@
+<% content_for :title, "Add a swatch to #{@palette.name}" %>
+
+<header class="page-head">
+  <h1 class="page-title">Add a swatch</h1>
+  <p class="page-lede">To <%= link_to @palette.name, @palette %>.</p>
+</header>
+
+<%= form_with url: palette_colors_path(@palette), class: "form" do %>
+  <%= render "shared/errors", record: @palette %>
+  <%= render "shared/swatch_fields" %>
+  <%= submit_tag "Add swatch", name: nil, class: "button button--primary" %>
+<% end %>

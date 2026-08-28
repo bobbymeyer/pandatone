@@ -1,0 +1,56 @@
+<%# The colour entry row. Both spaces are rendered so the form works with
+    JavaScript off; the Stimulus controller hides the space you are not using
+    and paints a live preview as you type. %>
+<div class="swatch-entry__fields"
+     data-controller="swatch-preview"
+     data-swatch-preview-source-value="<%= submitted_swatch[:source_space] || Color::RGB %>">
+  <div class="field">
+    <%= label_tag "swatch_name", "Swatch name" %>
+    <%= text_field_tag "swatch[name]", submitted_swatch[:name], id: "swatch_name", autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= label_tag "swatch_tags", "Swatch tags" %>
+    <%= text_field_tag "swatch[tags]", submitted_swatch[:tags], id: "swatch_tags", autocomplete: "off" %>
+  </div>
+
+  <fieldset class="space-toggle">
+    <legend>Source space</legend>
+    <% { Color::RGB => "RGB", Color::CMYK => "CMYK" }.each do |value, label| %>
+      <span class="radio">
+        <%= radio_button_tag "swatch[source_space]", value,
+              (submitted_swatch[:source_space] || Color::RGB) == value,
+              id: "swatch_source_space_#{value}",
+              data: { swatch_preview_target: "space", action: "change->swatch-preview#spaceChanged" } %>
+        <%= label_tag "swatch_source_space_#{value}", label %>
+      </span>
+    <% end %>
+  </fieldset>
+
+  <div class="channels-entry" data-swatch-preview-target="rgbFields">
+    <% %w[ r g b ].each do |channel| %>
+      <div class="field field--channel">
+        <%= label_tag "swatch_#{channel}", channel.upcase %>
+        <%= number_field_tag "swatch[#{channel}]", submitted_swatch[channel], id: "swatch_#{channel}",
+              min: 0, max: 255, step: 1,
+              data: { swatch_preview_target: "rgb", action: "input->swatch-preview#redraw" } %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="channels-entry" data-swatch-preview-target="cmykFields">
+    <% %w[ c m y k ].each do |channel| %>
+      <div class="field field--channel">
+        <%= label_tag "swatch_#{channel}", channel.upcase %>
+        <%= number_field_tag "swatch[#{channel}]", submitted_swatch[channel], id: "swatch_#{channel}",
+              min: 0, max: 100, step: 0.1,
+              data: { swatch_preview_target: "cmyk", action: "input->swatch-preview#redraw" } %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="preview">
+    <div class="swatch" data-swatch-preview-target="preview"></div>
+    <p class="hex" data-swatch-preview-target="hex"></p>
+  </div>
+</div>

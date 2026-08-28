@@ -160,4 +160,44 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_equal "#FFCC00", ColorSpace.normalize_hex("fc0")
     assert_nil ColorSpace.normalize_hex("nope")
   end
+
+  # --- Freeform parsing --------------------------------------------------
+  #
+  # What someone pastes into the lookup field: a hex, an RGB triple, or
+  # whatever their design tool put on the clipboard.
+
+  test "parses a pasted hex" do
+    assert_equal({ r: 227, g: 6, b: 19 }, ColorSpace.parse("#E30613"))
+    assert_equal({ r: 227, g: 6, b: 19 }, ColorSpace.parse("e30613"))
+    assert_equal({ r: 255, g: 204, b: 0 }, ColorSpace.parse("#fc0"))
+  end
+
+  test "parses a pasted rgb triple however it is punctuated" do
+    expected = { r: 227, g: 6, b: 19 }
+
+    assert_equal expected, ColorSpace.parse("227, 6, 19")
+    assert_equal expected, ColorSpace.parse("227 6 19")
+    assert_equal expected, ColorSpace.parse("rgb(227, 6, 19)")
+    assert_equal expected, ColorSpace.parse("  227,6,19  ")
+  end
+
+  test "reads six digits as hex rather than as a triple" do
+    assert_equal({ r: 18, g: 52, b: 86 }, ColorSpace.parse("123456"))
+  end
+
+  test "rejects a triple with a channel out of range" do
+    assert_nil ColorSpace.parse("300, 0, 0")
+    assert_nil ColorSpace.parse("-1, 0, 0")
+  end
+
+  test "rejects a triple that is not three numbers" do
+    assert_nil ColorSpace.parse("227, 6")
+    assert_nil ColorSpace.parse("227, 6, 19, 4")
+  end
+
+  test "returns nil for input it cannot read" do
+    [ nil, "", "   ", "wat", "cornflower blue" ].each do |bad|
+      assert_nil ColorSpace.parse(bad), "expected #{bad.inspect} to be unreadable"
+    end
+  end
 end

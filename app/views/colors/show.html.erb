@@ -1,0 +1,40 @@
+<% content_for :title, @color.name %>
+
+<article class="color-detail">
+  <%= swatch_tag @color.hex, transition_name: "color-#{@color.id}", class: "swatch--large" %>
+
+  <div class="color-detail__body">
+    <h1 class="page-title"><%= @color.name %></h1>
+    <p class="hex hex--large"><%= @color.hex %></p>
+
+    <dl class="channels channels--stacked">
+      <% channel_pairs(@color).each do |space, values| %>
+        <dt><%= space %></dt>
+        <dd><%= values %></dd>
+      <% end %>
+    </dl>
+
+    <p class="provenance">
+      Authored in <%= @color.source_space.upcase %>.
+      The <%= @color.rgb_source? ? "CMYK" : "RGB" %> values are an approximate device
+      conversion, not a profiled one.
+    </p>
+
+    <% if @color.tags.any? %>
+      <p class="tags"><%= @color.tags.join(" · ") %></p>
+    <% end %>
+
+    <section class="memberships">
+      <h2>Palettes</h2>
+      <% if @palettes.empty? %>
+        <p class="empty">No palettes hold this colour yet.</p>
+      <% else %>
+        <ul class="link-list">
+          <% @palettes.each do |palette| %>
+            <li><%= link_to palette.name, palette %></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </section>
+  </div>
+</article>

@@ -1,0 +1,55 @@
+<% content_for :title, @palette.name %>
+
+<header class="page-head">
+  <h1 class="page-title"><%= @palette.name %></h1>
+
+  <%= turbo_frame_tag "palette_tags" do %>
+    <div class="inline-edit">
+      <p class="tags"><%= @palette.tags.any? ? @palette.tags.join(" · ") : "Untagged" %></p>
+      <%= link_to "Edit tags", edit_palette_tags_path(@palette), class: "link-quiet" %>
+    </div>
+  <% end %>
+
+  <p class="page-actions">
+    <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button" %>
+    <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
+    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--quiet" %>
+  </p>
+</header>
+
+<% if @palette.palette_colors.empty? %>
+  <p class="empty">No swatches yet.</p>
+<% else %>
+  <%= form_with url: reorder_palette_path(@palette), method: :patch, class: "swatch-grid-form" do %>
+    <ol class="swatch-grid">
+      <% @palette.palette_colors.each do |membership| %>
+        <% color = membership.color %>
+        <li class="swatch-detail" id="<%= dom_id(membership) %>">
+          <%= link_to color, class: "swatch-link" do %>
+            <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}" %>
+          <% end %>
+
+          <h3><%= link_to color.name, color, class: "swatch-name" %></h3>
+          <p class="hex"><%= color.hex %></p>
+
+          <dl class="channels">
+            <% channel_pairs(color).each do |space, values| %>
+              <dt><%= space %></dt>
+              <dd><%= values %></dd>
+            <% end %>
+          </dl>
+
+          <div class="swatch-detail__controls">
+            <%= label_tag "position_#{membership.id}", "Position", class: "visually-hidden" %>
+            <%= number_field_tag "positions[#{membership.id}]", membership.position,
+                  id: "position_#{membership.id}", min: 0, class: "position-field" %>
+            <%= link_to "Remove", palette_color_path(@palette, color),
+                  data: { turbo_method: :delete }, class: "link-quiet" %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+
+    <%= submit_tag "Save order", name: nil, class: "button" %>
+  <% end %>
+<% end %>

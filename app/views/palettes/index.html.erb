@@ -1,0 +1,37 @@
+<% content_for :title, "Palettes" %>
+
+<header class="page-head">
+  <h1 class="page-title">Palettes</h1>
+  <p class="page-lede"><%= pluralize(@palettes.size, "palette") %> in the library.</p>
+</header>
+
+<section class="filters">
+  <%= form_with url: palettes_path, method: :get, class: "filter-form" do %>
+    <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+    <div class="field">
+      <%= label_tag :q, "Search" %>
+      <%= text_field_tag :q, params[:q], autocomplete: "off" %>
+    </div>
+    <%= submit_tag "Filter", name: nil, class: "button" %>
+  <% end %>
+
+  <ul class="tag-filter">
+    <li><%= link_to "All", palettes_path(q: params[:q]), class: class_names("tag", active: params[:tag].blank?) %></li>
+    <% @tags.each do |tag| %>
+      <li>
+        <%= link_to tag, palettes_path(tag: tag, q: params[:q]),
+              class: class_names("tag", active: params[:tag] == tag) %>
+      </li>
+    <% end %>
+  </ul>
+
+  <%= link_to "New palette", new_palette_path, class: "button button--primary" %>
+</section>
+
+<% if @palettes.empty? %>
+  <p class="empty">No palettes match.</p>
+<% else %>
+  <ul class="palette-list">
+    <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>
+  </ul>
+<% end %>

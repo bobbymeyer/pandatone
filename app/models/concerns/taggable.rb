@@ -19,6 +19,14 @@ module Taggable
   end
 
   class_methods do
+    # Every tag actually in use, for building a filter bar. Cheap enough at
+    # this scale to ask the database each time.
+    def all_tags
+      connection.select_values(
+        "SELECT DISTINCT json_each.value FROM #{table_name}, json_each(#{table_name}.tags) ORDER BY 1"
+      )
+    end
+
     # Accepts either a list or a comma-separated string, so the same writer
     # serves a JSON API body and a text field in a form.
     def normalize_tags(value)

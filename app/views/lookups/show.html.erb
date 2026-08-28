@@ -1,0 +1,50 @@
+<% content_for :title, "Look up a colour" %>
+
+<header class="page-head">
+  <h1 class="page-title">Look up a colour</h1>
+  <p class="page-lede">Paste a swatch to find out which palettes already hold it.</p>
+</header>
+
+<%= form_with url: lookup_path, method: :get, class: "form form--inline" do %>
+  <div class="field">
+    <%= label_tag :q, "Hex or RGB" %>
+    <%= text_field_tag :q, @query, autocomplete: "off", placeholder: "#E30613 or 227, 6, 19" %>
+  </div>
+  <%= submit_tag "Look up", name: nil, class: "button button--primary" %>
+<% end %>
+
+<% if @query.present? %>
+  <% if @rgb.nil? %>
+    <p class="empty">Could not read <q><%= @query %></q> as a hex or an RGB triple.</p>
+  <% else %>
+    <section class="lookup-result">
+      <%= swatch_tag @hex, transition_name: "lookup-#{@hex.delete('#')}", class: "swatch--large" %>
+
+      <div class="lookup-result__body">
+        <p class="hex hex--large"><%= @hex %></p>
+
+        <% if @colors.empty? %>
+          <p class="empty">Not in the library.</p>
+        <% else %>
+          <h2>Stored as</h2>
+          <ul class="link-list">
+            <% @colors.each do |color| %>
+              <li><%= link_to color.name, color %></li>
+            <% end %>
+          </ul>
+        <% end %>
+
+        <h2>Palettes</h2>
+        <% if @palettes.empty? %>
+          <p class="empty">No palette holds this colour.</p>
+        <% else %>
+          <ul class="link-list">
+            <% @palettes.each do |palette| %>
+              <li><%= link_to palette.name, palette %></li>
+            <% end %>
+          </ul>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+<% end %>

@@ -10,10 +10,13 @@ class PaletteComposition
   Invalid = Class.new(StandardError)
   private_constant :Invalid
 
-  def initialize(palette, attributes:, colors: nil)
+  # colors: replaces the whole ordered list. append: adds to the end of it.
+  # The API replaces; the web forms append one swatch at a time.
+  def initialize(palette, attributes:, colors: nil, append: nil)
     @palette = palette
     @attributes = attributes
     @colors = colors
+    @append = append
   end
 
   def save
@@ -22,6 +25,7 @@ class PaletteComposition
       raise Invalid unless @palette.save
 
       replace_colors unless @colors.nil?
+      append_colors if @append.present?
     end
 
     true
@@ -30,6 +34,13 @@ class PaletteComposition
   end
 
   private
+    def append_colors
+      resolved = @append.map { |spec| resolve(spec) }
+      raise Invalid if @palette.errors.any?
+
+      attach(resolved, from: (@palette.palette_colors.maximum(:position) || -1) + 1)
+    end
+
     def replace_colors
       # Resolve everything before touching the palette, so an invalid entry
       # anywhere in the list leaves the existing swatches untouched.
@@ -38,8 +49,12 @@ class PaletteComposition
 
       @palette.palette_colors.destroy_all
 
-      resolved.each_with_index do |color, position|
-        membership = @palette.palette_colors.create(color: color, position: position)
+      attach(resolved, from: 0)
+    end
+
+    def attach(colors, from:)
+      colors.each_with_index do |color, offset|
+        membership = @palette.palette_colors.create(color: color, position: from + offset)
         next if membership.persisted?
 
         add_errors_from(membership)

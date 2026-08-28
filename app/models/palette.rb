@@ -18,6 +18,15 @@ class Palette < ApplicationRecord
       id: Integer(key, exception: false), name: key.downcase)
   }
 
+  # Substring search for the index. Wildcards are escaped so a stray % in the
+  # search box does not quietly match everything.
+  scope :name_matching, ->(term) {
+    term = term.to_s.strip
+    next all if term.blank?
+
+    where("LOWER(palettes.name) LIKE ?", "%#{sanitize_sql_like(term.downcase)}%")
+  }
+
   scope :containing_hex, ->(hex) {
     rgb = ColorSpace.parse_hex(hex)
     next none if rgb.nil?

@@ -58,11 +58,26 @@ module ColorSpace
     }
   end
 
+  # Freeform input from a human: a hex, or an RGB triple in whatever
+  # punctuation their tool produced. Six hex digits are read as hex, since
+  # that is overwhelmingly what "123456" means in a colour field.
+  def parse(input)
+    parse_hex(input) || parse_triple(input)
+  end
+
   # normalize_hex("fc0") # => "#FFCC00"
   def normalize_hex(hex)
     rgb = parse_hex(hex)
     to_hex(rgb[:r], rgb[:g], rgb[:b]) if rgb
   end
+
+  def parse_triple(input)
+    channels = input.to_s.scan(/-?\d+/).map(&:to_i)
+    return nil unless channels.length == 3 && channels.all? { |channel| (0..255).cover?(channel) }
+
+    { r: channels[0], g: channels[1], b: channels[2] }
+  end
+  private_class_method :parse_triple
 
   def clamp(value, low, high)
     return low if value.nil?

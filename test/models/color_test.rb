@@ -246,6 +246,10 @@ class ColorTest < ActiveSupport::TestCase
     assert_equal [ "ink-black", "paper-white", "signal-red" ], Color.in_palette("Brand Core").order(:name).pluck(:name)
   end
 
+  test "all_tags lists every colour tag in use once, in order" do
+    assert_equal [ "brand", "cool", "neutral", "primary", "print", "process", "seasonal" ], Color.all_tags
+  end
+
   test "in_palette returns nothing for an unknown palette" do
     assert_empty Color.in_palette("No Such Palette")
   end

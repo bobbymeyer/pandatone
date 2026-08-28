@@ -11,11 +11,16 @@ Rails.application.routes.draw do
     end
   end
 
-  resource :lookup, only: :show, controller: :lookups
-  resources :colors, only: %i[ index show ]
+  # The human side. Colours are only ever created in the context of a palette
+  # or read on their own; the API is the place for bulk work.
   resources :palettes do
-    resources :colors, only: %i[ new create ], controller: "palettes/colors"
+    patch :reorder, on: :member
+    resource :tags, only: %i[ edit update ], controller: "palettes/tags"
+    resources :colors, only: %i[ new create destroy ], controller: "palettes/colors"
   end
+
+  resources :colors, only: :show
+  resource :lookup, only: :show
 
   get "up" => "rails/health#show", as: :rails_health_check
 

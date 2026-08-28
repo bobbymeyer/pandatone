@@ -1,0 +1,24 @@
+<%= form_with model: palette, url: url, class: "form" do |form| %>
+  <%= render "shared/errors", record: palette %>
+
+  <div class="field">
+    <%= form.label :name, "Name" %>
+    <%= form.text_field :name, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :tag_list, "Tags" %>
+    <%= form.text_field :tag_list, value: palette.tag_list, autocomplete: "off" %>
+    <p class="hint">Comma separated. Tags are how palettes are found: an "active" palette is one tagged <code>active</code>.</p>
+  </div>
+
+  <% if with_swatch %>
+    <fieldset class="swatch-entry">
+      <legend>Add a swatch</legend>
+      <p class="hint">Optional. Leave empty to save the palette on its own.</p>
+      <%= render "shared/swatch_fields" %>
+    </fieldset>
+  <% end %>
+
+  <%= form.submit submit, class: "button button--primary" %>
+<% end %>

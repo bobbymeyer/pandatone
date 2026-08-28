@@ -160,6 +160,32 @@ class PaletteTest < ActiveSupport::TestCase
     assert_equal [ "Autumn 2026" ], Palette.tagged("seasonal").containing_hex("#E30613").pluck(:name)
   end
 
+  test "name_matching finds palettes by partial name" do
+    assert_equal [ "Autumn 2026" ], Palette.name_matching("autumn").pluck(:name)
+    assert_equal [ "Autumn 2026" ], Palette.name_matching("AUTUMN").pluck(:name)
+    assert_equal [ "Brand Core" ], Palette.name_matching("core").pluck(:name)
+  end
+
+  test "name_matching treats wildcards as literal characters" do
+    assert_empty Palette.name_matching("%")
+    assert_empty Palette.name_matching("_utumn")
+  end
+
+  test "name_matching returns everything for a blank term" do
+    assert_equal Palette.count, Palette.name_matching("").count
+    assert_equal Palette.count, Palette.name_matching(nil).count
+  end
+
+  test "all_tags lists every tag in use once, in order" do
+    assert_equal [ "active", "brand", "print", "seasonal" ], Palette.all_tags
+  end
+
+  test "all_tags is empty when nothing is tagged" do
+    Palette.find_each { |palette| palette.update!(tags: []) }
+
+    assert_empty Palette.all_tags
+  end
+
   # --- Friendly lookup ---------------------------------------------------
 
   test "finds by id" do

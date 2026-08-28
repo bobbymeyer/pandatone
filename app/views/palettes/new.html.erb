@@ -1,0 +1,7 @@
+<% content_for :title, "New palette" %>
+
+<header class="page-head">
+  <h1 class="page-title">New palette</h1>
+</header>
+
+<%= render "form", palette: @palette, url: palettes_path, submit: "Create palette", with_swatch: true %>
