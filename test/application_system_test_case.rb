@@ -14,6 +14,14 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Manager sorts it out.
     Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER"] if ENV["CHROMEDRIVER"].present?
 
+    # Two seconds is Capybara's default and a desktop-speed assumption. Before
+    # a browser test can assert anything, the page has to fetch an importmap,
+    # connect Stimulus and swap a Turbo Frame, and a CI runner does all of that
+    # at a fraction of the speed this was written on. This is a budget, not a
+    # weaker assertion: every matcher still has to come true, and one that
+    # never does still fails.
+    Capybara.default_max_wait_time = 5
+
     driven_by :selenium, using: :headless_chrome, screen_size: SCREEN_SIZE do |options|
       options.binary = ENV["CHROME_BINARY"] if ENV["CHROME_BINARY"].present?
       options.add_argument("--no-sandbox")
