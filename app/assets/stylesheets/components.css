@@ -164,6 +164,11 @@
   height: calc(var(--baseline) * 9);
 }
 
+/* The strip is the one thing in a palette card with a height of its own
+   rather than a proportion, so halving the card does not halve it. Five
+   units is the step on the ladder nearest half of nine. */
+.list--small .strip { height: calc(var(--baseline) * 5); }
+
 .strip .swatch { flex: 1 1 0; }
 
 /* height:auto defeats the base .swatch height:100%, so the square comes from

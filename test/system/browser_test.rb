@@ -24,6 +24,36 @@ class BrowserTest < ApplicationSystemTestCase
       evaluate_script("getComputedStyle(document.querySelector('.masthead__panda')).filter")
   end
 
+  # Half the width, which is the whole of what "small" means here. Measured,
+  # because the arithmetic that produces it lives in the grid and a card that
+  # merely looked smaller would satisfy any assertion about class names.
+  test "a small card is half the width of a large one" do
+    [ [ colors_path, ".color-card" ], [ palettes_path, ".palette-strip" ] ].each do |path, card|
+      visit path
+      large = rect_of(card)["width"]
+
+      visit "#{path}?size=small"
+      small = rect_of(card)["width"]
+
+      assert_in_delta large / 2.0, small, large / 12.0,
+        "#{path}: a small #{card} is #{small}px against #{large}px large, which is not half"
+    end
+  end
+
+  # Enough colors that a row is a row rather than the whole library: six
+  # fixtures already fit on one at either size, which would have agreed that
+  # nothing had changed.
+  test "small fits twice as many on a row" do
+    14.times { |i| Color.create!(name: "filler-#{i}", source_space: Color::RGB, r: i, g: 40 + i, b: 90) }
+
+    visit colors_path
+    large = cards_on_the_first_row(".color-card")
+
+    visit colors_path(size: "small")
+
+    assert_equal large * 2, cards_on_the_first_row(".color-card")
+  end
+
   # --- Layout ------------------------------------------------------------
 
   test "the palette results fill the field the filters fill" do
@@ -220,7 +250,7 @@ class BrowserTest < ApplicationSystemTestCase
   # labels differ in width, so without a shared column their controls start a
   # few pixels apart — and the search was a stacked field above them rather
   # than one of them at all.
-  test "search, tags and sort are three registers sharing a label column" do
+  test "search, tags, sort and size are four registers sharing a label column" do
     [ colors_path, palettes_path ].each do |path|
       visit path
 
@@ -234,7 +264,7 @@ class BrowserTest < ApplicationSystemTestCase
             .getBoundingClientRect().left)))
       JS
 
-      assert_equal 3, lefts.size, "#{path}: expected a search, a tag and a sort register"
+      assert_equal 4, lefts.size, "#{path}: expected a search, a tag, a sort and a size register"
       assert_equal 1, lefts.map(&:first).uniq.size, "#{path}: labels start in different columns: #{lefts.inspect}"
       assert_equal 1, lefts.map(&:last).uniq.size, "#{path}: controls start in different columns: #{lefts.inspect}"
     end
@@ -389,6 +419,16 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   private
+    def cards_on_the_first_row(selector)
+      evaluate_script(<<~JS)
+        (() => {
+          const cards = Array.from(document.querySelectorAll('#{selector}'));
+          const top = Math.round(cards[0].getBoundingClientRect().top);
+          return cards.filter(c => Math.round(c.getBoundingClientRect().top) === top).length;
+        })()
+      JS
+    end
+
     def pages
       {
         "palette index" => palettes_path,

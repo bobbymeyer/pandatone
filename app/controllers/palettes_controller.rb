@@ -1,5 +1,6 @@
 class PalettesController < ApplicationController
   include Sorting
+  include Sizing
   include PaletteExports
 
   before_action :set_palette, only: %i[ show edit update destroy ]

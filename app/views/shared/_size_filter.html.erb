@@ -1,0 +1,11 @@
+<%# The same register as the tag filter and the order, because it is the same
+    kind of control: pick one of a handful. Carries the other two, as they
+    carry it — three choices that have to survive each other.
+
+    url_for without a controller keeps the index it is rendered on, so one
+    partial serves both. %>
+<%= render "shared/filter_row", name: "size", label: "Size",
+      items: Sizing::SIZES.map { |key, label|
+        [ label, url_for(size: key, q: params[:q], tag: params[:tag], sort: params[:sort]),
+          size_key == key ]
+      } %>

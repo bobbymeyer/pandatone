@@ -8,5 +8,5 @@
     url_for without a controller keeps the index it is rendered on, so one
     partial serves both. %>
 <%= render "shared/filter_row", name: "sort", label: "Sort by", items: sorts.map { |key, label|
-      [ label, url_for(sort: key, q: params[:q], tag: params[:tag]), sort_key == key ]
+      [ label, url_for(sort: key, q: params[:q], tag: params[:tag], size: params[:size]), sort_key == key ]
     } %>

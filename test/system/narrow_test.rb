@@ -105,8 +105,11 @@ class NarrowTest < ApplicationSystemTestCase
           .map(row => Array.from(row.children).map(el => Math.round(el.getBoundingClientRect().left)))
       JS
 
+      # However many registers there are, they stack or they do not, together.
       stacked = lefts.map { |row| row.uniq.size == 1 }
-      assert_equal [ stacked.first ] * 3, stacked,
+
+      assert_operator lefts.size, :>=, 3, "the registers went missing"
+      assert_equal 1, stacked.uniq.size,
         "at #{size.first}px the registers disagree about stacking: #{lefts.inspect}"
     end
   end

@@ -1,5 +1,6 @@
 class ColorsController < ApplicationController
   include Sorting
+  include Sizing
 
   before_action :set_color, only: %i[ show edit update destroy ]
 

@@ -18,6 +18,7 @@
     <%# Searching keeps the order you were reading in. Choosing an order is a
         whole navigation rather than a frame swap, so this is never stale. %>
     <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+    <%= hidden_field_tag :size, params[:size] if params[:size].present? %>
     <div class="field">
       <%= label_tag :q, "Search" %>
       <%= text_field_tag :q, params[:q], autocomplete: "off" %>
@@ -29,11 +30,15 @@
   <% end %>
 
   <%= render "shared/filter_row", name: "tag", label: "Tagged",
-        items: [ [ "All", colors_path(q: params[:q], sort: params[:sort]), params[:tag].blank? ] ] +
-               @tags.map { |tag| [ tag, colors_path(tag: tag, q: params[:q], sort: params[:sort]),
+        items: [ [ "All", colors_path(q: params[:q], sort: params[:sort], size: params[:size]),
+                  params[:tag].blank? ] ] +
+               @tags.map { |tag| [ tag, colors_path(tag: tag, q: params[:q], sort: params[:sort],
+                                                    size: params[:size]),
                                    params[:tag] == tag ] } %>
 
   <%= render "shared/sort_filter", sorts: Color::SORTS %>
+
+  <%= render "shared/size_filter" %>
 </section>
 
 <%= turbo_frame_tag "colors", data: { turbo_action: "replace" }, target: "_top" do %>
@@ -46,7 +51,7 @@
       <p class="empty">No colors match.</p>
     <% end %>
   <% else %>
-    <ul class="color-list">
+    <ul class="color-list <%= "list--small" if size_key == "small" %>">
       <%= render partial: "colors/card", collection: @colors, as: :color %>
     </ul>
   <% end %>

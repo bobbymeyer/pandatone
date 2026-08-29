@@ -9,6 +9,10 @@
      empty between the panes. Twelve would only buy quarters, which nothing
      here asks for. */
   --columns: 6;
+  /* Twice the fields, for the small size on the two indexes. Written out
+     rather than doubled in a calc, because repeat() takes an integer and not
+     an expression — so the two have to be kept in step by hand. */
+  --columns-dense: 12;
   --gutter: 1.5rem;
   --baseline: 0.5rem;
 
@@ -75,6 +79,15 @@ main.grid {
 
 .palette-list,
 .color-list { row-gap: var(--space-5); }
+
+/* Small is half of whatever large is at that width: the same card spanning
+   the same number of fields, over twice as many of them. Every field line the
+   page has is still a line here, with one more between each pair — which is
+   why the cards stay square with the margins at either end. */
+.list--small {
+  grid-template-columns: repeat(var(--columns-dense), minmax(0, 1fr));
+  row-gap: var(--space-4);
+}
 
 .palette-list > * { grid-column: span var(--card-wide); }
 

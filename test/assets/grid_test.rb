@@ -14,17 +14,23 @@ class GridTest < ActiveSupport::TestCase
       "auto-fill/auto-fit sizes tracks from available width, which cannot line up with the field"
   end
 
-  test "the column tracks are declared exactly once" do
-    declarations = STYLESHEETS.sum { |sheet| sheet.read.scan(/grid-template-columns:\s*repeat\(/).size }
+  # A field is a run of equal tracks — repeat(). A two-column label and value
+  # grid is not a field and is nobody's business but its component's.
+  test "the field's tracks are declared in the grid and nowhere else" do
+    elsewhere = STYLESHEETS.reject { |sheet| sheet.basename.to_s == "grid.css" }
+      .select { |sheet| sheet.read.match?(/grid-template-columns:\s*repeat\(/) }
 
-    assert_equal 1, declarations,
-      "the field should be defined in one place and shared, not restated per component"
+    assert_empty elsewhere.map { |sheet| sheet.basename.to_s },
+      "the field belongs in grid.css, not restated per component"
   end
 
-  test "every grid derives its tracks from the column count" do
+  # Two densities, not two grids: the field, and the same field halved for the
+  # small size on the indexes. Both are named counts declared beside each
+  # other, which is what keeps a card edge on a field line at either one.
+  test "every grid derives its tracks from a declared field count" do
     repeats = STYLESHEETS.flat_map { |sheet| sheet.read.scan(/grid-template-columns:\s*repeat\(([^,]+),/) }.flatten
 
-    assert_equal [ "var(--columns)" ], repeats
+    assert_equal %w[ var(--columns) var(--columns-dense) ], repeats.uniq
   end
 
   test "nothing is set in capitals" do
