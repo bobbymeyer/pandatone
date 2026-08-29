@@ -27,6 +27,27 @@ class GridTest < ActiveSupport::TestCase
     assert_equal [ "var(--columns)" ], repeats
   end
 
+  test "nothing is set in capitals" do
+    offenders = STYLESHEETS.select { |sheet| sheet.read.match?(/text-transform:\s*uppercase/) }
+
+    assert_empty offenders.map { |sheet| sheet.basename.to_s },
+      "capitals are not used in this interface; size and colour carry the micro register"
+  end
+
+  test "leading and spacing come from one ladder" do
+    type = Rails.root.join("app/assets/stylesheets/type.css").read
+
+    assert_no_match(/--lead-/, type, "leading should draw on the spacing ladder, not a second one")
+    assert_match(/line-height: var\(--space-/, type)
+  end
+
+  test "the measure is derived from the field" do
+    grid = Rails.root.join("app/assets/stylesheets/grid.css").read
+
+    assert_match(/--measure:\s*calc\(/, grid)
+    assert_no_match(/--measure:\s*[\d.]+rem/, grid, "a hand-picked measure lands between field lines")
+  end
+
   test "cards span whole fields rather than fixed widths" do
     grid = Rails.root.join("app/assets/stylesheets/grid.css").read
 

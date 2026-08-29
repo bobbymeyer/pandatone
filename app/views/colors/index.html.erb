@@ -5,6 +5,10 @@
   <p class="page-lede">
     Every swatch in the library, including those no palette has claimed yet.
   </p>
+
+  <p class="page-actions">
+    <%= link_to "New colour", new_color_path, class: "button button--primary" %>
+  </p>
 </header>
 
 <section class="filters">
@@ -30,10 +34,14 @@
 </section>
 
 <%= turbo_frame_tag "colors", data: { turbo_action: "replace" } do %>
-  <p class="count"><%= result_count(@colors.size, @total, "colour") %></p>
+  <p class="result-count"><%= result_count(@colors.size, @total, "colour") %></p>
 
   <% if @colors.empty? %>
-    <p class="empty">No colours match.</p>
+    <% if @total.zero? %>
+      <p class="empty">No colours yet. <%= link_to "Add the first one", new_color_path %>.</p>
+    <% else %>
+      <p class="empty">No colours match.</p>
+    <% end %>
   <% else %>
     <ul class="color-list">
       <%= render partial: "colors/card", collection: @colors, as: :color %>

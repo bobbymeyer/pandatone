@@ -1,0 +1,14 @@
+<% content_for :title, "New colour" %>
+
+<header class="page-head">
+  <h1 class="page-title">New colour</h1>
+  <p class="page-lede">
+    It joins the library on its own. Put it in a palette whenever you like.
+  </p>
+</header>
+
+<%= form_with url: colors_path, class: "form" do %>
+  <%= render "shared/errors", record: @color %>
+  <%= render "shared/swatch_fields", color: @color.persisted? ? @color : nil %>
+  <%= submit_tag "Create colour", name: nil, class: "button button--primary" %>
+<% end %>

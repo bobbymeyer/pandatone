@@ -18,17 +18,29 @@
   --card: 1;
   --card-wide: 2;
 
-  /* A tight progression on the baseline unit, so vertical rhythm and
-     horizontal rhythm are measured in the same currency. */
-  --space-1: var(--baseline);
-  --space-2: calc(var(--baseline) * 2);
-  --space-3: calc(var(--baseline) * 3);
-  --space-4: calc(var(--baseline) * 5);
-  --space-5: calc(var(--baseline) * 8);
-  --space-6: calc(var(--baseline) * 13);
+  /* One ladder for the whole vertical axis, numbered by baseline units, and
+     used for leading as much as for spacing. There were two before — a
+     Fibonacci set for space and a linear one for leading — which agreed at
+     three values and diverged everywhere else, so a heading whose line box
+     was four units could not be separated from the next block by four units.
+     The value simply did not exist. */
+  --space-1: calc(var(--baseline) * 1);    /* 8 */
+  --space-2: calc(var(--baseline) * 2);    /* 16 */
+  --space-3: calc(var(--baseline) * 3);    /* 24 */
+  --space-4: calc(var(--baseline) * 4);    /* 32 */
+  --space-5: calc(var(--baseline) * 5);    /* 40 */
+  --space-6: calc(var(--baseline) * 6);    /* 48 */
+  --space-8: calc(var(--baseline) * 8);    /* 64 */
+  --space-13: calc(var(--baseline) * 13);  /* 104 */
 
   --page-max: 82rem;
-  --measure: 32rem;
+  /* Three fields wide, derived from the page rather than chosen. At 32rem it
+     ended at 512px, a vertical that existed nowhere else on the page: the
+     field lines are 199, 421, 644. Prose narrower than its container still
+     stops on a line, because the container is field-aligned itself. */
+  --measure: calc(
+    (var(--page-max) - var(--gutter) * (var(--columns) - 1)) / var(--columns) * 3 + var(--gutter) * 2
+  );
 }
 
 /* The one grid. The page field and every list of cards share this single
@@ -53,14 +65,14 @@
 }
 
 main.grid {
-  row-gap: var(--space-4);
-  padding-block: var(--space-4) var(--space-6);
+  row-gap: var(--space-5);
+  padding-block: var(--space-5) var(--space-13);
   align-content: start;
 }
 
 .palette-list,
 .color-list,
-.swatch-grid { row-gap: var(--space-4); }
+.swatch-grid { row-gap: var(--space-5); }
 
 .palette-list > * { grid-column: span var(--card-wide); }
 

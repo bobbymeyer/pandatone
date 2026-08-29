@@ -91,6 +91,60 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "paper-white"
   end
 
+  test "a colour card is one link, not two to the same place" do
+    visit colors_path
+
+    within "#color_#{colors(:signal_red).id}" do
+      assert_selector "a", count: 1
+      assert_equal "/colors/#{colors(:signal_red).id}", find("a")[:href]
+    end
+  end
+
+  test "an empty library reads as empty, not as a failed search" do
+    Palette.destroy_all
+    Color.destroy_all
+
+    visit colors_path
+
+    assert_text "No colours yet"
+    assert_no_text "No colours match"
+  end
+
+  test "an empty result reads as a failed search" do
+    visit colors_path
+
+    fill_in "Search", with: "nothing-matches-this"
+    click_on "Filter"
+
+    assert_text "No colours match"
+    assert_no_text "No colours yet"
+  end
+
+  test "creates a colour that belongs to no palette yet" do
+    visit colors_path
+    click_on "New colour"
+
+    fill_in "Swatch name", with: "loose-blue"
+    choose "Hex"
+    fill_in "Hex value", with: "#2B4A8A"
+    click_on "Create colour"
+
+    assert_text "loose-blue"
+    assert_text "#2B4A8A"
+    assert_text "No palettes hold this colour yet"
+  end
+
+  test "reports a bad new colour without losing what was typed" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "impossible"
+    fill_in "R", with: "999"
+    click_on "Create colour"
+
+    assert_text "must be less than or equal to 255"
+    assert_equal "impossible", find_field("Swatch name").value
+  end
+
   # --- Edit --------------------------------------------------------------
 
   test "edits a colour name and tags" do

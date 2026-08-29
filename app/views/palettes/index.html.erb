@@ -36,10 +36,16 @@
 <%= turbo_frame_tag "palettes", data: { turbo_action: "replace" } do %>
   <%# The count belongs with the results: outside the frame it would still
       read "4 palettes" after a search narrowed the list to one. %>
-  <p class="count"><%= result_count(@palettes.size, @total, "palette") %></p>
+  <p class="result-count"><%= result_count(@palettes.size, @total, "palette") %></p>
 
   <% if @palettes.empty? %>
-    <p class="empty">No palettes match.</p>
+    <%# A library with nothing in it is a different state from a search that
+        found nothing, and on a first run the second reading is simply wrong. %>
+    <% if @total.zero? %>
+      <p class="empty">No palettes yet. <%= link_to "Make the first one", new_palette_path %>.</p>
+    <% else %>
+      <p class="empty">No palettes match.</p>
+    <% end %>
   <% else %>
     <ul class="palette-list">
       <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>

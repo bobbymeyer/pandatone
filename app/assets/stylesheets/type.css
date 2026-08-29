@@ -26,21 +26,16 @@
   --size-4: 2rem;      /* 32 — subhead, large values */
   --size-5: 3rem;      /* 48 — page title */
 
-  /* Leading in eighths. Every line box below resolves to a whole number of
-     baseline units, so text sits on the same grid the spacing is measured
-     in. Before this, not one line-height in the app did. */
-  --lead-1: 1rem;      /* 16 = 2 units */
-  --lead-2: 1.5rem;    /* 24 = 3 */
-  --lead-3: 2rem;      /* 32 = 4 */
-  --lead-4: 2.5rem;    /* 40 = 5 */
-  --lead-5: 3rem;      /* 48 = 6 */
+  /* Leading is drawn from the one spacing ladder in grid.css, so a line box
+     and the space beneath it are measured in the same units. Every line box
+     below is a whole number of them. */
 }
 
 body {
   font-family: var(--font);
   font-size: var(--size-2);
   font-weight: 400;
-  line-height: var(--lead-2);
+  line-height: var(--space-3);
   text-align: left;
   font-synthesis: none;
 }
@@ -50,7 +45,7 @@ h1, h2, h3, p, dd, dt, li, label, legend { text-align: left; }
 
 .page-title {
   font-size: var(--size-5);
-  line-height: var(--lead-5);
+  line-height: var(--space-6);
   font-weight: 700;
   letter-spacing: -0.028em;
   text-wrap: balance;
@@ -66,32 +61,29 @@ h1, h2, h3, p, dd, dt, li, label, legend { text-align: left; }
 
 h2 {
   font-size: var(--size-3);
-  line-height: var(--lead-3);
+  line-height: var(--space-4);
   font-weight: 700;
   letter-spacing: -0.015em;
 }
 
 h3 {
   font-size: var(--size-2);
-  line-height: var(--lead-2);
+  line-height: var(--space-3);
   font-weight: 700;
 }
 
-/* The micro register: labels and metadata only. Set open and upper against
-   the tight display sizes, which is most of the contrast in the app.
-   Deliberately excludes buttons and navigation — an action set in the same
-   type as the word "Position" reads as a caption, and 12px is a poor target.
-   Excludes tags too: a tag is content, and displaying it in a case it was
-   not typed in is a small lie about the data. */
+/* The micro register: labels and metadata. Size and colour carry it; nothing
+   in this app is set in capitals. Tracking stays only slightly open, since
+   the wide tracking it used to have is a convention of capitals and reads as
+   a gap in lowercase. */
 .field label,
 .mode-toggle legend,
 .source-toggle legend,
 .channels dt,
 .count {
   font-size: var(--size-1);
-  line-height: var(--lead-1);
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+  line-height: var(--space-2);
+  letter-spacing: 0.01em;
 }
 
 .tag,
@@ -99,17 +91,17 @@ h3 {
 .hint,
 .link-quiet {
   font-size: var(--size-1);
-  line-height: var(--lead-1);
+  line-height: var(--space-2);
 }
 
-.hint { line-height: var(--lead-2); }
+.hint { line-height: var(--space-3); }
 
 /* Navigation and actions read at body size. They are how the app is used,
    not annotations on it. */
 .masthead__nav a,
 .button {
   font-size: var(--size-2);
-  line-height: var(--lead-2);
+  line-height: var(--space-3);
 }
 
 /* Colour values are read as columns of digits, so they get tabular figures. */
@@ -123,7 +115,7 @@ h3 {
 
 .hex--large {
   font-size: var(--size-4);
-  line-height: var(--lead-4);
+  line-height: var(--space-5);
   letter-spacing: 0.02em;
 }
 

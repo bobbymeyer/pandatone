@@ -12,6 +12,23 @@ class ColorsController < ApplicationController
     @palettes = @color.palettes.reorder(:name).includes(palette_colors: :color)
   end
 
+  # Colours are first-class in the domain, so one can be brought into
+  # existence without a palette to put it in — which the API has always
+  # allowed and the interface did not.
+  def new
+    @color = Color.new
+  end
+
+  def create
+    @color = Color.new(swatch_attributes)
+
+    if @color.save
+      redirect_to @color
+    else
+      render :new, status: :unprocessable_content
+    end
+  end
+
   def edit
   end
 

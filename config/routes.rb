@@ -21,7 +21,7 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :colors, only: %i[ index show edit update ]
+  resources :colors, only: %i[ index new create show edit update ]
   resource :lookup, only: :show
 
   get "up" => "rails/health#show", as: :rails_health_check

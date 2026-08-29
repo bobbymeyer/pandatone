@@ -72,6 +72,23 @@ class PalettesTest < ApplicationSystemTestCase
     assert_no_text "Press Check"
   end
 
+  test "a swatch card is one link, not two to the same place" do
+    visit palette_path(palettes(:brand))
+
+    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+      assert_selector "a", count: 1
+    end
+  end
+
+  test "an empty library reads as empty, not as a failed search" do
+    Palette.destroy_all
+
+    visit palettes_path
+
+    assert_text "No palettes yet"
+    assert_no_text "No palettes match"
+  end
+
   test "says so when a search matches nothing" do
     visit palettes_path
 

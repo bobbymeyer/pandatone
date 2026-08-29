@@ -1,10 +1,13 @@
 <li class="color-card" id="<%= dom_id(color) %>">
+  <%# One link, not two to the same place: the swatch and its name were
+      separate anchors, so every card cost two tab stops and announced its
+      destination twice. %>
   <%= link_to color, class: "swatch-link" do %>
     <%# Shares its transition name with the swatch on the colour's own page. %>
-    <%= swatch_tag color.hex, transition_name: "color-#{color.id}" %>
+    <%= swatch_tag color.hex, transition_name: "color-#{color.id}", class: "swatch--card" %>
+    <h2 class="color-card__name swatch-name"><%= color.name %></h2>
   <% end %>
 
-  <h2 class="color-card__name"><%= link_to color.name, color, class: "swatch-name" %></h2>
   <p class="hex"><%= color.hex %></p>
 
   <p class="color-card__palettes">
