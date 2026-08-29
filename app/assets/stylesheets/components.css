@@ -108,30 +108,10 @@
 
 .library-picker .filter-form { margin-bottom: var(--space-3); }
 
-/* One row, sharing the width between however many swatches there are, rather
-   than a grid that grows downwards as the library does. The point of this
-   panel is to glance along what you already have; a wall of swatches pushes
-   everything else off the screen. */
-.swatch-picker {
-  display: flex;
-  gap: var(--gutter);
-}
-
-/* min-width:0 lets a card shrink past its contents, so a long library
-   narrows the row evenly instead of overflowing the page. */
-.swatch-picker > .color-card {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-/* At narrow widths the labels would otherwise force the row wider than the
-   page. The swatch is the thing being chosen; the text is a caption. */
-.swatch-picker .color-card__name,
-.swatch-picker .hex {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+/* What the palette already holds, as one row above the choosing. Context for
+   the decision, not part of it, so it reuses the index strip rather than the
+   card grid below. */
+.current-swatches h2 { margin-bottom: var(--space-2); }
 
 .color-card__name {
   font-size: var(--size-3);

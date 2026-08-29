@@ -1,16 +1,10 @@
 <li class="palette-strip" id="<%= dom_id(palette) %>">
   <h2 class="palette-strip__name"><%= link_to palette.name, palette %></h2>
 
-  <div class="strip">
-    <% palette.palette_colors.each do |membership| %>
-      <%# The transition name is the membership, not the colour: one colour can
-          sit in several palettes on this page, and a duplicate name would
-          switch the morph off. %>
-      <%= swatch_tag membership.color.hex,
-            transition_name: "palette-color-#{membership.id}",
-            title: "#{membership.color.name} #{membership.color.hex}" %>
-    <% end %>
-  </div>
+  <%# The transition name is the membership, not the colour: one colour can sit
+      in several palettes on this page, and a duplicate name would switch the
+      morph off. %>
+  <%= render "palettes/swatch_row", memberships: palette.palette_colors %>
 
   <p class="palette-strip__meta">
     <% if palette.tags.any? %>

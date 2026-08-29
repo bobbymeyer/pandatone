@@ -47,6 +47,7 @@ main.grid {
 .empty,
 .memberships,
 .add-swatch,
+.current-swatches,
 .lookup-result,
 .color-detail { grid-column: 1 / -1; }
 

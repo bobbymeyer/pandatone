@@ -3,6 +3,7 @@ module Palettes
     before_action :set_palette
 
     def new
+      @current = current_memberships
       @available = available_colors
     end
 
@@ -36,6 +37,10 @@ module Palettes
         @palette = Palette.friendly_find(params[:palette_id])
       end
 
+      def current_memberships
+        @palette.palette_colors.includes(:color)
+      end
+
       # Offering a colour the palette already holds would only produce a
       # uniqueness error, so it is left out rather than shown and refused.
       def available_colors
@@ -43,6 +48,7 @@ module Palettes
       end
 
       def render_new
+        @current = current_memberships
         @available = available_colors
         render :new, status: :unprocessable_content
       end

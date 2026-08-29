@@ -214,15 +214,27 @@ class PalettesTest < ApplicationSystemTestCase
     assert_equal [ "signal-red", "ink-black", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
   end
 
-  test "keeps the existing swatches in a single row" do
+  test "shows the swatches already in the palette as one row at the top" do
+    visit new_palette_color_path(palettes(:brand))
+
+    within ".current-swatches" do
+      assert_selector ".swatch", count: 3
+      assert_selector ".swatch[style*='#E30613']"
+      assert_selector ".swatch[style*='#111111']"
+    end
+  end
+
+  test "leaves out the current row for a palette with no swatches" do
+    visit new_palette_color_path(palettes(:empty))
+
+    assert_no_selector ".current-swatches"
+  end
+
+  test "offers the library to choose from as a grid below" do
     visit new_palette_color_path(palettes(:press), source: "library")
 
-    assert_selector ".swatch-picker"
-    assert_no_selector ".library-picker .color-list"
-
-    # Every offered swatch is a direct child of the one row, not wrapped into
-    # a grid that grows downwards as the library does.
-    assert_equal 5, all(".swatch-picker > .color-card").size
+    assert_selector ".library-picker .color-list"
+    assert_equal 5, all(".library-picker .color-list > .color-card").size
   end
 
   test "searches the library when adding a swatch" do
