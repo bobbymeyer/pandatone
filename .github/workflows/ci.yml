@@ -149,17 +149,10 @@ jobs:
       # assertion in it. This one drives the runner's Chrome, so the Stimulus
       # preview, the :has() panels, Turbo's frames and the measured layout are
       # all actually exercised.
-      # Two workers, not one per core. Each one runs a Chrome and a Puma, and
-      # four of each on a shared runner left them fighting for it: the tests
-      # that failed here and nowhere else were all waiting on a Turbo Frame
-      # that a contended machine took seconds to swap. This costs wall time —
-      # measurably, not marginally — and buys a suite that means something
-      # when it passes.
       - name: Run system tests in a real browser
         env:
           RAILS_ENV: test
           SYSTEM_TEST_DRIVER: selenium
-          PARALLEL_WORKERS: 2
         run: bin/rails db:test:prepare test:system
 
       - name: Keep screenshots from failed browser tests

@@ -54,6 +54,30 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.current_driver != :rack_test
   end
 
+  # Turbo and Stimulus arrive over an importmap, after the HTML they act on.
+  # Waiting for markup is not waiting for behavior, and the gap between the
+  # two is where three rounds of CI failures lived: the first test in a
+  # process, on a cold browser, clicked a data-turbo-confirm button before
+  # Turbo was listening, so the form submitted with no dialog for
+  # accept_confirm to find. Nothing here is slower once the browser is warm —
+  # the check passes on its first poll — and no test can start before the
+  # behavior it is about exists.
+  def visit(*)
+    super
+
+    await_javascript if javascript_driver?
+  end
+
+  def await_javascript
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Capybara.default_max_wait_time
+
+    until page.evaluate_script("!!(window.Turbo && window.Stimulus)")
+      raise "Turbo and Stimulus never booted" if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+      sleep 0.05
+    end
+  end
+
   # Turbo's confirmation is a real dialog in a browser and a no-op under
   # rack_test, which ignores the data attribute and just submits. Wrapping the
   # click keeps the flow identical under either driver.
