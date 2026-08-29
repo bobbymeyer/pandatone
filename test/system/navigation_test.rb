@@ -34,9 +34,9 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
-  # The colour index and the colour page share a transition name per colour,
+  # The color index and the color page share a transition name per color,
   # so a swatch morphs across that navigation too.
-  test "a colour swatch keeps its transition name from the index to its page" do
+  test "a color swatch keeps its transition name from the index to its page" do
     color = colors(:signal_red)
 
     visit colors_path
@@ -48,7 +48,7 @@ class NavigationTest < ApplicationSystemTestCase
     assert_match(/view-transition-name:\s*color-#{color.id}\b/, detail_swatch[:style])
   end
 
-  test "transition names are unique on the colour index" do
+  test "transition names are unique on the color index" do
     visit colors_path
 
     names = all(".swatch").map { |swatch| swatch[:style][/view-transition-name:\s*([\w-]+)/, 1] }
@@ -57,10 +57,10 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
-  test "leads the nav with colours" do
+  test "leads the nav with colors" do
     visit root_path
 
-    assert_equal [ "Colours", "Palettes", "Lookup" ], all(".masthead__nav a").map(&:text)
+    assert_equal [ "Colors", "Palettes", "Lookup" ], all(".masthead__nav a").map(&:text)
   end
 
   # The typeface ships with the app. This is a local tool, so it should not
@@ -73,9 +73,9 @@ class NavigationTest < ApplicationSystemTestCase
     assert_no_selector "link[href*='fonts.gstatic.com']", visible: false
   end
 
-  # The colour page now carries its own swatch plus a strip per palette that
-  # holds it, and the colour appears inside each of those strips.
-  test "transition names are unique on a colour page" do
+  # The color page now carries its own swatch plus a strip per palette that
+  # holds it, and the color appears inside each of those strips.
+  test "transition names are unique on a color page" do
     visit color_path(colors(:signal_red))
 
     names = all(".swatch").map { |swatch| swatch[:style][/view-transition-name:\s*([\w-]+)/, 1] }
@@ -94,7 +94,7 @@ class NavigationTest < ApplicationSystemTestCase
     click_on "signal-red"
     assert_text "#E30613"
 
-    click_on "Colours"
+    click_on "Colors"
     assert_text "signal-red"
 
     click_on "Lookup"

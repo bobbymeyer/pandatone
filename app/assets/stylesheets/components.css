@@ -82,7 +82,7 @@
   color: var(--ink-quiet);
 }
 
-/* --- Colour index ------------------------------------------------------ */
+/* --- Color index ------------------------------------------------------ */
 
 
 
@@ -101,7 +101,7 @@
    card grid below. */
 .current-swatches h2 { margin-bottom: var(--space-2); }
 
-/* Card titles on the palette index and the colour index are the same thing
+/* Card titles on the palette index and the color index are the same thing
    and now read the same. The palette one used to inherit h2 by omission and
    came out a full step larger. */
 .palette-strip__name,
@@ -180,14 +180,14 @@
   margin-top: var(--space-3);
 }
 
-/* On a colour's own page the values are the content, not a caption on it,
+/* On a color's own page the values are the content, not a caption on it,
    and there is room to set them properly. */
 .channels--stacked dd {
   font-size: var(--size-2);
   line-height: var(--space-3);
 }
 
-/* --- Colour detail and lookup ------------------------------------------ */
+/* --- Color detail and lookup ------------------------------------------ */
 
 .color-detail,
 .lookup-result {
@@ -273,7 +273,7 @@
   gap: var(--space-2);
   /* A definite basis, not the content width: sharing a row with a long tag
      list would otherwise squeeze the search field down to almost nothing,
-     which is what nine tags were already doing to the colour index. */
+     which is what nine tags were already doing to the color index. */
   flex: 1 1 var(--measure);
   max-width: var(--measure);
 }
@@ -316,7 +316,7 @@
 .tag:hover { color: var(--ink); }
 
 /* The accent says which one is current, and the weight says it again: this
-   is a colour tool, and a reader who cannot separate the red from the grey
+   is a color tool, and a reader who cannot separate the red from the grey
    would otherwise have no current state at all. */
 .tag.active {
   color: var(--accent);
@@ -431,7 +431,7 @@
 /* Show only the panel whose mode is selected. Written as "hide the others"
    rather than "show the chosen one" so that a browser without :has() falls
    back to showing every panel, which still works, rather than to showing
-   none, which would leave no way to enter a colour at all. */
+   none, which would leave no way to enter a color at all. */
 .swatch-entry__fields:has(#swatch_input_mode_rgb:checked) .entry-panel:not([data-mode="rgb"]),
 .swatch-entry__fields:has(#swatch_input_mode_cmyk:checked) .entry-panel:not([data-mode="cmyk"]),
 .swatch-entry__fields:has(#swatch_input_mode_hex:checked) .entry-panel:not([data-mode="hex"]),
@@ -443,7 +443,7 @@
 
 .field--picker { width: max-content; }
 
-/* The system picker. Stripped back to a plain block of colour so it reads as
+/* The system picker. Stripped back to a plain block of color so it reads as
    a swatch rather than as a browser control. */
 .field--picker input {
   width: calc(var(--baseline) * 9);
@@ -506,7 +506,7 @@
 .button--danger:hover,
 .button--danger:focus-visible { color: var(--accent); }
 
-/* Set apart from the actions beside it, not only coloured once you arrive:
+/* Set apart from the actions beside it, not only colored once you arrive:
    at rest, reordering and destroying were the same grey word in a row, and a
    gap is read before a word is. */
 /* :has, because button_to wraps its button in a form: the flex child here is

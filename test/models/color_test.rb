@@ -118,7 +118,7 @@ class ColorTest < ActiveSupport::TestCase
     color = Color.create!(name: "flip", source_space: "cmyk", c: 0, m: 0, y: 0, k: 100)
     assert_equal 0, color.r
 
-    # Now treat it as an RGB colour: RGB becomes the truth and CMYK is redrawn.
+    # Now treat it as an RGB color: RGB becomes the truth and CMYK is redrawn.
     color.update!(source_space: "rgb", r: 255, g: 255, b: 255)
     assert_in_delta 0.0, color.k.to_f
   end
@@ -140,14 +140,14 @@ class ColorTest < ActiveSupport::TestCase
     assert_not_includes Color.column_names, "hex"
   end
 
-  test "derives hex from the rgb of a cmyk sourced colour" do
+  test "derives hex from the rgb of a cmyk sourced color" do
     assert_equal "#00FFFF", colors(:process_cyan).hex
   end
 
   # --- Hex as an input path ----------------------------------------------
   #
-  # hex is derived for reading, but it is also how a colour arrives from a hex
-  # field or the system colour picker, both of which are RGB sources.
+  # hex is derived for reading, but it is also how a color arrives from a hex
+  # field or the system color picker, both of which are RGB sources.
 
   test "sets rgb channels from an assigned hex" do
     color = Color.create!(name: "from hex", source_space: "rgb", hex: "#3366CC")
@@ -172,7 +172,7 @@ class ColorTest < ActiveSupport::TestCase
     color = Color.new(name: "bad hex", source_space: "rgb", hex: "nope")
 
     assert_not color.valid?
-    assert_includes color.errors[:hex], "is not a colour we can read"
+    assert_includes color.errors[:hex], "is not a color we can read"
   end
 
   test "does not complain about a hex that was never given" do
@@ -252,7 +252,7 @@ class ColorTest < ActiveSupport::TestCase
 
   # --- Scopes ------------------------------------------------------------
 
-  test "tagged returns colours carrying the tag" do
+  test "tagged returns colors carrying the tag" do
     assert_equal [ "ink-black", "paper-white", "signal-red" ], Color.tagged("brand").order(:name).pluck(:name)
   end
 
@@ -290,7 +290,7 @@ class ColorTest < ActiveSupport::TestCase
     assert_equal [ "ink-black", "paper-white", "signal-red" ], Color.in_palette("Brand Core").order(:name).pluck(:name)
   end
 
-  test "all_tags lists every colour tag in use once, in order" do
+  test "all_tags lists every color tag in use once, in order" do
     assert_equal [ "brand", "cool", "neutral", "primary", "print", "process", "seasonal" ], Color.all_tags
   end
 
@@ -300,21 +300,21 @@ class ColorTest < ActiveSupport::TestCase
 
   # --- Uniqueness --------------------------------------------------------
 
-  test "refuses a second colour with the same value" do
+  test "refuses a second color with the same value" do
     twin = Color.new(name: "another red", source_space: "rgb", r: 227, g: 6, b: 19)
 
     assert_not twin.valid?
     assert_includes twin.errors[:base], %(#E30613 is already in the library as "signal-red")
   end
 
-  test "refuses a duplicate however the colour was authored" do
+  test "refuses a duplicate however the color was authored" do
     twin = Color.new(name: "cyan again", source_space: "cmyk", c: 100, m: 0, y: 0, k: 0)
 
-    assert_not twin.valid?, "a cmyk recipe landing on an existing colour is still that colour"
+    assert_not twin.valid?, "a cmyk recipe landing on an existing color is still that color"
     assert_includes twin.errors[:base], %(#00FFFF is already in the library as "process-cyan")
   end
 
-  test "a colour does not collide with itself on re-save" do
+  test "a color does not collide with itself on re-save" do
     color = colors(:signal_red)
     color.name = "signal red"
 
@@ -330,17 +330,17 @@ class ColorTest < ActiveSupport::TestCase
 
   # --- Similarity --------------------------------------------------------
 
-  test "similar_to finds a near-identical colour already in the library" do
+  test "similar_to finds a near-identical color already in the library" do
     near = Color.new(name: "off white", source_space: "rgb", r: 255, g: 255, b: 255)
 
     assert_equal colors(:paper_white), Color.similar_to(near)
   end
 
-  test "similar_to ignores colours that plainly differ" do
+  test "similar_to ignores colors that plainly differ" do
     assert_nil Color.similar_to(Color.new(name: "grass", source_space: "rgb", r: 20, g: 160, b: 40))
   end
 
-  test "similar_to never returns the colour itself" do
+  test "similar_to never returns the color itself" do
     assert_nil Color.similar_to(colors(:signal_red))
   end
 
@@ -351,13 +351,13 @@ class ColorTest < ActiveSupport::TestCase
     assert_equal nearer, Color.similar_to(Color.new(name: "q", source_space: "rgb", r: 248, g: 249, b: 247))
   end
 
-  test "similar_to says nothing about a colour with no values yet" do
+  test "similar_to says nothing about a color with no values yet" do
     assert_nil Color.similar_to(Color.new(name: "blank", source_space: "rgb"))
   end
 
   # --- Nearest ------------------------------------------------------------
 
-  test "nearest_to returns the closest colour in the library" do
+  test "nearest_to returns the closest color in the library" do
     assert_equal colors(:paper_white), Color.nearest_to({ r: 255, g: 255, b: 255 })
   end
 
@@ -415,7 +415,7 @@ class ColorTest < ActiveSupport::TestCase
     assert_equal Color.sorted("dark").map(&:name).reverse, Color.sorted("light").map(&:name)
   end
 
-  test "the colour sort runs black, then the spectrum, then white" do
+  test "the color sort runs black, then the spectrum, then white" do
     order = Color.sorted("spectrum").map(&:name)
 
     assert_equal "ink-black", order.first, "the darkest neutral leads"

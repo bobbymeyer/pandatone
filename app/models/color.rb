@@ -1,4 +1,4 @@
-# A colour is a first-class record, not a child of a palette. One brand blue
+# A color is a first-class record, not a child of a palette. One brand blue
 # shared across ten seasonal palettes is one row here, which is what makes the
 # reverse lookup ("which palettes contain this swatch") answerable.
 class Color < ApplicationRecord
@@ -19,7 +19,7 @@ class Color < ApplicationRecord
   SIMILARITY_THRESHOLD = 32
 
   # Below this much chroma there is not enough hue to place on the spectrum,
-  # so the colour belongs on the black-to-white axis instead. It clears the
+  # so the color belongs on the black-to-white axis instead. It clears the
   # off-whites and the warm greys without catching a muted olive.
   NEUTRAL_CHROMA = 24
 
@@ -27,7 +27,7 @@ class Color < ApplicationRecord
   NEUTRAL_MIDPOINT = 127.5
 
   # A wheel has no beginning, so a linear list has to cut it somewhere, and
-  # wherever the cut falls two neighbouring colours end up at opposite ends.
+  # wherever the cut falls two neighbouring colors end up at opposite ends.
   # Cutting at red would do it between #FF0010 and #FF0000 — putting a red
   # that leans a few degrees blue, like #E30613 at 356.5, after the violets.
   # The gap between magenta and red is the emptiest place to break, so the
@@ -75,7 +75,7 @@ class Color < ApplicationRecord
   # The nearest swatch already on file that this one is close enough to be a
   # duplicate of, or nil. Exact matches are a validation, not a warning, so by
   # the time this is consulted the answer is always a genuinely distinct
-  # colour that merely looks the same.
+  # color that merely looks the same.
   def self.similar_to(color)
     return nil unless [ color.r, color.g, color.b ].all?(Integer)
 
@@ -86,7 +86,7 @@ class Color < ApplicationRecord
     nearest if distance && distance <= SIMILARITY_THRESHOLD
   end
 
-  # The closest colour on file to a value, however far off it is. This is what
+  # The closest color on file to a value, however far off it is. This is what
   # the lookup answers with when the library holds nothing matching exactly:
   # "we do not have that, but we have this". No threshold, because nearest has
   # to mean nearest, and no bounding box for the same reason — one query over
@@ -128,7 +128,7 @@ class Color < ApplicationRecord
     ColorSpace.chroma(r, g, b)
   end
 
-  # A colour with too little hue to place on the spectrum.
+  # A color with too little hue to place on the spectrum.
   def neutral?
     chroma < NEUTRAL_CHROMA
   end
@@ -156,7 +156,7 @@ class Color < ApplicationRecord
   end
 
   # hex is derived for reading, but it is also an input path: a hex field and
-  # the system colour picker both hand back a hex string, and both are RGB
+  # the system color picker both hand back a hex string, and both are RGB
   # sources. Assigning it sets the RGB channels; nothing stores the string.
   def hex=(value)
     @assigned_hex = value
@@ -184,11 +184,11 @@ class Color < ApplicationRecord
   end
 
   private
-    # One value, one swatch. Two rows rendering the same hex are one colour
+    # One value, one swatch. Two rows rendering the same hex are one color
     # under two names, which breaks the reverse lookup ("which palettes contain
     # #E30613") into an arbitrary choice between them. A CMYK recipe that lands
-    # on a colour already on file is held to the same line: on screen, and in
-    # this library, it is that colour.
+    # on a color already on file is held to the same line: on screen, and in
+    # this library, it is that color.
     def must_not_duplicate_a_swatch
       return unless [ r, g, b ].all?(Integer)
 
@@ -203,7 +203,7 @@ class Color < ApplicationRecord
     def assigned_hex_must_be_readable
       return if @assigned_hex.blank? || ColorSpace.parse_hex(@assigned_hex)
 
-      errors.add(:hex, "is not a colour we can read")
+      errors.add(:hex, "is not a color we can read")
     end
 
     # The source space is the truth; the other one is redrawn from it on every

@@ -1,4 +1,4 @@
-# The orders an index offers, shared by colours and palettes because a
+# The orders an index offers, shared by colors and palettes because a
 # library reads the same way whichever of the two you are looking at.
 #
 # Name, added and modified are what a database can express, so they stay in
@@ -6,7 +6,7 @@
 # rows the page loads anyway — expressing hue in SQL would mean a CASE over
 # which channel is largest, written out again in every model that wanted it.
 #
-# What "dark" or "on the spectrum" means differs between one colour and a
+# What "dark" or "on the spectrum" means differs between one color and a
 # palette of them, so each model answers that for itself.
 module Sortable
   extend ActiveSupport::Concern
@@ -15,7 +15,7 @@ module Sortable
     "name" => "Name",
     "added" => "Date added",
     "modified" => "Date modified",
-    "spectrum" => "Colour",
+    "spectrum" => "Color",
     "dark" => "Dark first",
     "light" => "Light first"
   }.freeze

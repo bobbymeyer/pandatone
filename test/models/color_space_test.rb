@@ -31,7 +31,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_equal({ c: 0.0, m: 0.0, y: 0.0, k: 49.8 }, ColorSpace.rgb_to_cmyk(128, 128, 128))
   end
 
-  test "converts a real brand colour" do
+  test "converts a real brand color" do
     # signal-red, #E30613
     assert_equal({ c: 0.0, m: 97.4, y: 91.6, k: 11.0 }, ColorSpace.rgb_to_cmyk(227, 6, 19))
   end
@@ -110,7 +110,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
 
   # CMYK is the lossy direction, and this is the documented reason
   # source_space exists: many CMYK mixes collapse onto one RGB triple, so a
-  # CMYK-sourced colour must keep its own values as the source of truth
+  # CMYK-sourced color must keep its own values as the source of truth
   # rather than being re-derived from RGB.
   test "cmyk does not survive a round trip through rgb" do
     rgb = ColorSpace.cmyk_to_rgb(50, 50, 50, 50)
@@ -195,9 +195,9 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_nil ColorSpace.parse("227, 6, 19, 4, 8")
   end
 
-  # Four numbers are a CMYK build, three are an RGB triple. Every colour
+  # Four numbers are a CMYK build, three are an RGB triple. Every color
   # stores both spaces, so reading a build back as RGB is what lets a search
-  # in either space find a colour authored in the other.
+  # in either space find a color authored in the other.
 
   test "parses a cmyk build of four numbers" do
     assert_equal({ r: 0, g: 255, b: 255 }, ColorSpace.parse("100, 0, 0, 0"))
@@ -226,7 +226,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
 
   # --- Distance ----------------------------------------------------------
 
-  test "distance is zero between a colour and itself" do
+  test "distance is zero between a color and itself" do
     assert_equal 0.0, ColorSpace.distance({ r: 227, g: 6, b: 19 }, { r: 227, g: 6, b: 19 })
   end
 
@@ -237,7 +237,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_in_delta ColorSpace.distance(a, b), ColorSpace.distance(b, a), 0.0001
   end
 
-  test "distance grows with how far apart two colours look" do
+  test "distance grows with how far apart two colors look" do
     base = { r: 128, g: 128, b: 128 }
 
     near = ColorSpace.distance(base, { r: 133, g: 133, b: 133 })
@@ -288,7 +288,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_in_delta 300.0, ColorSpace.hue(255, 0, 255)
   end
 
-  test "hue is undefined for a colour with no hue in it" do
+  test "hue is undefined for a color with no hue in it" do
     assert_nil ColorSpace.hue(17, 17, 17)
     assert_nil ColorSpace.hue(0, 0, 0)
     assert_nil ColorSpace.hue(255, 255, 255)

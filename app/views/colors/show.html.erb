@@ -30,12 +30,12 @@
     <% end %>
 
     <div class="page-actions">
-      <%= link_to "Edit colour", edit_color_path(@color), class: "button" %>
+      <%= link_to "Edit color", edit_color_path(@color), class: "button" %>
 
       <%# The confirmation names the palettes rather than asking twice: the
-          server refuses a bare delete of a held colour, so the page that
+          server refuses a bare delete of a held color, so the page that
           knows what holds it asks for that permission up front. %>
-      <%= button_to "Delete colour", @color, method: :delete,
+      <%= button_to "Delete color", @color, method: :delete,
             params: { from_palettes: @palettes.any? || nil }.compact,
             class: "button button--danger",
             data: { turbo_confirm: delete_color_warning(@color, @palettes) } %>
@@ -51,7 +51,7 @@
   <h2>Palettes</h2>
 
   <% if @palettes.empty? %>
-    <p class="empty">No palettes hold this colour yet.</p>
+    <p class="empty">No palettes hold this color yet.</p>
   <% else %>
     <ul class="palette-list">
       <%= render partial: "palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>

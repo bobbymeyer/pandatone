@@ -70,11 +70,11 @@ class PaletteTest < ActiveSupport::TestCase
 
   # --- Associations ------------------------------------------------------
 
-  test "has colours in position order" do
+  test "has colors in position order" do
     assert_equal [ "signal-red", "ink-black", "paper-white" ], palettes(:brand).colors.map(&:name)
   end
 
-  test "orders colours by position regardless of insertion order" do
+  test "orders colors by position regardless of insertion order" do
     palette = Palette.create!(name: "Reordered")
     palette.palette_colors.create!(color: colors(:ink_black), position: 5)
     palette.palette_colors.create!(color: colors(:signal_red), position: 1)
@@ -82,11 +82,11 @@ class PaletteTest < ActiveSupport::TestCase
     assert_equal [ "signal-red", "ink-black" ], palette.reload.colors.map(&:name)
   end
 
-  test "can have no colours" do
+  test "can have no colors" do
     assert_empty palettes(:empty).colors
   end
 
-  test "destroys its memberships but not the colours themselves" do
+  test "destroys its memberships but not the colors themselves" do
     palette = palettes(:brand)
 
     assert_difference -> { PaletteColor.count }, -3 do
@@ -98,7 +98,7 @@ class PaletteTest < ActiveSupport::TestCase
     assert Color.exists?(colors(:signal_red).id)
   end
 
-  test "shares a colour with other palettes rather than copying it" do
+  test "shares a color with other palettes rather than copying it" do
     assert_includes palettes(:brand).colors, colors(:signal_red)
     assert_includes palettes(:autumn).colors, colors(:signal_red)
   end
@@ -136,7 +136,7 @@ class PaletteTest < ActiveSupport::TestCase
     assert_empty Palette.tagged(nil)
   end
 
-  test "containing_hex finds every palette holding that exact colour" do
+  test "containing_hex finds every palette holding that exact color" do
     assert_equal [ "Autumn 2026", "Brand Core" ], Palette.containing_hex("#E30613").order(:name).pluck(:name)
   end
 
@@ -241,13 +241,13 @@ class PaletteTest < ActiveSupport::TestCase
   end
 
   # A hue cannot be averaged — the mean of red and violet is green — so the
-  # colour sort reads the swatch the strip leads with.
-  test "the colour sort reads the swatch each palette leads with" do
+  # color sort reads the swatch the strip leads with.
+  test "the color sort reads the swatch each palette leads with" do
     assert_equal [ "Brand Core", "Autumn 2026", "Press Check" ],
       Palette.sorted("spectrum").map(&:name).first(3)
   end
 
-  test "a palette with no swatches sorts last, whichever way the colour runs" do
+  test "a palette with no swatches sorts last, whichever way the color runs" do
     %w[ spectrum dark light ].each do |key|
       assert_equal "Unfilled", Palette.sorted(key).map(&:name).last,
         "expected the empty palette to sort last under #{key}"

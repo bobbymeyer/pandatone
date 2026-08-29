@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Live preview for the colour entry row.
+// Live preview for the color entry row.
 //
 // Which panel is visible is CSS's job, not this controller's: :has() on the
 // checked radio handles it, so the right fields show even with scripting off.

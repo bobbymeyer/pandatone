@@ -17,7 +17,7 @@
     <%= link_to "New from this", new_palette_path(from: @palette.id), class: "button" %>
     <%# The only thing in this app that cannot be undone. %>
     <%= button_to "Delete palette", @palette, method: :delete, class: "button button--danger",
-          data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colours stay in the library." } %>
+          data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colors stay in the library." } %>
   </div>
 </header>
 

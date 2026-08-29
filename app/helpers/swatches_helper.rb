@@ -1,5 +1,5 @@
 module SwatchesHelper
-  # The only colour in the interface. A swatch carries its own background, and
+  # The only color in the interface. A swatch carries its own background, and
   # a transition name unique within the page so Turbo can morph it across a
   # navigation instead of crossfading it.
   def swatch_tag(hex, transition_name: nil, **options)
@@ -10,8 +10,8 @@ module SwatchesHelper
     tag.div(nil, **options, style: styles.join("; "))
   end
 
-  # What the colour entry row should show. What was just submitted wins, so a
-  # validation error does not wipe what you typed; then the colour being
+  # What the color entry row should show. What was just submitted wins, so a
+  # validation error does not wipe what you typed; then the color being
   # edited; then nothing, for a fresh row.
   def swatch_field_value(key, color)
     return submitted_swatch[key] if params[:swatch].present?
@@ -53,7 +53,7 @@ module SwatchesHelper
       aria: { label: "Copy #{hex}" })
   end
 
-  # Says what deleting will actually do. A colour no palette holds is a small
+  # Says what deleting will actually do. A color no palette holds is a small
   # act; one that four palettes hold is four palettes changing, and the
   # confirmation is the last place to say so.
   def delete_color_warning(color, palettes)

@@ -39,7 +39,7 @@ module Api
         end
       end
 
-      # Deleting a shared colour rewrites every palette holding it, so a client
+      # Deleting a shared color rewrites every palette holding it, so a client
       # has to say that is what it means: pass from_palettes.
       def destroy
         color = Color.find(params[:id])
@@ -59,7 +59,7 @@ module Api
         # The same near-duplicate check the interface makes, in the shape a
         # client can act on: refused with the swatch it resembles attached, and
         # accepted on a second call carrying confirm_similar. Silently letting
-        # machines fill the library with colours no human would have added
+        # machines fill the library with colors no human would have added
         # would make the rule decorative.
         def unconfirmed_twin(color)
           return nil if boolean(params[:confirm_similar])

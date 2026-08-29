@@ -22,7 +22,7 @@
 <div class="add-swatch">
   <fieldset class="source-toggle">
     <legend>Add</legend>
-    <% { "library" => "Existing swatch", "new" => "New colour" }.each do |source, label| %>
+    <% { "library" => "Existing swatch", "new" => "New color" }.each do |source, label| %>
       <span class="radio">
         <%= radio_button_tag :source, source, swatch_source == source, id: "swatch_source_#{source}" %>
         <%= label_tag "swatch_source_#{source}", label %>
@@ -59,7 +59,7 @@
 <%= turbo_frame_tag "library", target: "_top" do %>
       <% if @available.empty? %>
         <p class="empty">
-          <%= params[:q].present? ? "No colours match." : "Every colour in the library is already in this palette." %>
+          <%= params[:q].present? ? "No colors match." : "Every color in the library is already in this palette." %>
         </p>
       <% else %>
         <ul class="color-list">

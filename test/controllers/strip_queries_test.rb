@@ -1,7 +1,7 @@
 require "test_helper"
 
 # The palette strip renders every swatch of every palette it is given, so both
-# the palette index and the colour page sit one missing preload away from a
+# the palette index and the color page sit one missing preload away from a
 # query per palette. These pin the count flat in the number of palettes rather
 # than checking an exact number, which would only measure today's behaviour.
 class StripQueriesTest < ActionDispatch::IntegrationTest
@@ -11,9 +11,9 @@ class StripQueriesTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # The colour orders read every swatch of every palette in Ruby, which is one
+  # The color orders read every swatch of every palette in Ruby, which is one
   # `palette.swatches` away from a query each.
-  test "ordering the palette index by colour does not issue a query per palette" do
+  test "ordering the palette index by color does not issue a query per palette" do
     %w[ spectrum dark light ].each do |key|
       assert_query_count_flat palettes_path(sort: key) do
         palette_holding(colors(:deep_indigo))
@@ -21,7 +21,7 @@ class StripQueriesTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "a colour page does not issue a query per palette holding it" do
+  test "a color page does not issue a query per palette holding it" do
     color = colors(:signal_red)
 
     assert_query_count_flat color_path(color) do

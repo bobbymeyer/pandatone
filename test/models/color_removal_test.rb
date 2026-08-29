@@ -1,7 +1,7 @@
 require "test_helper"
 
 class ColorRemovalTest < ActiveSupport::TestCase
-  test "deletes a colour no palette holds" do
+  test "deletes a color no palette holds" do
     color = colors(:deep_indigo)
 
     assert_difference "Color.count", -1 do
@@ -9,10 +9,10 @@ class ColorRemovalTest < ActiveSupport::TestCase
     end
   end
 
-  # Deleting a shared colour quietly rewrites every palette holding it, which
+  # Deleting a shared color quietly rewrites every palette holding it, which
   # is a much larger act than the button says. So it is refused until asked
   # for in those terms.
-  test "refuses a colour a palette holds, and names the palettes" do
+  test "refuses a color a palette holds, and names the palettes" do
     color = colors(:signal_red)
 
     assert_no_difference "Color.count" do
@@ -23,7 +23,7 @@ class ColorRemovalTest < ActiveSupport::TestCase
       %(signal-red is in Autumn 2026 and Brand Core. Delete it from those palettes too if you mean to remove it.)
   end
 
-  test "deletes a held colour when that is what was asked for" do
+  test "deletes a held color when that is what was asked for" do
     color = colors(:signal_red)
 
     assert_difference "Color.count", -1 do
@@ -40,7 +40,7 @@ class ColorRemovalTest < ActiveSupport::TestCase
     assert_equal 3, palettes(:brand).palette_colors.reload.size
   end
 
-  # The rule that no two palettes hold the same colours cannot be true only on
+  # The rule that no two palettes hold the same colors cannot be true only on
   # the way in: a cascade that quietly makes two palettes identical breaks it
   # just as thoroughly as saving a duplicate would.
   test "refuses a deletion that would leave two palettes identical" do
@@ -55,7 +55,7 @@ class ColorRemovalTest < ActiveSupport::TestCase
     end
 
     assert_includes color.errors[:base],
-      %(Deleting this would leave "Brand Core" and "Pair" holding exactly the same colours.)
+      %(Deleting this would leave "Brand Core" and "Pair" holding exactly the same colors.)
   end
 
   test "empty palettes left behind do not count as duplicates" do
@@ -66,7 +66,7 @@ class ColorRemovalTest < ActiveSupport::TestCase
     end
 
     assert_empty palettes(:press).palette_colors.reload,
-      "Press Check held only that colour, so it is left empty rather than refused"
+      "Press Check held only that color, so it is left empty rather than refused"
   end
 
   test "closes the gap in the positions of the palettes it strips" do

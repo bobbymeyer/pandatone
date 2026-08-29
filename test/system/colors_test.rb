@@ -3,7 +3,7 @@ require "application_system_test_case"
 class ColorsTest < ApplicationSystemTestCase
   # --- Index -------------------------------------------------------------
 
-  test "lists every colour in the library as a swatch" do
+  test "lists every color in the library as a swatch" do
     visit colors_path
 
     assert_selector ".color-card", count: 6
@@ -15,7 +15,7 @@ class ColorsTest < ApplicationSystemTestCase
     end
   end
 
-  test "shows on the index which palettes each colour sits in" do
+  test "shows on the index which palettes each color sits in" do
     visit colors_path
 
     within "#color_#{colors(:signal_red).id}" do
@@ -24,7 +24,7 @@ class ColorsTest < ApplicationSystemTestCase
     end
   end
 
-  test "says on the index when a colour sits in no palette" do
+  test "says on the index when a color sits in no palette" do
     visit colors_path
 
     within "#color_#{colors(:deep_indigo).id}" do
@@ -38,10 +38,10 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Search", with: "ink"
     click_on "Filter"
 
-    assert_text "1 of 6 colours"
+    assert_text "1 of 6 colors"
   end
 
-  test "filters the colour index by tag" do
+  test "filters the color index by tag" do
     visit colors_path
 
     within("[data-filter=tag]") { click_on "print" }
@@ -50,7 +50,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "signal-red"
   end
 
-  test "searches the colour index by name" do
+  test "searches the color index by name" do
     visit colors_path
 
     fill_in "Search", with: "ink"
@@ -60,16 +60,16 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "signal-red"
   end
 
-  test "says so when the colour search matches nothing" do
+  test "says so when the color search matches nothing" do
     visit colors_path
 
     fill_in "Search", with: "nothing-matches-this"
     click_on "Filter"
 
-    assert_text "No colours"
+    assert_text "No colors"
   end
 
-  test "reaches a colour from the index" do
+  test "reaches a color from the index" do
     visit colors_path
 
     within "#color_#{colors(:autumn_ochre).id}" do
@@ -80,11 +80,11 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Autumn 2026"
   end
 
-  test "combines the colour tag filter with a search" do
+  test "combines the color tag filter with a search" do
     visit colors_path
 
     within("[data-filter=tag]") { click_on "brand" }
-    assert_text "3 of 6 colours"
+    assert_text "3 of 6 colors"
 
     fill_in "Search", with: "ink"
     click_on "Filter"
@@ -93,7 +93,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "paper-white"
   end
 
-  test "a colour card is one link to the colour, not two to the same place" do
+  test "a color card is one link to the color, not two to the same place" do
     visit colors_path
 
     within "#color_#{colors(:signal_red).id}" do
@@ -122,8 +122,8 @@ class ColorsTest < ApplicationSystemTestCase
 
     visit colors_path
 
-    assert_text "No colours yet"
-    assert_no_text "No colours match"
+    assert_text "No colors yet"
+    assert_no_text "No colors match"
   end
 
   test "an empty result reads as a failed search" do
@@ -132,13 +132,13 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Search", with: "nothing-matches-this"
     click_on "Filter"
 
-    assert_text "No colours match"
-    assert_no_text "No colours yet"
+    assert_text "No colors match"
+    assert_no_text "No colors yet"
   end
 
   # --- Tags and copying ----------------------------------------------------
 
-  test "edits a colour's tags in place" do
+  test "edits a color's tags in place" do
     visit color_path(colors(:deep_indigo))
 
     click_on "Edit tags"
@@ -149,7 +149,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "cool · brand"
   end
 
-  test "says so rather than showing nothing when a colour has no tags" do
+  test "says so rather than showing nothing when a color has no tags" do
     colors(:deep_indigo).update!(tags: [])
 
     visit color_path(colors(:deep_indigo))
@@ -179,29 +179,29 @@ class ColorsTest < ApplicationSystemTestCase
 
   # --- Deleting -----------------------------------------------------------
 
-  test "deletes a colour no palette holds" do
+  test "deletes a color no palette holds" do
     visit color_path(colors(:deep_indigo))
 
-    confirming { click_on "Delete colour" }
+    confirming { click_on "Delete color" }
 
     assert_current_path colors_path
     assert_no_text "deep-indigo"
     assert_not Color.exists?(colors(:deep_indigo).id)
   end
 
-  # The confirmation is the last place to say what deleting a shared colour
+  # The confirmation is the last place to say what deleting a shared color
   # will actually do, so it names the palettes rather than asking twice.
-  test "names the palettes before deleting a colour they hold" do
+  test "names the palettes before deleting a color they hold" do
     visit color_path(colors(:signal_red))
 
     assert_equal "signal-red is in Autumn 2026 and Brand Core. Delete it and take it out of those palettes?",
-      find_button("Delete colour")[:"data-turbo-confirm"]
+      find_button("Delete color")[:"data-turbo-confirm"]
   end
 
-  test "deletes a shared colour out of every palette holding it" do
+  test "deletes a shared color out of every palette holding it" do
     visit color_path(colors(:signal_red))
 
-    confirming { click_on "Delete colour" }
+    confirming { click_on "Delete color" }
 
     assert_current_path colors_path
     assert_equal [ "ink-black", "paper-white" ], palettes(:brand).colors.reload.order(:name).pluck(:name)
@@ -213,27 +213,27 @@ class ColorsTest < ApplicationSystemTestCase
       colors: [ { id: colors(:signal_red).id }, { id: colors(:ink_black).id } ]).save
 
     visit color_path(colors(:paper_white))
-    confirming { click_on "Delete colour" }
+    confirming { click_on "Delete color" }
 
-    assert_text %(Deleting this would leave "Brand Core" and "Pair" holding exactly the same colours)
+    assert_text %(Deleting this would leave "Brand Core" and "Pair" holding exactly the same colors)
     assert Color.exists?(colors(:paper_white).id)
   end
 
   # --- Sorting ------------------------------------------------------------
 
-  test "lists colours by name until asked otherwise" do
+  test "lists colors by name until asked otherwise" do
     visit colors_path
 
     assert_equal Color.order(:name).pluck(:name), card_names
     assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
   end
 
-  test "sorts by colour, dark first and light first" do
+  test "sorts by color, dark first and light first" do
     visit colors_path
 
     sort_by "Dark first", leading: "ink-black"
     sort_by "Light first", leading: "paper-white"
-    sort_by "Colour", leading: "ink-black"
+    sort_by "Color", leading: "ink-black"
 
     assert_equal "paper-white", card_names.last, "the lightest neutral closes the spectrum"
   end
@@ -271,41 +271,41 @@ class ColorsTest < ApplicationSystemTestCase
     assert_selector "[data-filter=sort] .tag.active", text: "Light first", exact_text: true
   end
 
-  test "creates a colour that belongs to no palette yet" do
+  test "creates a color that belongs to no palette yet" do
     visit colors_path
-    click_on "New colour"
+    click_on "New color"
 
     fill_in "Swatch name", with: "loose-blue"
     choose "Hex"
     fill_in "Hex value", with: "#1E5AAA"
-    click_on "Create colour"
+    click_on "Create color"
 
     assert_text "loose-blue"
     assert_text "#1E5AAA"
-    assert_text "No palettes hold this colour yet"
+    assert_text "No palettes hold this color yet"
   end
 
-  test "reports a bad new colour without losing what was typed" do
+  test "reports a bad new color without losing what was typed" do
     visit new_color_path
 
     fill_in "Swatch name", with: "impossible"
     choose "Hex"
-    fill_in "Hex value", with: "not-a-colour"
-    click_on "Create colour"
+    fill_in "Hex value", with: "not-a-color"
+    click_on "Create color"
 
-    assert_text "is not a colour we can read"
+    assert_text "is not a color we can read"
     assert_equal "impossible", find_field("Swatch name").value
   end
 
   # --- Edit --------------------------------------------------------------
 
-  test "edits a colour name and tags" do
+  test "edits a color name and tags" do
     visit color_path(colors(:deep_indigo))
-    click_on "Edit colour"
+    click_on "Edit color"
 
     fill_in "Swatch name", with: "night-indigo"
     fill_in "Swatch tags", with: "Cool, brand"
-    click_on "Save colour"
+    click_on "Save color"
 
     assert_text "night-indigo"
     assert_text "cool · brand"
@@ -320,20 +320,20 @@ class ColorsTest < ApplicationSystemTestCase
     assert find("#swatch_input_mode_rgb", visible: :all).checked?
   end
 
-  test "opens a cmyk sourced colour in cmyk" do
+  test "opens a cmyk sourced color in cmyk" do
     visit edit_color_path(colors(:process_cyan))
 
     assert find("#swatch_input_mode_cmyk", visible: :all).checked?
     assert_equal "100.0", find_field("C").value
   end
 
-  test "edits a colour by its rgb values" do
+  test "edits a color by its rgb values" do
     visit edit_color_path(colors(:deep_indigo))
 
     fill_in "R", with: "213"
     fill_in "G", with: "22"
     fill_in "B", with: "43"
-    click_on "Save colour"
+    click_on "Save color"
 
     # The path, not the hex: the entry row's live preview paints the hex on
     # the form itself, so asserting on it would be satisfied without the save
@@ -343,19 +343,19 @@ class ColorsTest < ApplicationSystemTestCase
     assert_equal [ 213, 22, 43 ], colors(:deep_indigo).reload.rgb.values
   end
 
-  test "edits a colour by hex" do
+  test "edits a color by hex" do
     visit edit_color_path(colors(:deep_indigo))
 
     choose "Hex"
     fill_in "Hex value", with: "#C77A1A"
-    click_on "Save colour"
+    click_on "Save color"
 
     assert_current_path color_path(colors(:deep_indigo))
     assert_text "#C77A1A"
     assert_text "Authored in RGB"
   end
 
-  test "switches a colour from rgb to cmyk" do
+  test "switches a color from rgb to cmyk" do
     visit edit_color_path(colors(:deep_indigo))
 
     choose "CMYK"
@@ -363,7 +363,7 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "M", with: "0"
     fill_in "Y", with: "100"
     fill_in "K", with: "0"
-    click_on "Save colour"
+    click_on "Save color"
 
     assert_text "Authored in CMYK"
     assert_text "#FFFF00"
@@ -374,21 +374,21 @@ class ColorsTest < ApplicationSystemTestCase
 
     fill_in "Swatch name", with: ""
     choose "Hex"
-    fill_in "Hex value", with: "not-a-colour"
-    click_on "Save colour"
+    fill_in "Hex value", with: "not-a-color"
+    click_on "Save color"
 
-    assert_text "is not a colour we can read"
-    assert_equal "not-a-colour", find_field("Hex value").value
+    assert_text "is not a color we can read"
+    assert_equal "not-a-color", find_field("Hex value").value
     assert_equal 43, colors(:deep_indigo).reload.r
   end
 
-  test "editing a shared colour changes it in every palette holding it" do
+  test "editing a shared color changes it in every palette holding it" do
     visit edit_color_path(colors(:signal_red))
 
     fill_in "R", with: "0"
     fill_in "G", with: "0"
     fill_in "B", with: "0"
-    click_on "Save colour"
+    click_on "Save color"
 
     assert_current_path color_path(colors(:signal_red))
 
@@ -399,7 +399,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_selector "#palette_color_#{palette_colors(:autumn_signal_red).id} .swatch[style*='#000000']"
   end
 
-  test "warns that a shared colour is shared" do
+  test "warns that a shared color is shared" do
     visit edit_color_path(colors(:signal_red))
 
     assert_text "2 palettes"
@@ -408,14 +408,14 @@ class ColorsTest < ApplicationSystemTestCase
   test "reaches the edit form from a palette swatch" do
     visit palette_path(palettes(:brand))
     click_on "signal-red"
-    click_on "Edit colour"
+    click_on "Edit color"
 
     assert_equal "signal-red", find_field("Swatch name").value
   end
 
   # --- Show --------------------------------------------------------------
 
-  test "shows a colour in both spaces with the palettes that hold it" do
+  test "shows a color in both spaces with the palettes that hold it" do
     visit color_path(colors(:signal_red))
 
     assert_text "signal-red"
@@ -427,7 +427,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Autumn 2026"
   end
 
-  test "marks which space a colour was authored in" do
+  test "marks which space a color was authored in" do
     visit color_path(colors(:process_cyan))
 
     assert_text "CMYK"
@@ -435,7 +435,7 @@ class ColorsTest < ApplicationSystemTestCase
   end
 
   # A name alone does not tell you what the palette is. Rendering each one as
-  # its own strip shows the company the colour keeps.
+  # its own strip shows the company the color keeps.
   test "shows each related palette as a strip of its swatches" do
     visit color_path(colors(:signal_red))
 
@@ -452,7 +452,7 @@ class ColorsTest < ApplicationSystemTestCase
     end
   end
 
-  test "links from a colour through to a palette that holds it" do
+  test "links from a color through to a palette that holds it" do
     visit color_path(colors(:signal_red))
 
     within "#palette_#{palettes(:brand).id}" do
@@ -463,14 +463,14 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "paper-white"
   end
 
-  test "shows a colour that belongs to no palette" do
+  test "shows a color that belongs to no palette" do
     visit color_path(colors(:deep_indigo))
 
     assert_text "deep-indigo"
     assert_text "No palettes"
   end
 
-  test "looks a colour up by hex and lists every palette containing it" do
+  test "looks a color up by hex and lists every palette containing it" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#E30613"
@@ -481,7 +481,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Autumn 2026"
   end
 
-  test "looks a colour up by hex without a leading hash" do
+  test "looks a color up by hex without a leading hash" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "e30613"
@@ -490,7 +490,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Brand Core"
   end
 
-  test "looks a colour up by an rgb triple" do
+  test "looks a color up by an rgb triple" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "227, 6, 19"
@@ -500,11 +500,11 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Brand Core"
   end
 
-  # Every colour stores both spaces, so a search in one finds a colour
+  # Every color stores both spaces, so a search in one finds a color
   # authored in the other. process-cyan was authored in CMYK; signal-red in
   # RGB. Each is findable from either direction.
 
-  test "finds a cmyk authored colour from its build" do
+  test "finds a cmyk authored color from its build" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "100, 0, 0, 0"
@@ -515,7 +515,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Read as a CMYK build"
   end
 
-  test "finds a cmyk authored colour from its hex" do
+  test "finds a cmyk authored color from its hex" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#00FFFF"
@@ -525,7 +525,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "Read as a CMYK build"
   end
 
-  test "finds an rgb authored colour from a cmyk build" do
+  test "finds an rgb authored color from a cmyk build" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "0, 97.4, 91.6, 11"
@@ -554,7 +554,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Could not read"
   end
 
-  test "shows the swatch even when no stored colour matches" do
+  test "shows the swatch even when no stored color matches" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
@@ -566,52 +566,52 @@ class ColorsTest < ApplicationSystemTestCase
 
   # "We do not have that" on its own sends you away to look somewhere else.
   # The nearest thing on file is usually the answer you were after — and if it
-  # is not, the colour you just pasted is one click from joining the library.
+  # is not, the color you just pasted is one click from joining the library.
 
-  test "offers to add a colour the library does not hold" do
+  test "offers to add a color the library does not hold" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
 
     assert_text "Not in the library"
-    click_on "Add this colour swatch"
+    click_on "Add this color swatch"
 
     assert_current_path(/#{Regexp.escape(new_color_path)}/)
     assert_equal "#ABCDEF", find_field("Hex value").value
     assert find("#swatch_input_mode_hex", visible: :all).checked?
   end
 
-  test "adding from a lookup lands the colour in the library" do
+  test "adding from a lookup lands the color in the library" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
-    click_on "Add this colour swatch"
+    click_on "Add this color swatch"
 
     fill_in "Swatch name", with: "sky"
 
     before = Color.count
-    click_on "Create colour"
+    click_on "Create color"
 
-    assert_text "No palettes hold this colour yet"
+    assert_text "No palettes hold this color yet"
     assert_text "#ABCDEF"
     assert_equal before + 1, Color.count
     assert_equal [ 171, 205, 239 ], Color.find_by(name: "sky").rgb.values
   end
 
-  test "does not offer to add a colour the library already holds" do
+  test "does not offer to add a color the library already holds" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#E30613"
     click_on "Look up"
 
     assert_text "signal-red"
-    assert_no_link "Add this colour swatch"
+    assert_no_link "Add this color swatch"
   end
 
 
-  test "offers the closest stored colour when the library holds no match" do
+  test "offers the closest stored color when the library holds no match" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#FFFFFF"
@@ -625,7 +625,7 @@ class ColorsTest < ApplicationSystemTestCase
     end
   end
 
-  test "the closest stored colour links through to it" do
+  test "the closest stored color links through to it" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#FFFFFF"
@@ -636,7 +636,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_current_path color_path(colors(:paper_white))
   end
 
-  test "offers a closest colour however far off it is" do
+  test "offers a closest color however far off it is" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#800080"
@@ -645,7 +645,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_selector ".lookup-nearest .swatch"
   end
 
-  test "does not offer a closest colour when the lookup matched exactly" do
+  test "does not offer a closest color when the lookup matched exactly" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#E30613"
@@ -655,7 +655,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_selector ".lookup-nearest"
   end
 
-  test "says nothing about a closest colour when the library is empty" do
+  test "says nothing about a closest color when the library is empty" do
     PaletteColor.delete_all
     Color.delete_all
 
@@ -667,9 +667,9 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_selector ".lookup-nearest"
   end
 
-  # The one navigation on this screen is to the colour it found, so the swatch
-  # takes that colour's transition name and morphs across rather than fading.
-  test "a found colour keeps its transition name through to its page" do
+  # The one navigation on this screen is to the color it found, so the swatch
+  # takes that color's transition name and morphs across rather than fading.
+  test "a found color keeps its transition name through to its page" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#E30613"
@@ -679,7 +679,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_match(/view-transition-name:\s*color-#{colors(:signal_red).id}\b/, swatch[:style])
   end
 
-  test "an unmatched lookup names its swatch by the colour itself" do
+  test "an unmatched lookup names its swatch by the color itself" do
     visit lookup_path
 
     fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
@@ -698,7 +698,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Could not read"
   end
 
-  test "reaches a colour from the palette it sits in" do
+  test "reaches a color from the palette it sits in" do
     visit palette_path(palettes(:autumn))
 
     click_on "autumn-ochre"
@@ -711,9 +711,9 @@ class ColorsTest < ApplicationSystemTestCase
   #
   # paper-white is #FAFAF8. A plain #FFFFFF is 17 apart on the redmean scale:
   # near enough that a library holding both is almost certainly holding one
-  # colour twice.
+  # color twice.
 
-  test "asks before adding a colour that is nearly one already in the library" do
+  test "asks before adding a color that is nearly one already in the library" do
     visit new_color_path
 
     fill_in "Swatch name", with: "off-white"
@@ -721,7 +721,7 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Hex value", with: "#FFFFFF"
 
     before = Color.count
-    click_on "Create colour"
+    click_on "Create color"
 
     assert_text "This is similar to paper-white"
     assert_text "#FAFAF8"
@@ -735,7 +735,7 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Swatch name", with: "off-white"
     choose "Hex"
     fill_in "Hex value", with: "#FFFFFF"
-    click_on "Create colour"
+    click_on "Create color"
 
     assert_text "This is similar to paper-white"
     before = Color.count
@@ -747,13 +747,13 @@ class ColorsTest < ApplicationSystemTestCase
     assert_equal before + 1, Color.count
   end
 
-  test "asks again when the colour changes after the warning" do
+  test "asks again when the color changes after the warning" do
     visit new_color_path
 
     fill_in "Swatch name", with: "off-white"
     choose "Hex"
     fill_in "Hex value", with: "#FFFFFF"
-    click_on "Create colour"
+    click_on "Create color"
 
     assert_text "This is similar to paper-white"
     fill_in "Hex value", with: "#FDFDFD"
@@ -763,7 +763,7 @@ class ColorsTest < ApplicationSystemTestCase
 
     # The old warning is still on screen, so asserting on its wording would
     # pass without the second submission ever landing. Only the re-rendered
-    # warning names the colour that was just typed.
+    # warning names the color that was just typed.
     within ".warning" do
       assert_text "#FDFDFD"
     end
@@ -778,19 +778,19 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Hex value", with: "#E30613"
 
     before = Color.count
-    click_on "Create colour"
+    click_on "Create color"
 
     assert_text %(#E30613 is already in the library as "signal-red")
     assert_no_text "This is similar to"
     assert_equal before, Color.count
   end
 
-  test "asks before editing a colour into a near duplicate" do
+  test "asks before editing a color into a near duplicate" do
     visit edit_color_path(colors(:deep_indigo))
 
     choose "Hex"
     fill_in "Hex value", with: "#FFFFFF"
-    click_on "Save colour"
+    click_on "Save color"
 
     assert_text "This is similar to paper-white"
     assert_equal [ 43, 74, 138 ], colors(:deep_indigo).reload.rgb.values
@@ -801,7 +801,7 @@ class ColorsTest < ApplicationSystemTestCase
     assert_equal [ 255, 255, 255 ], colors(:deep_indigo).reload.rgb.values
   end
 
-  test "says nothing about a colour that resembles nothing on file" do
+  test "says nothing about a color that resembles nothing on file" do
     visit new_color_path
 
     fill_in "Swatch name", with: "grass"
@@ -809,12 +809,12 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Hex value", with: "#14A028"
 
     before = Color.count
-    click_on "Create colour"
+    click_on "Create color"
 
-    # Text only the colour's own page carries: a path built from
+    # Text only the color's own page carries: a path built from
     # Color.find_by would be evaluated before the wait, when the row the
     # request is creating may not exist yet.
-    assert_text "No palettes hold this colour yet"
+    assert_text "No palettes hold this color yet"
     assert_text "#14A028"
     assert_equal before + 1, Color.count
   end

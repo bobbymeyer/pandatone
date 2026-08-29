@@ -2,7 +2,7 @@ module PaletteSerializer
   module_function
 
   # Collections and embedded references carry the summary; only a palette
-  # asked for by itself carries its colours.
+  # asked for by itself carries its colors.
   def summary(palette)
     { id: palette.id, name: palette.name, tags: palette.tags }
   end

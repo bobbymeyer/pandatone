@@ -1,10 +1,10 @@
-# Writes a palette and, optionally, its whole ordered colour list in one
+# Writes a palette and, optionally, its whole ordered color list in one
 # transaction.
 #
 # Replacing the list rather than diffing it means a single shape of request
 # covers adding, removing and reordering swatches, and a half-applied change
 # is impossible: either the palette ends up exactly as described or nothing
-# moves. Colours removed from a palette are left in the library, since they
+# moves. Colors removed from a palette are left in the library, since they
 # may sit in other palettes.
 class PaletteComposition
   Invalid = Class.new(StandardError)
@@ -35,18 +35,18 @@ class PaletteComposition
   end
 
   private
-    # A palette is the set of colours it holds; its name is a label on that
-    # set, not part of it. Two palettes holding the same colours are one
+    # A palette is the set of colors it holds; its name is a label on that
+    # set, not part of it. Two palettes holding the same colors are one
     # palette filed twice, so the second is refused rather than saved and
     # left to be noticed later. Order is not part of the identity — the same
-    # five colours resequenced are the same palette — and empty palettes do
+    # five colors resequenced are the same palette — and empty palettes do
     # not duplicate one another, or a second one could never be started.
     def ensure_composition_is_distinct
       color_ids = @palette.palette_colors.reload.pluck(:color_id)
       twin = palette_holding(color_ids)
       return if twin.nil?
 
-      @palette.errors.add(:base, %("#{twin.name}" already holds exactly these colours))
+      @palette.errors.add(:base, %("#{twin.name}" already holds exactly these colors))
       raise Invalid
     end
 
@@ -93,7 +93,7 @@ class PaletteComposition
       end
     end
 
-    # An entry is either a reference to a colour already in the library
+    # An entry is either a reference to a color already in the library
     # ({ "id": 12 }) or a full definition to create. References are how one
     # brand blue ends up in ten palettes as a single row.
     def resolve(spec)
@@ -101,7 +101,7 @@ class PaletteComposition
 
       if spec[:id].present?
         existing = Color.find_by(id: spec[:id])
-        @palette.errors.add(:base, "No colour with id #{spec[:id]}") if existing.nil?
+        @palette.errors.add(:base, "No color with id #{spec[:id]}") if existing.nil?
         existing
       else
         color = Color.new(spec.except(:id))

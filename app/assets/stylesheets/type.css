@@ -72,7 +72,7 @@ h3 {
   font-weight: 700;
 }
 
-/* The micro register: labels and metadata. Size and colour carry it; nothing
+/* The micro register: labels and metadata. Size and color carry it; nothing
    in this app is set in capitals. Tracking stays only slightly open, since
    the wide tracking it used to have is a convention of capitals and reads as
    a gap in lowercase. */
@@ -105,7 +105,7 @@ h3 {
   line-height: var(--space-3);
 }
 
-/* Colour values are read as columns of digits, so they get tabular figures. */
+/* Color values are read as columns of digits, so they get tabular figures. */
 .hex,
 .channels dd {
   font-variant-numeric: tabular-nums;

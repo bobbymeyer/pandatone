@@ -33,9 +33,9 @@ class FieldPlacementTest < ApplicationSystemTestCase
         "palette index" => palettes_path,
         "palette show" => palette_path(palettes(:brand)),
         "palette form" => new_palette_path,
-        "colour index" => colors_path,
-        "colour show" => color_path(colors(:signal_red)),
-        "colour form" => new_color_path,
+        "color index" => colors_path,
+        "color show" => color_path(colors(:signal_red)),
+        "color form" => new_color_path,
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "lookup" => lookup_path(q: "#E30613")
       }

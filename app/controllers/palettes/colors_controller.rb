@@ -9,7 +9,7 @@ module Palettes
       @available = available_colors
     end
 
-    # Two ways to fill a swatch: reach for a colour already in the library, or
+    # Two ways to fill a swatch: reach for a color already in the library, or
     # describe a new one. Both end up appending to the same palette, so they
     # share one route and one transaction.
     def create
@@ -20,7 +20,7 @@ module Palettes
         return render_new
       end
 
-      # Only a colour being described from scratch can be a near-duplicate;
+      # Only a color being described from scratch can be a near-duplicate;
       # one picked out of the library is by definition already in it.
       if spec[:id].blank?
         @candidate = Color.new(spec)
@@ -53,12 +53,12 @@ module Palettes
       redirect_to @palette
     end
 
-    # Removes the swatch from this palette only. The colour stays in the
+    # Removes the swatch from this palette only. The color stays in the
     # library, because it may well sit in other palettes.
     #
     # Expressed as a replacement rather than a delete so that it goes through
     # the same check as every other write: taking a swatch out can land this
-    # palette on the same set of colours as another one, and that is a
+    # palette on the same set of colors as another one, and that is a
     # duplicate however it came about. It also closes the gap the removed
     # swatch left in the positions.
     def destroy
@@ -93,7 +93,7 @@ module Palettes
         @palette.palette_colors.includes(:color)
       end
 
-      # Offering a colour the palette already holds would only produce a
+      # Offering a color the palette already holds would only produce a
       # uniqueness error, so it is left out rather than shown and refused.
       def available_colors
         Color.where.not(id: @palette.color_ids).order(:name).name_matching(params[:q])
@@ -107,9 +107,9 @@ module Palettes
 
       # Which panel the page opens on. Reaching for a swatch the library
       # already holds is the default, because a library of near-identical
-      # colours is the failure mode this app exists to avoid, and a default
+      # colors is the failure mode this app exists to avoid, and a default
       # that starts you typing a new one every time is how you get there.
-      # Describing a new colour leads only when there is nothing to pick.
+      # Describing a new color leads only when there is nothing to pick.
       #
       # A rejected submission comes back on the panel it came from rather than
       # resetting to the default.

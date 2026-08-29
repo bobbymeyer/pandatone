@@ -1,4 +1,4 @@
-# Tags are the discovery mechanism for both palettes and colours: there is no
+# Tags are the discovery mechanism for both palettes and colors: there is no
 # "active" boolean anywhere, just a palette tagged "active". That makes tag
 # handling load-bearing, so it is normalised in one place and queried in one
 # place.

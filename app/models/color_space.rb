@@ -1,8 +1,8 @@
 # Device RGB <-> CMYK conversion.
 #
 # Deliberately naive: the standard textbook formulas, no ICC profiles, no
-# gamut mapping, no black generation or under-colour removal. The CMYK a
-# colour reports is an approximation good enough to hand a printer as a
+# gamut mapping, no black generation or under-color removal. The CMYK a
+# color reports is an approximation good enough to hand a printer as a
 # starting point, and nothing more.
 #
 # The two directions are not symmetrical. RGB round-trips through CMYK
@@ -60,15 +60,15 @@ module ColorSpace
 
   # Freeform input from a human: a hex, or an RGB triple in whatever
   # punctuation their tool produced. Six hex digits are read as hex, since
-  # that is overwhelmingly what "123456" means in a colour field.
-  # Reads a colour written any of the ways someone might have it to hand: a
+  # that is overwhelmingly what "123456" means in a color field.
+  # Reads a color written any of the ways someone might have it to hand: a
   # hex, an RGB triple, or a CMYK build. All three come back as RGB, which is
-  # what makes a search in one space find a colour authored in the other —
-  # every colour stores both, and RGB is the one they share.
+  # what makes a search in one space find a color authored in the other —
+  # every color stores both, and RGB is the one they share.
   #
   # The count decides the space: four numbers are inks on 0..100, three are
   # channels on 0..255. A build is lossy in that direction, so this finds the
-  # colour the build renders to rather than the build itself.
+  # color the build renders to rather than the build itself.
   def parse(input)
     parse_hex(input) || parse_triple(input) || build(input)&.then { |inks| cmyk_to_rgb(*inks.values) }
   end
@@ -89,11 +89,11 @@ module ColorSpace
     to_hex(rgb[:r], rgb[:g], rgb[:b]) if rgb
   end
 
-  # How different two colours look, on a 0..765 scale. This is "redmean": a
+  # How different two colors look, on a 0..765 scale. This is "redmean": a
   # weighted RGB distance that tracks perception far better than the plain
   # Euclidean one — which reads a shift in green as no bigger than the same
   # shift in blue — while staying pure arithmetic. No profiles, no Lab, no
-  # colour-science apparatus for a question that only needs an approximate
+  # color-science apparatus for a question that only needs an approximate
   # answer.
   def distance(a, b)
     mean = (a[:r] + b[:r]) / 2.0
@@ -112,13 +112,13 @@ module ColorSpace
     0.299 * r + 0.587 * g + 0.114 * b
   end
 
-  # How much colour there is in a colour: the spread between its channels, on
+  # How much color there is in a color: the spread between its channels, on
   # 0..255. Zero is a grey, and everything near zero reads as one.
   def chroma(r, g, b)
     [ r, g, b ].max - [ r, g, b ].min
   end
 
-  # Where the colour sits on the wheel, in degrees from red, or nil when there
+  # Where the color sits on the wheel, in degrees from red, or nil when there
   # is no hue to speak of.
   def hue(r, g, b)
     high = [ r, g, b ].max

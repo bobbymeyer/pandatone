@@ -3,7 +3,7 @@ require "test_helper"
 class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
   # --- Index -------------------------------------------------------------
 
-  test "lists every colour by name" do
+  test "lists every color by name" do
     get api_v1_colors_url
 
     assert_response :success
@@ -11,13 +11,13 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
       json.map { |c| c["name"] }
   end
 
-  test "filters colours by tag" do
+  test "filters colors by tag" do
     get api_v1_colors_url(tag: "brand")
 
     assert_equal [ "ink-black", "paper-white", "signal-red" ], json.map { |c| c["name"] }
   end
 
-  test "filters colours by hex" do
+  test "filters colors by hex" do
     get api_v1_colors_url(hex: "E30613")
 
     assert_equal [ "signal-red" ], json.map { |c| c["name"] }
@@ -29,25 +29,25 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "signal-red" ], json.map { |c| c["name"] }
   end
 
-  test "filters colours by palette name" do
+  test "filters colors by palette name" do
     get api_v1_colors_url(palette: "Brand Core")
 
     assert_equal [ "ink-black", "paper-white", "signal-red" ], json.map { |c| c["name"] }
   end
 
-  test "filters colours by palette id" do
+  test "filters colors by palette id" do
     get api_v1_colors_url(palette: palettes(:brand).id)
 
     assert_equal [ "ink-black", "paper-white", "signal-red" ], json.map { |c| c["name"] }
   end
 
-  test "combines colour filters" do
+  test "combines color filters" do
     get api_v1_colors_url(palette: "Brand Core", tag: "primary")
 
     assert_equal [ "signal-red" ], json.map { |c| c["name"] }
   end
 
-  test "returns an empty array when no colour matches" do
+  test "returns an empty array when no color matches" do
     get api_v1_colors_url(hex: "#ABCDEF")
 
     assert_response :success
@@ -62,7 +62,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   # --- Show --------------------------------------------------------------
 
-  test "shows a colour with the palettes that contain it" do
+  test "shows a color with the palettes that contain it" do
     get api_v1_color_url(colors(:signal_red))
 
     assert_response :success
@@ -75,20 +75,20 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "Autumn 2026", "Brand Core" ], json["palettes"].map { |p| p["name"] }
   end
 
-  test "embedded palettes are summaries without their colours" do
+  test "embedded palettes are summaries without their colors" do
     get api_v1_color_url(colors(:signal_red))
 
     assert_equal %w[ id name tags ], json["palettes"].first.keys.sort
   end
 
-  test "shows a colour that belongs to no palette" do
+  test "shows a color that belongs to no palette" do
     get api_v1_color_url(colors(:deep_indigo))
 
     assert_response :success
     assert_equal [], json["palettes"]
   end
 
-  test "shows a cmyk sourced colour with its approximate rgb" do
+  test "shows a cmyk sourced color with its approximate rgb" do
     get api_v1_color_url(colors(:process_cyan))
 
     assert_equal "cmyk", json["source_space"]
@@ -97,7 +97,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "#00FFFF", json["hex"]
   end
 
-  test "returns 404 for an unknown colour" do
+  test "returns 404 for an unknown color" do
     get api_v1_color_url(999_999)
 
     assert_response :not_found
@@ -106,7 +106,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   # --- Create ------------------------------------------------------------
 
-  test "creates a standalone rgb colour and derives its cmyk" do
+  test "creates a standalone rgb color and derives its cmyk" do
     assert_difference "Color.count", 1 do
       post api_v1_colors_url, as: :json, params: { color: {
         name: "signal-blue", source_space: "rgb", r: 30, g: 90, b: 170, tags: [ "Cool", "brand" ]
@@ -120,7 +120,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [], json["palettes"]
   end
 
-  test "creates a standalone cmyk colour and derives its rgb" do
+  test "creates a standalone cmyk color and derives its rgb" do
     post api_v1_colors_url, as: :json, params: { color: {
       name: "process-yellow", source_space: "cmyk", c: 0, m: 0, y: 100, k: 0
     } }
@@ -131,7 +131,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "#FFFF00", json["hex"]
   end
 
-  test "rejects a colour with no name" do
+  test "rejects a color with no name" do
     assert_no_difference "Color.count" do
       post api_v1_colors_url, as: :json, params: { color: { source_space: "rgb", r: 0, g: 0, b: 0 } }
     end
@@ -160,10 +160,10 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   # --- Update ------------------------------------------------------------
   #
-  # A colour is shared, so being unable to correct one after it is stored
+  # A color is shared, so being unable to correct one after it is stored
   # means living with the mistake in every palette that holds it.
 
-  test "updates a colour name and tags" do
+  test "updates a color name and tags" do
     patch api_v1_color_url(colors(:deep_indigo)), as: :json,
       params: { color: { name: "night-indigo", tags: [ "Cool", "brand" ] } }
 
@@ -190,14 +190,14 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "r" => 255, "g" => 255, "b" => 0 }, json["rgb"])
   end
 
-  test "leaves palette membership alone when a colour changes" do
+  test "leaves palette membership alone when a color changes" do
     patch api_v1_color_url(colors(:signal_red)), as: :json, params: { color: { name: "renamed" } }
 
     assert_response :success
     assert_equal [ "Autumn 2026", "Brand Core" ], json["palettes"].map { |p| p["name"] }
   end
 
-  test "editing a shared colour changes it in every palette holding it" do
+  test "editing a shared color changes it in every palette holding it" do
     patch api_v1_color_url(colors(:signal_red)), as: :json, params: { color: { r: 0, g: 0, b: 0 } }
 
     get colors_api_v1_palette_url(palettes(:brand))
@@ -224,7 +224,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_includes json["errors"]["name"], "can't be blank"
   end
 
-  test "returns 404 when updating an unknown colour" do
+  test "returns 404 when updating an unknown color" do
     patch api_v1_color_url(999_999), as: :json, params: { color: { name: "x" } }
 
     assert_response :not_found
@@ -270,7 +270,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   # --- Duplicates and near duplicates ------------------------------------
 
-  test "refuses a colour the library already holds" do
+  test "refuses a color the library already holds" do
     assert_no_difference "Color.count" do
       post api_v1_colors_url, as: :json, params: { color: {
         name: "red again", source_space: "rgb", r: 227, g: 6, b: 19
@@ -306,7 +306,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "#FFFFFF", json["hex"]
   end
 
-  test "refuses an update that walks a colour onto a near duplicate" do
+  test "refuses an update that walks a color onto a near duplicate" do
     patch api_v1_color_url(colors(:deep_indigo)), as: :json,
       params: { color: { r: 255, g: 255, b: 255 } }
 
@@ -315,7 +315,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ 43, 74, 138 ], colors(:deep_indigo).reload.rgb.values
   end
 
-  test "leaves a plainly distinct colour alone" do
+  test "leaves a plainly distinct color alone" do
     assert_difference "Color.count", 1 do
       post api_v1_colors_url, as: :json, params: { color: {
         name: "grass", source_space: "rgb", r: 20, g: 160, b: 40
@@ -328,7 +328,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   # --- Delete -------------------------------------------------------------
 
-  test "deletes a colour no palette holds" do
+  test "deletes a color no palette holds" do
     assert_difference "Color.count", -1 do
       delete api_v1_color_url(colors(:deep_indigo))
     end
@@ -336,7 +336,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
-  test "refuses to delete a colour a palette holds" do
+  test "refuses to delete a color a palette holds" do
     assert_no_difference "Color.count" do
       delete api_v1_color_url(colors(:signal_red))
     end
@@ -345,7 +345,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_match "Autumn 2026 and Brand Core", json["errors"]["base"].first
   end
 
-  test "deletes a held colour when the client says that is what it means" do
+  test "deletes a held color when the client says that is what it means" do
     assert_difference "Color.count", -1 do
       delete api_v1_color_url(colors(:signal_red)), as: :json, params: { from_palettes: true }
     end
@@ -354,7 +354,7 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, palettes(:brand).colors.reload.size
   end
 
-  test "reports a missing colour rather than pretending to delete it" do
+  test "reports a missing color rather than pretending to delete it" do
     delete api_v1_color_url(id: 0)
 
     assert_response :not_found

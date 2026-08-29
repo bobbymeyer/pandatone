@@ -26,7 +26,7 @@ class HeadingOutlineTest < ApplicationSystemTestCase
     nested = within("section.memberships") { first(".palette-strip__name").tag_name }
 
     assert_equal "h2", index, "a strip is the page's own content on the index"
-    assert_equal "h3", nested, "the same strip sits under the Palettes heading on a colour"
+    assert_equal "h3", nested, "the same strip sits under the Palettes heading on a color"
   end
 
   private
@@ -37,10 +37,10 @@ class HeadingOutlineTest < ApplicationSystemTestCase
         "new palette" => new_palette_path,
         "fork palette" => new_palette_path(from: palettes(:brand).id),
         "edit palette" => edit_palette_path(palettes(:brand)),
-        "colour index" => colors_path,
-        "colour show" => color_path(colors(:signal_red)),
-        "new colour" => new_color_path,
-        "edit colour" => edit_color_path(colors(:signal_red)),
+        "color index" => colors_path,
+        "color show" => color_path(colors(:signal_red)),
+        "new color" => new_color_path,
+        "edit color" => edit_color_path(colors(:signal_red)),
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "add a swatch, new" => new_palette_color_path(palettes(:press), source: "new"),
         "lookup" => lookup_path,

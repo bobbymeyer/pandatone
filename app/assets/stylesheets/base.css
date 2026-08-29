@@ -1,7 +1,7 @@
 /* Ground, ink, and the one accent. The interface is near-monochrome so that
-   the swatches are the only colour on the page.
+   the swatches are the only color on the page.
    The accent is only ever a rule, a focus ring or a word — never a filled
-   area. A filled block of colour is what a swatch is, and the chrome must
+   area. A filled block of color is what a swatch is, and the chrome must
    not be able to be mistaken for the content it holds. */
 
 :root {

@@ -3,8 +3,8 @@ require "application_system_test_case"
 class PalettesTest < ApplicationSystemTestCase
   # --- Forking --------------------------------------------------------------
   #
-  # A seasonal variant starts life as last season's palette with one colour
-  # swapped, and the rule that no two palettes hold the same colours blocks
+  # A seasonal variant starts life as last season's palette with one color
+  # swapped, and the rule that no two palettes hold the same colors blocks
   # the clone that workflow would otherwise go through. So the fork carries
   # the swatches into the form instead of saving them: what you save is
   # already the palette you meant.
@@ -54,7 +54,7 @@ class PalettesTest < ApplicationSystemTestCase
     fill_in "Name", with: "Brand Core Again"
     click_on "Create palette"
 
-    assert_text %("Brand Core" already holds exactly these colours)
+    assert_text %("Brand Core" already holds exactly these colors)
     assert_not Palette.exists?(name: "Brand Core Again")
   end
 
@@ -96,15 +96,15 @@ class PalettesTest < ApplicationSystemTestCase
     assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
   end
 
-  test "sorts palettes by colour, dark first and light first" do
+  test "sorts palettes by color, dark first and light first" do
     visit palettes_path
 
     sort_by "Dark first", leading: "Autumn 2026"
     sort_by "Light first", leading: "Press Check"
-    sort_by "Colour", leading: "Brand Core"
+    sort_by "Color", leading: "Brand Core"
   end
 
-  test "an empty palette sorts last however the colours run" do
+  test "an empty palette sorts last however the colors run" do
     visit palettes_path
 
     sort_by "Dark first", leading: "Autumn 2026"
@@ -227,7 +227,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "No palettes"
   end
 
-  test "shows a palette with every swatch in both colour spaces" do
+  test "shows a palette with every swatch in both color spaces" do
     visit palette_path(palettes(:brand))
 
     assert_text "Brand Core"
@@ -285,11 +285,11 @@ class PalettesTest < ApplicationSystemTestCase
     fill_in "Name", with: "Half Filled"
     fill_in "Swatch name", with: "impossible"
     choose "Hex"
-    fill_in "Hex value", with: "not-a-colour"
+    fill_in "Hex value", with: "not-a-color"
 
     click_on "Create palette"
 
-    assert_text "Hex is not a colour we can read"
+    assert_text "Hex is not a color we can read"
     assert_no_text "Colors Hex"
     assert_equal "Half Filled", find_field("Name").value
     assert_not Palette.exists?(name: "Half Filled")
@@ -298,7 +298,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "adds a swatch to an existing palette in cmyk" do
     visit palette_path(palettes(:press))
     click_on "Add a swatch"
-    choose "New colour"
+    choose "New color"
 
     fill_in "Swatch name", with: "process-magenta"
     choose "CMYK"
@@ -316,9 +316,9 @@ class PalettesTest < ApplicationSystemTestCase
 
   # --- Adding an existing swatch -----------------------------------------
   #
-  # One colour row shared across palettes is the whole point of the join
-  # table, so reaching for a colour already in the library leads — and a
-  # library of near-identical swatches is what a "new colour" default builds.
+  # One color row shared across palettes is the whole point of the join
+  # table, so reaching for a color already in the library leads — and a
+  # library of near-identical swatches is what a "new color" default builds.
 
   test "opens on the library" do
     visit new_palette_color_path(palettes(:press))
@@ -327,7 +327,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_not find("#swatch_source_new", visible: :all).checked?
   end
 
-  test "opens on the new colour form when there is nothing left to pick" do
+  test "opens on the new color form when there is nothing left to pick" do
     palette = palettes(:press)
     PaletteComposition.new(palette, attributes: {}, colors: Color.ids.map { |id| { id: id } }).save
 
@@ -337,7 +337,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_not find("#swatch_source_library", visible: :all).checked?
   end
 
-  test "comes back on the new colour form after it is refused" do
+  test "comes back on the new color form after it is refused" do
     visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: ""
@@ -347,7 +347,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     # The refusal first: the radio is already checked before the submission,
     # so asserting on it alone would pass without the round trip happening.
-    assert_text "is not a colour we can read"
+    assert_text "is not a color we can read"
     assert find("#swatch_source_new", visible: :all).checked?
   end
 
@@ -375,19 +375,19 @@ class PalettesTest < ApplicationSystemTestCase
     assert find("#swatch_source_library", visible: :all).checked?
   end
 
-  test "stays on the new colour form when it is rejected" do
+  test "stays on the new color form when it is rejected" do
     visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "impossible"
     choose "Hex"
-    fill_in "Hex value", with: "not-a-colour"
+    fill_in "Hex value", with: "not-a-color"
     click_on "Add swatch"
 
-    assert_text "is not a colour we can read"
+    assert_text "is not a color we can read"
     assert find("#swatch_source_new", visible: :all).checked?
   end
 
-  test "leaves out colours the palette already holds" do
+  test "leaves out colors the palette already holds" do
     visit new_palette_color_path(palettes(:brand), source: "library")
 
     assert_no_selector "#color_#{colors(:signal_red).id}"
@@ -395,7 +395,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_selector "#color_#{colors(:deep_indigo).id}"
   end
 
-  test "adds an existing colour without making a second copy of it" do
+  test "adds an existing color without making a second copy of it" do
     visit new_palette_color_path(palettes(:press), source: "library")
     colors_before, memberships_before = Color.count, PaletteColor.count
 
@@ -413,7 +413,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_equal [ "process-cyan", "signal-red" ], palettes(:press).reload.colors.map(&:name)
   end
 
-  test "an added colour keeps its place in the palettes it already belonged to" do
+  test "an added color keeps its place in the palettes it already belonged to" do
     visit new_palette_color_path(palettes(:press), source: "library")
 
     within "#color_#{colors(:signal_red).id}" do
@@ -465,14 +465,14 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "already in this palette"
   end
 
-  test "still offers a new colour alongside the library" do
+  test "still offers a new color alongside the library" do
     visit new_palette_color_path(palettes(:press), source: "new")
 
-    assert_text "New colour"
+    assert_text "New color"
     assert_selector "#swatch_name"
   end
 
-  test "offers all four ways of entering a colour" do
+  test "offers all four ways of entering a color" do
     visit new_palette_color_path(palettes(:press))
 
     assert_selector "input[type=radio][value=rgb]", visible: :all
@@ -491,7 +491,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "adds a swatch entered as hex" do
     visit palette_path(palettes(:press))
     click_on "Add a swatch"
-    choose "New colour"
+    choose "New color"
 
     fill_in "Swatch name", with: "signal-blue"
     choose "Hex"
@@ -524,11 +524,11 @@ class PalettesTest < ApplicationSystemTestCase
 
     fill_in "Swatch name", with: "nonsense"
     choose "Hex"
-    fill_in "Hex value", with: "not-a-colour"
+    fill_in "Hex value", with: "not-a-color"
 
     click_on "Add swatch"
 
-    assert_text "is not a colour we can read"
+    assert_text "is not a color we can read"
   end
 
   test "adds a swatch chosen with the system picker" do
@@ -536,7 +536,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     fill_in "Swatch name", with: "picked"
     choose "Picker"
-    fill_in "Pick a colour", with: "#1e5aaa"
+    fill_in "Pick a color", with: "#1e5aaa"
 
     click_on "Add swatch"
 
@@ -574,7 +574,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "No swatches"
   end
 
-  test "records a hex entered colour as an rgb source" do
+  test "records a hex entered color as an rgb source" do
     visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "hex sourced"
@@ -586,7 +586,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "Authored in RGB"
   end
 
-  test "removes a swatch from a palette but keeps the colour in the library" do
+  test "removes a swatch from a palette but keeps the color in the library" do
     visit palette_path(palettes(:brand))
 
     within "#palette_color_#{palette_colors(:brand_ink_black).id}" do
@@ -669,7 +669,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "asks before deleting a palette" do
     visit palette_path(palettes(:press))
 
-    assert_equal "Delete Press Check and its swatch order? The colours stay in the library.",
+    assert_equal "Delete Press Check and its swatch order? The colors stay in the library.",
       find("button", text: "Delete palette")[:"data-turbo-confirm"]
   end
 
@@ -683,7 +683,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert Color.exists?(colors(:process_cyan).id)
   end
 
-  test "navigates from a swatch on the index through to the colour" do
+  test "navigates from a swatch on the index through to the color" do
     visit palettes_path
 
     within "#palette_#{palettes(:brand).id}" do
@@ -729,7 +729,7 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "paper-white"
   end
 
-  test "refuses a palette that would hold exactly another palette's colours" do
+  test "refuses a palette that would hold exactly another palette's colors" do
     palettes(:brand).colors.each do |color|
       visit new_palette_color_path(palettes(:empty), source: "library")
       within "#color_#{color.id}" do
@@ -737,7 +737,7 @@ class PalettesTest < ApplicationSystemTestCase
       end
     end
 
-    assert_text %("Brand Core" already holds exactly these colours)
+    assert_text %("Brand Core" already holds exactly these colors)
     assert_equal 2, palettes(:empty).palette_colors.reload.size,
       "the swatch that would have completed the duplicate must not have landed"
   end
@@ -753,7 +753,7 @@ class PalettesTest < ApplicationSystemTestCase
       click_on "Remove"
     end
 
-    assert_text %("Brand Core" already holds exactly these colours)
+    assert_text %("Brand Core" already holds exactly these colors)
     assert_equal 4, press.palette_colors.reload.size
   end
 

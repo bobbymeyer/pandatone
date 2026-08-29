@@ -1,13 +1,13 @@
-<% content_for :title, "Colours" %>
+<% content_for :title, "Colors" %>
 
 <header class="page-head">
-  <h1 class="page-title">Colours</h1>
+  <h1 class="page-title">Colors</h1>
   <p class="page-lede">
     Every swatch in the library, including those no palette has claimed yet.
   </p>
 
   <div class="page-actions">
-    <%= link_to "New colour", new_color_path, class: "button button--primary" %>
+    <%= link_to "New color", new_color_path, class: "button button--primary" %>
   </div>
 </header>
 
@@ -34,13 +34,13 @@
 </section>
 
 <%= turbo_frame_tag "colors", data: { turbo_action: "replace" }, target: "_top" do %>
-  <p class="result-count"><%= result_count(@colors.size, @total, "colour") %></p>
+  <p class="result-count"><%= result_count(@colors.size, @total, "color") %></p>
 
   <% if @colors.empty? %>
     <% if @total.zero? %>
-      <p class="empty">No colours yet. <%= link_to "Add the first one", new_color_path %>.</p>
+      <p class="empty">No colors yet. <%= link_to "Add the first one", new_color_path %>.</p>
     <% else %>
-      <p class="empty">No colours match.</p>
+      <p class="empty">No colors match.</p>
     <% end %>
   <% else %>
     <ul class="color-list">

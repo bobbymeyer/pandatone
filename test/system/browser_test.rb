@@ -20,7 +20,7 @@ class BrowserTest < ApplicationSystemTestCase
       "the results are not spanning the field — something between them and the grid is unplaced"
   end
 
-  test "the colour results fill the field the filters fill" do
+  test "the color results fill the field the filters fill" do
     visit colors_path
 
     assert_in_delta width_of(".filters"), width_of(".color-list"), 1
@@ -158,7 +158,7 @@ class BrowserTest < ApplicationSystemTestCase
     assert_visible "[data-source='library']"
     assert_hidden "[data-source='new']"
 
-    choose "New colour"
+    choose "New color"
 
     assert_hidden "[data-source='library']"
     assert_visible "[data-source='new']"
@@ -329,9 +329,9 @@ class BrowserTest < ApplicationSystemTestCase
         "palette index" => palettes_path,
         "palette show" => palette_path(palettes(:brand)),
         "palette form" => new_palette_path,
-        "colour index" => colors_path,
-        "colour show" => color_path(colors(:signal_red)),
-        "colour form" => new_color_path,
+        "color index" => colors_path,
+        "color show" => color_path(colors(:signal_red)),
+        "color form" => new_color_path,
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "lookup" => lookup_path(q: "#E30613")
       }

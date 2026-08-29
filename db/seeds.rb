@@ -57,4 +57,4 @@ PALETTES.each do |name, definition|
   ).save || abort("Could not seed #{name}: #{palette.errors.full_messages.to_sentence}")
 end
 
-puts "Seeded #{Palette.count} palettes and #{Color.count} colours."
+puts "Seeded #{Palette.count} palettes and #{Color.count} colors."

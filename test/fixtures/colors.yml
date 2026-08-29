@@ -1,4 +1,4 @@
-# Both colour spaces are written out longhand rather than derived, so that a
+# Both color spaces are written out longhand rather than derived, so that a
 # regression in ColorSpace shows up as a failing test instead of quietly
 # rewriting the expectations along with the code.
 
@@ -63,7 +63,7 @@ process_cyan:
   b: 255
   tags: [ "print", "process" ]
 
-# Belongs to no palette. Guards the "standalone colour" paths.
+# Belongs to no palette. Guards the "standalone color" paths.
 deep_indigo:
   name: deep-indigo
   source_space: rgb

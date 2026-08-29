@@ -41,9 +41,9 @@ class Palette < ApplicationRecord
     swatches.sum(&:luma) / swatches.size if swatches.any?
   end
 
-  # Which is why the colour sort reads the swatch the strip leads with: the
+  # Which is why the color sort reads the swatch the strip leads with: the
   # one anchoring the palette, and the one you see first on every screen that
-  # shows it. A palette holding nothing has no colour to sort by, so it goes
+  # shows it. A palette holding nothing has no color to sort by, so it goes
   # last rather than pretending to be black.
   def spectrum_position
     swatches.any? ? [ 0, *swatches.first.spectrum_position ] : [ 1 ]

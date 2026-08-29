@@ -63,7 +63,7 @@ module Api
           attributes
         end
 
-        # nil means "leave the colours alone"; an array, including an empty
+        # nil means "leave the colors alone"; an array, including an empty
         # one, replaces the whole list in the order given.
         def colors_attributes
           permitted[:colors] if palette_params.key?(:colors)

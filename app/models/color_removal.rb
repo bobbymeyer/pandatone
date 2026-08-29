@@ -1,14 +1,14 @@
-# Deletes a colour from the library, with the two guards that make deletion
+# Deletes a color from the library, with the two guards that make deletion
 # safe to offer at all.
 #
-# A colour is shared, so deleting one held by palettes silently rewrites every
-# one of them — a much larger act than a button reading "delete colour"
+# A color is shared, so deleting one held by palettes silently rewrites every
+# one of them — a much larger act than a button reading "delete color"
 # suggests. That is refused until it is asked for in those terms, and the
 # refusal names the palettes so the choice is an informed one.
 #
 # The second guard is the palette-uniqueness rule, which cannot be true only
-# on the way in: stripping a colour out of a palette can land it on exactly
-# the colours another palette holds, and a cascade that quietly does so breaks
+# on the way in: stripping a color out of a palette can land it on exactly
+# the colors another palette holds, and a cascade that quietly does so breaks
 # the rule as thoroughly as saving a duplicate would.
 class ColorRemoval
   def initialize(color, from_palettes: false)
@@ -43,12 +43,12 @@ class ColorRemoval
 
       @color.errors.add(:base,
         %(Deleting this would leave #{twins.map { |name| %("#{name}") }.to_sentence} ) +
-        "holding exactly the same colours.")
+        "holding exactly the same colors.")
       false
     end
 
     # Compares what every palette would hold afterwards, rather than only the
-    # ones this colour touches: two palettes it strips can just as easily
+    # ones this color touches: two palettes it strips can just as easily
     # collide with each other as with a third it never appears in.
     def colliding_palettes
       Palette.includes(:palette_colors).map { |palette|

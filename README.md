@@ -1,14 +1,14 @@
 # Pandatone
 
-A palette library manager. It stores colour swatches and palettes, and serves
+A palette library manager. It stores color swatches and palettes, and serves
 them over a small versioned JSON API so other tools can ask two questions
 without knowing anything about how this app is built:
 
-- *Give me the colours of the palette tagged `active`.*
+- *Give me the colors of the palette tagged `active`.*
 - *Which palettes contain `#E30613`?*
 
-It does that one job. There are no colour-science ambitions here: no ICC
-profiles, no Lab, no spot colours, no gamut mapping. CMYK is stored and served
+It does that one job. There are no color-science ambitions here: no ICC
+profiles, no Lab, no spot colors, no gamut mapping. CMYK is stored and served
 but is an approximate device conversion, and says so.
 
 ## Running it
@@ -23,11 +23,11 @@ Seeds are idempotent, so `bin/rails db:seed` can be re-run at any time.
 
 ## The domain
 
-Colours are first-class, not children of palettes. One brand blue used across
+Colors are first-class, not children of palettes. One brand blue used across
 ten seasonal palettes is **one** `Color` row joined to ten palettes through
 `PaletteColor`, which is what makes discovery work in both directions.
 
-Every colour stores **both** colour spaces. `source_space` records which one
+Every color stores **both** color spaces. `source_space` records which one
 was authored; the other is redrawn from it on every write, so the two cannot
 drift apart. RGB round-trips through CMYK losslessly, but many CMYK mixes
 collapse onto a single RGB triple — which is exactly why the source space is
@@ -36,30 +36,30 @@ recorded rather than inferred.
 There is no `active` boolean anywhere. An active palette is one tagged
 `active`. Tags are normalised to stripped, downcased, deduped strings.
 
-### One swatch per colour, one palette per set
+### One swatch per color, one palette per set
 
 A library nobody trusts to be free of near-identical swatches is a library
 nobody looks in, so duplication is stopped at the write rather than tidied up
 afterwards:
 
-* **A colour is its value.** No two `Color` rows may render the same hex —
+* **A color is its value.** No two `Color` rows may render the same hex —
   enforced by a validation and a unique index on `(r, g, b)`. A CMYK recipe
-  that lands on a colour already on file is held to the same line, because on
-  screen it *is* that colour. Without this the reverse lookup ("which palettes
+  that lands on a color already on file is held to the same line, because on
+  screen it *is* that color. Without this the reverse lookup ("which palettes
   contain `#E30613`") would be an arbitrary choice between rows.
-* **A palette is its set of colours.** No two palettes may hold exactly the
-  same colours; a name is a label on a set, not part of it. Order is not part
+* **A palette is its set of colors.** No two palettes may hold exactly the
+  same colors; a name is a label on a set, not part of it. Order is not part
   of the identity, and empty palettes do not duplicate one another. The check
   runs inside the same transaction as every other write, so removing a swatch
   is refused too if it would leave a duplicate behind.
-* **Deleting is the same rule, backwards.** A colour is shared, so deleting
+* **Deleting is the same rule, backwards.** A color is shared, so deleting
   one held by palettes rewrites every one of them — more than a button
-  reading "delete colour" suggests. It is refused until the request asks for
+  reading "delete color" suggests. It is refused until the request asks for
   it in those terms, and the refusal names the palettes. It is refused
   outright when stripping it would leave two palettes holding exactly the
-  same colours, since that rule cannot be true only on the way in.
+  same colors, since that rule cannot be true only on the way in.
 * **Starting from an existing palette carries, it does not copy.** A seasonal
-  variant is usually last season's palette with a colour swapped, and a saved
+  variant is usually last season's palette with a color swapped, and a saved
   clone is exactly the duplicate the rule forbids. "New from this" carries the
   swatches into the form as ticked boxes instead: untick what you do not want,
   or add a swatch, and what you save is already the palette you meant. Keeping
@@ -69,14 +69,14 @@ afterwards:
   distance of 32 of an existing swatch — `#FFFFFF` against `#FAFAF8` scores
   17 — is put back to you with both swatches side by side and a "create
   anyway" button. Redmean is a weighted RGB distance: it tracks how different
-  two colours look far better than plain Euclidean RGB while staying pure
-  arithmetic. No profiles, no Lab, no colour science for a question that only
+  two colors look far better than plain Euclidean RGB while staying pure
+  arithmetic. No profiles, no Lab, no color science for a question that only
   needs an approximate answer. Two greys twenty steps apart score 60 and stay
   two swatches.
 
 ### Ordering
 
-Both indexes sort by name, date added, date modified, colour, dark first or
+Both indexes sort by name, date added, date modified, color, dark first or
 light first. The last three turn on what something looks like rather than on
 what a column holds, so they are computed in Ruby over rows the page loads
 anyway; name, added and modified stay in SQL.
@@ -85,7 +85,7 @@ Dark and light order by Rec. 601 luma — the standard weighted average of the
 channels. It is not a perceptual lightness, but it puts yellow well above blue
 where a plain mid-point calls them equal.
 
-The **colour** sort runs black, then ROYGBIV, then white. Colours with almost
+The **color** sort runs black, then ROYGBIV, then white. Colors with almost
 no chroma are not on the spectrum at all, so they go to the two ends by which
 half of the black-to-white axis they sit on, and everything with a hue runs
 between them in hue order. A wheel has no beginning, so a linear list has to
@@ -94,10 +94,10 @@ in the gap between magenta and red rather than at red, because cutting at red
 puts `#E30613` — a red that leans a few degrees blue, at hue 356.5 — after the
 violets.
 
-A palette has many colours, so it answers those two questions differently.
+A palette has many colors, so it answers those two questions differently.
 **Dark** and **light** average the luma of its swatches, because a palette is
 dark or light as a whole rather than at its first swatch, and a scalar
-averages honestly. **Colour** reads the swatch the strip leads with, because
+averages honestly. **Color** reads the swatch the strip leads with, because
 a hue cannot be averaged — the mean of red and violet is green — and the lead
 swatch is the one anchoring the palette on every screen that shows it. A
 palette holding no swatches sorts last under all three rather than pretending
@@ -109,21 +109,21 @@ The UI is for a human curating the library; the API is for machines.
 
 - **Palettes** — the index as strips of swatches, filtered by tag and name; a
   palette page where swatches are reordered, removed and added in place.
-- **Colours** — the whole library as swatches, filtered by tag and name, each
-  showing the palettes it sits in; a colour page with both spaces, its tags
-  and its member palettes, editable from there. Editing a colour changes it
+- **Colors** — the whole library as swatches, filtered by tag and name, each
+  showing the palettes it sits in; a color page with both spaces, its tags
+  and its member palettes, editable from there. Editing a color changes it
   in every palette that holds it, which the edit form says before you commit.
 - **Lookup** — paste a hex or an RGB triple and find every palette holding it.
-  When the library holds no exact match it offers the closest colour it does
+  When the library holds no exact match it offers the closest color it does
   hold, with no threshold: "we do not have that, but we have this". The two
   swatches are shown, so how close *close* is stays a matter for your eye
   rather than a number nobody can interpret. If neither is what you wanted,
-  "Add this colour swatch" opens the entry form with the hex already in it.
+  "Add this color swatch" opens the entry form with the hex already in it.
   It reads a hex, an RGB triple or a CMYK build — four numbers are inks on
   0..100, three are channels on 0..255 — and matches on the RGB all three
-  resolve to, so a search in one space finds a colour authored in the other.
+  resolve to, so a search in one space finds a color authored in the other.
   A build says so on the result, because that conversion is lossy and the
-  match is on the colour it renders to, not on the build itself.
+  match is on the color it renders to, not on the build itself.
 
 ## API
 
@@ -134,18 +134,18 @@ missing records return `404` with `{"error": "Not found"}`.
 | Verb   | Path                        | Notes                                                     |
 | ------ | --------------------------- | --------------------------------------------------------- |
 | GET    | `/palettes`                 | Filters: `?tag=`, `?color=RRGGBB` (with or without `#`), combinable |
-| GET    | `/palettes/:id`             | Colours inline in position order. `:id` may be an id or a name |
-| GET    | `/palettes/:id/colors`      | Just the colours. The workhorse endpoint                   |
-| POST   | `/palettes`                 | Creates a palette with nested colours in one request       |
-| PATCH  | `/palettes/:id`             | Updates name/tags; adds, removes and reorders colours      |
-| DELETE | `/palettes/:id`             | Colours survive, since they may sit in other palettes      |
+| GET    | `/palettes/:id`             | Colors inline in position order. `:id` may be an id or a name |
+| GET    | `/palettes/:id/colors`      | Just the colors. The workhorse endpoint                   |
+| POST   | `/palettes`                 | Creates a palette with nested colors in one request       |
+| PATCH  | `/palettes/:id`             | Updates name/tags; adds, removes and reorders colors      |
+| DELETE | `/palettes/:id`             | Colors survive, since they may sit in other palettes      |
 | GET    | `/colors`                   | Filters: `?tag=`, `?hex=RRGGBB`, `?palette=name-or-id`     |
 | GET    | `/colors/:id`               | Includes a `palettes` array: the reverse lookup            |
-| POST   | `/colors`                   | Creates a standalone colour                                |
-| PATCH  | `/colors/:id`               | Edits a colour. It is shared, so this changes every palette holding it |
+| POST   | `/colors`                   | Creates a standalone color                                |
+| PATCH  | `/colors/:id`               | Edits a color. It is shared, so this changes every palette holding it |
 | DELETE | `/colors/:id`               | Refused while a palette holds it unless `from_palettes` is sent |
 
-A colour is serialised as:
+A color is serialised as:
 
 ```json
 {
@@ -163,10 +163,10 @@ That shape is pinned by `test/controllers/api/v1/contract_test.rb`, including
 key order. If that test fails, a downstream tool breaks: the fix is a `v2`,
 not an edit.
 
-### Writing colours to a palette
+### Writing colors to a palette
 
 `POST` and `PATCH` take a `colors` array whose entries are either a reference
-to a colour already in the library, or a full definition to create:
+to a color already in the library, or a full definition to create:
 
 ```json
 { "palette": { "name": "Autumn 2026", "tags": ["seasonal"],
@@ -176,7 +176,7 @@ to a colour already in the library, or a full definition to create:
 
 On `PATCH`, the array **replaces** the whole list in the order given, so one
 request shape covers adding, removing and reordering. Omit the key to leave
-the colours alone. The whole write is one transaction.
+the colors alone. The whole write is one transaction.
 
 ### Ordering over the API
 
@@ -189,11 +189,11 @@ because that order is the thing being published; pass `?sort=` to override it.
 
 ### Duplicates over the API
 
-The API applies the same rules as the interface. An exact duplicate colour, or
-a palette holding exactly another palette's colours, comes back `422` with the
+The API applies the same rules as the interface. An exact duplicate color, or
+a palette holding exactly another palette's colors, comes back `422` with the
 reason under `errors.base`.
 
-A near-duplicate colour also comes back `422`, with the swatch it resembles
+A near-duplicate color also comes back `422`, with the swatch it resembles
 serialised under a `similar` key so the client can show it. Send the same
 request again with a top-level `"confirm_similar": true` to create it anyway:
 
@@ -214,13 +214,13 @@ system in this repository. The typeface is Archivo, shipped in
 `app/assets/fonts` as a single variable Latin subset rather than pulled from
 a font CDN, so the app renders correctly with nothing external reachable. All spacing derives from the custom properties in
 `grid.css`; the interface is near-monochrome so that the swatches are the only
-colour on the page.
+color on the page.
 
-Two signals never rest on colour alone. The current filter and the current
-order carry weight as well as the accent, because this is a colour tool and a
+Two signals never rest on color alone. The current filter and the current
+order carry weight as well as the accent, because this is a color tool and a
 reader who cannot separate red from grey would otherwise have no current
 state at all. And a destructive action is set apart from the ones beside it
-by a gap before it is coloured on hover, because a gap is read before a word
+by a gap before it is colored on hover, because a gap is read before a word
 is. Both are pinned by stylesheet tests, and the separation by a rendered one
 — the rule for it existed and did nothing for a while, since `button_to`
 wraps its button in a form and an auto margin belongs to the flex child.
@@ -243,7 +243,7 @@ system test walks every page and fails on a skipped level.
 Navigation uses Turbo Drive with the View Transitions API. A swatch on the
 palette index and the same swatch on the palette page share a
 `view-transition-name`, so the browser morphs one into the other. Those names
-key on the palette *membership* rather than the colour, because one colour can
+key on the palette *membership* rather than the color, because one color can
 appear in several strips on the index and a duplicate name silently disables
 the morph. `prefers-reduced-motion` turns transitions off entirely.
 

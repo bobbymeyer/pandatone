@@ -13,7 +13,7 @@ class LiveSearchTest < ApplicationSystemTestCase
     assert_selector "turbo-frame#palettes .palette-list"
   end
 
-  test "the colour search is wired to a frame on the page" do
+  test "the color search is wired to a frame on the page" do
     visit colors_path
 
     assert_live_search_wired ".filter-form"

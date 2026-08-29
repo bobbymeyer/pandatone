@@ -11,7 +11,7 @@ Rails.application.routes.draw do
     end
   end
 
-  # The human side. Colours are only ever created in the context of a palette
+  # The human side. Colors are only ever created in the context of a palette
   # or read on their own; the API is the place for bulk work.
   resources :palettes do
     resource :tags, only: %i[ edit update ], controller: "palettes/tags"

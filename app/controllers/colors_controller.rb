@@ -15,7 +15,7 @@ class ColorsController < ApplicationController
     @palettes = holding_palettes
   end
 
-  # Colours are first-class in the domain, so one can be brought into
+  # Colors are first-class in the domain, so one can be brought into
   # existence without a palette to put it in — which the API has always
   # allowed and the interface did not.
   def new
@@ -36,8 +36,8 @@ class ColorsController < ApplicationController
   def edit
   end
 
-  # A colour is shared, so this edits it everywhere at once. That is the point
-  # of one row per colour, and the form says so before you commit to it.
+  # A color is shared, so this edits it everywhere at once. That is the point
+  # of one row per color, and the form says so before you commit to it.
   def update
     @color.assign_attributes(swatch_attributes)
     @similar = similar_swatch_for(@color)
@@ -49,7 +49,7 @@ class ColorsController < ApplicationController
     end
   end
 
-  # A colour is shared, so this is the one deletion in the app that can rewrite
+  # A color is shared, so this is the one deletion in the app that can rewrite
   # records the button does not name. ColorRemoval refuses until the request
   # says so in as many words.
   def destroy

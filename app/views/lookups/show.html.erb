@@ -1,7 +1,7 @@
-<% content_for :title, "Look up a colour" %>
+<% content_for :title, "Look up a color" %>
 
 <header class="page-head">
-  <h1 class="page-title">Look up a colour</h1>
+  <h1 class="page-title">Look up a color</h1>
   <p class="page-lede">Paste a swatch to find out which palettes already hold it. Hex, RGB or a CMYK build.</p>
 </header>
 
@@ -18,8 +18,8 @@
     <p class="empty">Could not read <q><%= @query %></q> as a hex, an RGB triple or a CMYK build.</p>
   <% else %>
     <section class="lookup-result">
-      <%# When the lookup lands on exactly one stored colour, the swatch takes
-          that colour's transition name, so following the link morphs the
+      <%# When the lookup lands on exactly one stored color, the swatch takes
+          that color's transition name, so following the link morphs the
           swatch across instead of crossfading the page under it. %>
       <% found = @colors.one? ? @colors.first : nil %>
       <%= swatch_tag @hex, class: "swatch--large",
@@ -29,13 +29,13 @@
         <%= hex_tag @hex, class: "hex--large" %>
 
         <% if @build %>
-          <%# Every colour stores both spaces, so the search runs on the RGB
+          <%# Every color stores both spaces, so the search runs on the RGB
               the build renders to. Which build it came from is not recoverable
               from that, and saying so is the honest way to show a hit. %>
           <p class="provenance">
             Read as a CMYK build of
             <%= @build.map { |ink, value| "#{ink.to_s.upcase} #{value}" }.join(" ") %>,
-            matched on the colour it renders to.
+            matched on the color it renders to.
           </p>
         <% end %>
 
@@ -45,12 +45,12 @@
               no special case at the other end. %>
           <div class="lookup-missing">
             <p class="empty">Not in the library.</p>
-            <%= link_to "Add this colour swatch",
+            <%= link_to "Add this color swatch",
                   new_color_path(swatch: { input_mode: "hex", hex: @hex }), class: "button" %>
           </div>
 
           <% if @nearest %>
-            <h2>Closest stored colour</h2>
+            <h2>Closest stored color</h2>
             <div class="lookup-nearest">
               <%= swatch_tag @nearest.hex, class: "swatch--card" %>
               <p><%= link_to @nearest.name, @nearest %></p>
@@ -68,7 +68,7 @@
 
         <h2>Palettes</h2>
         <% if @palettes.empty? %>
-          <p class="empty">No palette holds this colour.</p>
+          <p class="empty">No palette holds this color.</p>
         <% else %>
           <ul class="link-list">
             <% @palettes.each do |palette| %>

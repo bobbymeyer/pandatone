@@ -4,7 +4,7 @@ require "test_helper"
 # This test snapshots its exact JSON. If it fails, a downstream consumer
 # breaks, so treat a change here as a version bump rather than a fix.
 class Api::V1::ContractTest < ActionDispatch::IntegrationTest
-  test "the palette colours endpoint returns exactly this shape" do
+  test "the palette colors endpoint returns exactly this shape" do
     get colors_api_v1_palette_url("Brand Core")
 
     assert_response :success
@@ -43,7 +43,7 @@ class Api::V1::ContractTest < ActionDispatch::IntegrationTest
     assert_equal expected, JSON.parse(response.body)
   end
 
-  test "colour keys appear in a stable order" do
+  test "color keys appear in a stable order" do
     get colors_api_v1_palette_url("Brand Core")
 
     JSON.parse(response.body).each do |color|
@@ -54,7 +54,7 @@ class Api::V1::ContractTest < ActionDispatch::IntegrationTest
   end
 
   test "the two documented consumer questions are answerable in one call each" do
-    # "Give me the colours of the palette tagged active."
+    # "Give me the colors of the palette tagged active."
     get api_v1_palettes_url(tag: "active")
     active = JSON.parse(response.body)
     assert_not_empty active

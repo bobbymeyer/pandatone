@@ -18,7 +18,7 @@ class LookupsController < ApplicationController
     # "Not in the library" on its own sends you away to look somewhere else,
     # when the nearest thing on file is usually the answer you were after.
     # Only worth saying when nothing matched exactly — otherwise the nearest
-    # colour is the one already named above it.
+    # color is the one already named above it.
     @nearest = Color.nearest_to(@rgb) if @colors.empty?
   end
 end

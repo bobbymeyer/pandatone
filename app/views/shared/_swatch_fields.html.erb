@@ -1,6 +1,6 @@
 <%# locals: (color: nil) %>
-<%# The colour entry row, shared by the new-palette form, the add-a-swatch
-    form and the edit-a-colour form. Pass a colour to prefill it. All four panels are rendered so the form works with
+<%# The color entry row, shared by the new-palette form, the add-a-swatch
+    form and the edit-a-color form. Pass a color to prefill it. All four panels are rendered so the form works with
     JavaScript off; CSS :has() shows only the one whose mode is selected, and
     the Stimulus controller paints a live preview as you type. The server
     reads only the chosen mode's fields, so the hidden ones are inert. %>
@@ -62,7 +62,7 @@
 
   <div class="entry-panel" data-mode="picker">
     <div class="field field--picker">
-      <%= label_tag "swatch_picker", "Pick a colour" %>
+      <%= label_tag "swatch_picker", "Pick a color" %>
       <%= color_field_tag "swatch[picker]", swatch_field_value(:picker, color).presence || "#000000",
             id: "swatch_picker",
             data: { swatch_preview_target: "picker", action: "input->swatch-preview#redraw" } %>

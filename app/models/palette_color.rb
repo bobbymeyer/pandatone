@@ -1,5 +1,5 @@
-# Membership of a colour in a palette, at a position. Ordering lives here
-# rather than on Color, because the same colour sits at different positions in
+# Membership of a color in a palette, at a position. Ordering lives here
+# rather than on Color, because the same color sits at different positions in
 # different palettes.
 class PaletteColor < ApplicationRecord
   belongs_to :palette

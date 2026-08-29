@@ -31,7 +31,7 @@ class GridTest < ActiveSupport::TestCase
     offenders = STYLESHEETS.select { |sheet| sheet.read.match?(/text-transform:\s*uppercase/) }
 
     assert_empty offenders.map { |sheet| sheet.basename.to_s },
-      "capitals are not used in this interface; size and colour carry the micro register"
+      "capitals are not used in this interface; size and color carry the micro register"
   end
 
   test "leading and spacing come from one ladder" do
@@ -75,14 +75,14 @@ class GridTest < ActiveSupport::TestCase
 
   # --- Signals -------------------------------------------------------------
 
-  # This is a colour tool, so it is the last place that should lean on colour
+  # This is a color tool, so it is the last place that should lean on color
   # alone to say which of a row of choices is current.
-  test "the current filter and sort are marked by more than their colour" do
+  test "the current filter and sort are marked by more than their color" do
     rule = components[/\.tag\.active\s*\{([^}]*)\}/m, 1]
 
     assert rule, "expected a .tag.active rule"
     assert_match(/font-weight/, rule,
-      "the active state is colour and nothing else, which is invisible to a reader who cannot see it")
+      "the active state is color and nothing else, which is invisible to a reader who cannot see it")
   end
 
   test "the destructive register is not the quiet one" do
@@ -98,7 +98,7 @@ class GridTest < ActiveSupport::TestCase
       rule = components[/#{Regexp.escape(region)}[^{]*button--danger[^{]*\{([^}]*)\}/m, 1]
 
       assert rule, "expected #{region} to set its destructive action apart"
-      assert_match(/margin/, rule, "#{region} separates them by colour alone")
+      assert_match(/margin/, rule, "#{region} separates them by color alone")
     end
   end
 

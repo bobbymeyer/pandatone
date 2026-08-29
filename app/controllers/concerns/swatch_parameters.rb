@@ -1,12 +1,12 @@
-# The colour-entry row shared by the new-palette form and the add-a-swatch
+# The color-entry row shared by the new-palette form and the add-a-swatch
 # form. It submits under its own `swatch` key rather than nested inside the
 # palette, so the same partial works in both places.
 #
-# The row offers four ways in — RGB, CMYK, a hex field and the system colour
+# The row offers four ways in — RGB, CMYK, a hex field and the system color
 # picker — but a Color only knows two spaces. Hex and the picker are both ways
-# of writing an RGB colour, so they resolve to an rgb source and hand the
+# of writing an RGB color, so they resolve to an rgb source and hand the
 # string to Color#hex=. The input mode is a property of the form, not of the
-# colour, and nothing stores it.
+# color, and nothing stores it.
 module SwatchParameters
   extend ActiveSupport::Concern
 
@@ -25,7 +25,7 @@ module SwatchParameters
     # be free of near-identical swatches is a library nobody looks in.
     #
     # The confirmation carries the value it was given for, so changing the
-    # colour after seeing the warning asks again about the new one instead of
+    # color after seeing the warning asks again about the new one instead of
     # waving through something nobody looked at. An exact duplicate is a
     # validation, not a warning, and is left to speak for itself.
     def similar_swatch_for(color)
@@ -37,7 +37,7 @@ module SwatchParameters
 
     # Returns nil when the row was left empty, so an untouched entry row does
     # not become a validation error on an otherwise fine palette. Only the
-    # chosen mode's own fields count towards that: the colour picker always
+    # chosen mode's own fields count towards that: the color picker always
     # posts a value, so asking whether every field is blank would make an
     # untouched form look filled in.
     def swatch_spec
@@ -70,7 +70,7 @@ module SwatchParameters
     end
 
     # What was just submitted wins, so a validation error keeps you in the
-    # panel you were using; otherwise a colour being edited opens in the space
+    # panel you were using; otherwise a color being edited opens in the space
     # it was authored in.
     def swatch_input_mode(color = nil)
       mode = params.dig(:swatch, :input_mode)

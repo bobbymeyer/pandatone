@@ -1,17 +1,17 @@
 require "test_helper"
 
 class PaletteCompositionTest < ActiveSupport::TestCase
-  # A palette is the set of colours it holds. Two palettes holding the same
+  # A palette is the set of colors it holds. Two palettes holding the same
   # set are one palette with two names, which is exactly the duplication the
   # library exists to stop.
 
-  test "refuses a palette holding exactly the colours another already holds" do
+  test "refuses a palette holding exactly the colors another already holds" do
     palette = Palette.new
     composition = PaletteComposition.new(palette, attributes: { name: "Brand Core Copy" },
       colors: brand_specs)
 
     assert_not composition.save
-    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colours)
+    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colors)
     assert_not palette.persisted?, "the duplicate must not be left behind"
   end
 
@@ -21,10 +21,10 @@ class PaletteCompositionTest < ActiveSupport::TestCase
       colors: brand_specs.reverse)
 
     assert_not composition.save
-    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colours)
+    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colors)
   end
 
-  test "a different set of colours is fine" do
+  test "a different set of colors is fine" do
     palette = Palette.new
     composition = PaletteComposition.new(palette, attributes: { name: "Nearly Brand" },
       colors: brand_specs + [ { id: colors(:deep_indigo).id } ])
@@ -54,7 +54,7 @@ class PaletteCompositionTest < ActiveSupport::TestCase
     composition = PaletteComposition.new(palette, attributes: {}, append: [ brand_specs.last ])
 
     assert_not composition.save
-    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colours)
+    assert_includes palette.errors[:base], %("Brand Core" already holds exactly these colors)
     assert_equal 2, palette.palette_colors.reload.size, "the palette must be left as it was"
   end
 

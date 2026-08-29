@@ -1,4 +1,4 @@
-# The wire format for a colour. Key order here is the key order downstream
+# The wire format for a color. Key order here is the key order downstream
 # tools see, and a contract test pins it, so treat this file as the interface.
 module ColorSerializer
   module_function

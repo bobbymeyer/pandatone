@@ -1,5 +1,5 @@
 module Colors
-  # Tags are edited in place on the colour page through a Turbo Frame, the
+  # Tags are edited in place on the color page through a Turbo Frame, the
   # same as a palette's, and fall back to their own page without JavaScript.
   class TagsController < ApplicationController
     before_action :set_color
