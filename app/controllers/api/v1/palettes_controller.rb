@@ -6,7 +6,7 @@ module Api
       def index
         palettes = Palette.all
         palettes = palettes.tagged(params[:tag]) if params[:tag].present?
-        palettes = palettes.containing_hex(params[:color]) if params[:color].present?
+        palettes = palettes.containing(params[:color]) if params[:color].present?
 
         render json: PaletteSerializer.many(palettes.sorted(sort_key))
       end

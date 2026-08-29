@@ -178,6 +178,17 @@ On `PATCH`, the array **replaces** the whole list in the order given, so one
 request shape covers adding, removing and reordering. Omit the key to leave
 the colors alone. The whole write is one transaction.
 
+### Everything the interface does, the API does
+
+| Verb | Path | Notes |
+| ---- | ---- | ----- |
+| GET | `/lookup?q=` | What the lookup screen answers, in one call: the value read as hex, RGB or a CMYK build, the colors that match, the palettes holding them, and the nearest color on file when nothing matched |
+| GET | `/tags` | Every tag in use, by collection — what a client needs to offer the same filters |
+
+Both collections filter by a color value with `?color=`, written any of the
+three ways. `?hex=` is the name v1 published for that filter on `/colors` and
+still answers to it.
+
 ### Ordering over the API
 
 Both index endpoints take `?sort=` with the same keys the interface uses:

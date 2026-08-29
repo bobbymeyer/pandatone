@@ -4,7 +4,10 @@ module Api
       def index
         colors = Color.all
         colors = colors.tagged(params[:tag]) if params[:tag].present?
-        colors = colors.by_hex(params[:hex]) if params[:hex].present?
+        # color= is the name both collections use; hex= is what v1 published
+        # and still answers to.
+        value = params[:color].presence || params[:hex].presence
+        colors = colors.by_value(value) if value
         colors = colors.in_palette(params[:palette]) if params[:palette].present?
 
         render json: ColorSerializer.many(colors.sorted(sort_key))

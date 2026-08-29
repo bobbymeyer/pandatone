@@ -345,10 +345,6 @@ class Api::V1::PalettesControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  private
-    def json
-      JSON.parse(response.body)
-    end
 
   test "refuses a palette holding exactly another palette's colors" do
     assert_no_difference "Palette.count" do

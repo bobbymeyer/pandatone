@@ -269,18 +269,18 @@ class ColorTest < ActiveSupport::TestCase
     assert_empty Color.tagged(nil)
   end
 
-  test "by_hex finds an exact rgb match" do
-    assert_equal [ colors(:signal_red).id ], Color.by_hex("#E30613").pluck(:id)
+  test "by_value finds an exact rgb match" do
+    assert_equal [ colors(:signal_red).id ], Color.by_value("#E30613").pluck(:id)
   end
 
-  test "by_hex accepts hex without a leading hash and in any case" do
-    assert_equal [ colors(:signal_red).id ], Color.by_hex("e30613").pluck(:id)
+  test "by_value accepts hex without a leading hash and in any case" do
+    assert_equal [ colors(:signal_red).id ], Color.by_value("e30613").pluck(:id)
   end
 
-  test "by_hex returns nothing for an unparseable or unmatched hex" do
-    assert_empty Color.by_hex("not-a-hex")
-    assert_empty Color.by_hex("#ABCDEF")
-    assert_empty Color.by_hex(nil)
+  test "by_value returns nothing for an unparseable or unmatched hex" do
+    assert_empty Color.by_value("not-a-hex")
+    assert_empty Color.by_value("#ABCDEF")
+    assert_empty Color.by_value(nil)
   end
 
   test "in_palette accepts a palette id or name" do

@@ -13,7 +13,7 @@ class LookupsController < ApplicationController
 
     @hex = ColorSpace.to_hex(@rgb[:r], @rgb[:g], @rgb[:b])
     @colors = Color.where(@rgb).order(:name)
-    @palettes = Palette.containing_hex(@hex).order(:name)
+    @palettes = Palette.containing(@hex).order(:name)
 
     # "Not in the library" on its own sends you away to look somewhere else,
     # when the nearest thing on file is usually the answer you were after.

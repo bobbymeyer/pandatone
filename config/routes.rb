@@ -8,6 +8,11 @@ Rails.application.routes.draw do
       end
 
       resources :colors, only: %i[ index show create update destroy ]
+
+      # The lookup screen's answer, and the tags a client needs to build the
+      # same filters the interface offers.
+      resource :lookup, only: :show
+      resources :tags, only: :index
     end
   end
 

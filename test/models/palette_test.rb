@@ -136,28 +136,28 @@ class PaletteTest < ActiveSupport::TestCase
     assert_empty Palette.tagged(nil)
   end
 
-  test "containing_hex finds every palette holding that exact color" do
-    assert_equal [ "Autumn 2026", "Brand Core" ], Palette.containing_hex("#E30613").order(:name).pluck(:name)
+  test "containing finds every palette holding that exact color" do
+    assert_equal [ "Autumn 2026", "Brand Core" ], Palette.containing("#E30613").order(:name).pluck(:name)
   end
 
-  test "containing_hex accepts hex without a leading hash and in any case" do
-    assert_equal [ "Autumn 2026", "Brand Core" ], Palette.containing_hex("e30613").order(:name).pluck(:name)
+  test "containing accepts hex without a leading hash and in any case" do
+    assert_equal [ "Autumn 2026", "Brand Core" ], Palette.containing("e30613").order(:name).pluck(:name)
   end
 
-  test "containing_hex returns each palette once" do
+  test "containing returns each palette once" do
     palettes(:brand).palette_colors.create!(color: colors(:deep_indigo))
 
-    assert_equal 1, Palette.containing_hex("#2B4A8A").count
+    assert_equal 1, Palette.containing("#2B4A8A").count
   end
 
-  test "containing_hex returns nothing for an unparseable or unmatched hex" do
-    assert_empty Palette.containing_hex("not-a-hex")
-    assert_empty Palette.containing_hex("#ABCDEF")
-    assert_empty Palette.containing_hex(nil)
+  test "containing returns nothing for an unparseable or unmatched hex" do
+    assert_empty Palette.containing("not-a-hex")
+    assert_empty Palette.containing("#ABCDEF")
+    assert_empty Palette.containing(nil)
   end
 
   test "scopes combine" do
-    assert_equal [ "Autumn 2026" ], Palette.tagged("seasonal").containing_hex("#E30613").pluck(:name)
+    assert_equal [ "Autumn 2026" ], Palette.tagged("seasonal").containing("#E30613").pluck(:name)
   end
 
   test "name_matching finds palettes by partial name" do

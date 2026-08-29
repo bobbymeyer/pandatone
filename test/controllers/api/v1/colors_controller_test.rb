@@ -230,10 +230,6 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
-  private
-    def json
-      JSON.parse(response.body)
-    end
 
   # --- Sorting ------------------------------------------------------------
 

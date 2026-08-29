@@ -13,3 +13,12 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+class ActionDispatch::IntegrationTest
+  # Every API test reads the body this way; it was a private method copied
+  # into each file, which is also why one of them declared tests after a
+  # `private` keyword.
+  def json
+    JSON.parse(response.body)
+  end
+end

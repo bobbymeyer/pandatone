@@ -20,8 +20,9 @@ class Palette < ApplicationRecord
       id: Integer(key, exception: false), name: key.downcase)
   }
 
-  scope :containing_hex, ->(hex) {
-    rgb = ColorSpace.parse_hex(hex)
+  # Reads the same three notations the color scope does, for the same reason.
+  scope :containing, ->(input) {
+    rgb = ColorSpace.parse(input)
     next none if rgb.nil?
 
     where(id: PaletteColor.where(color_id: Color.where(rgb).select(:id)).select(:palette_id))
