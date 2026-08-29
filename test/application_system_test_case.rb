@@ -33,19 +33,34 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   # Every screen in this app is behind the sign-in, so every flow through one
-  # starts signed in. Going through the form rather than planting the cookie
-  # keeps this honest under both drivers: it is the same act a person performs,
-  # and it fails loudly if the sign-in itself breaks.
+  # starts signed in — by planting the session cookie, not by driving the form.
+  #
+  # Driving it was the honest-looking choice and it was the wrong one. Turbo
+  # will not begin a form submission while another is in progress, and a
+  # browser leaves the sign-in POST in flight when Capybara navigates away
+  # from it. The next form the test submits is then silently ignored: a click
+  # on a submit button that does nothing at all, on a page that still looks
+  # right. Every browser failure on CI since the sign-in went in has been some
+  # version of "the interaction did not take effect", and this is the one
+  # thing all of those tests newly had in common.
+  #
+  # The form itself is not left untested — sign_in_test.rb drives it.
   setup do
     visit new_session_path
-    fill_in "Email", with: users(:keeper).email_address
-    fill_in "Password", with: "password"
-    click_on "Sign in"
+    plant_session_cookie
+  end
 
-    # Waits for the sign-in to actually land. A browser submits the form
-    # asynchronously, so without something to wait on the next visit races the
-    # redirect and lands back on the sign-in page with the library still shut.
-    assert_selector ".masthead__nav a", text: "Account"
+  # A fixture session, so the row is there in every test and the cookie can be
+  # written without asking the app for anything.
+  def plant_session_cookie
+    jar = ActionDispatch::TestRequest.create.cookie_jar
+    jar.signed[:session_id] = sessions(:keeper).id
+
+    if javascript_driver?
+      page.driver.browser.manage.add_cookie(name: "session_id", value: jar[:session_id], path: "/")
+    else
+      page.driver.browser.set_cookie("session_id=#{jar[:session_id]}")
+    end
   end
 
   # rack_test has no CSS, no box model and no JavaScript, so anything about
