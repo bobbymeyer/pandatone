@@ -58,6 +58,13 @@ afterwards:
   it in those terms, and the refusal names the palettes. It is refused
   outright when stripping it would leave two palettes holding exactly the
   same colours, since that rule cannot be true only on the way in.
+* **Starting from an existing palette carries, it does not copy.** A seasonal
+  variant is usually last season's palette with a colour swapped, and a saved
+  clone is exactly the duplicate the rule forbids. "New from this" carries the
+  swatches into the form as ticked boxes instead: untick what you do not want,
+  or add a swatch, and what you save is already the palette you meant. Keeping
+  everything and adding nothing is refused, in the same words as any other
+  duplicate.
 * **Near-duplicates are a question, not a rule.** Anything within a redmean
   distance of 32 of an existing swatch — `#FFFFFF` against `#FAFAF8` scores
   17 — is put back to you with both swatches side by side and a "create

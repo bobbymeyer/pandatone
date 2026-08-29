@@ -1,7 +1,11 @@
-<% content_for :title, "New palette" %>
+<% content_for :title, @source ? "New palette from #{@source.name}" : "New palette" %>
 
 <header class="page-head">
   <h1 class="page-title">New palette</h1>
+  <% if @source %>
+    <p class="page-lede">Starting from <%= link_to @source.name, @source %>.</p>
+  <% end %>
 </header>
 
-<%= render "form", palette: @palette, url: palettes_path, submit: "Create palette", with_swatch: true %>
+<%= render "form", palette: @palette, url: palettes_path, submit: "Create palette",
+      with_swatch: true, source: @source %>

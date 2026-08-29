@@ -499,6 +499,30 @@ form.button_to { display: inline; }
 .hex--copy[data-copied]::after,
 .hex--copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
 
+/* The swatches a fork carries: a row of choices, each one a swatch you can
+   untick, sized like the cards they came from. */
+.carried-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--gutter);
+  margin-top: var(--space-2);
+  width: 100%;
+}
+
+.carried-swatch {
+  flex: 1 1 8rem;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+}
+
+.carried-swatch label {
+  flex: 1 1 auto;
+  min-width: 0;
+  cursor: pointer;
+}
+
 /* --- Empty and error states --------------------------------------------- */
 
 .empty { color: var(--ink-quiet); }

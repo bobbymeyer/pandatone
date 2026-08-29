@@ -66,8 +66,10 @@ class BrowserTest < ApplicationSystemTestCase
   test "the page actions sit on one line" do
     visit palette_path(palettes(:brand))
 
+    # Every action on the page, not a count of them: the row has to hold what
+    # it is given, and pinning a number only dates the test.
     tops = tops_of(".page-actions > *")
-    assert_equal 3, tops.size, "expected all three actions inside the row"
+    assert_operator tops.size, :>=, 3, "the page actions went missing"
     assert_equal 1, tops.uniq.size, "the actions wrapped onto #{tops.uniq.size} lines: #{tops.inspect}"
   end
 
