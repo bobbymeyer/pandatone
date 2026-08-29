@@ -271,8 +271,25 @@
   display: flex;
   align-items: flex-end;
   gap: var(--space-2);
+  /* A definite basis, not the content width: sharing a row with a long tag
+     list would otherwise squeeze the search field down to almost nothing,
+     which is what nine tags were already doing to the colour index. */
+  flex: 1 1 var(--measure);
   max-width: var(--measure);
 }
+
+/* Its own line under the filters it reorders, rather than a seventh thing
+   competing for the row. Built from the same links as the tag filter,
+   because it is the same kind of control: pick one of a handful. */
+.sort-filter {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.sort-filter__label { color: var(--ink-quiet); }
 
 .tag-filter {
   display: flex;

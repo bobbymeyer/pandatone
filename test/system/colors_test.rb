@@ -123,6 +123,58 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "No colours yet"
   end
 
+  # --- Sorting ------------------------------------------------------------
+
+  test "lists colours by name until asked otherwise" do
+    visit colors_path
+
+    assert_equal Color.order(:name).pluck(:name), card_names
+    assert_selector ".sort-filter .tag.active", text: "Name", exact_text: true
+  end
+
+  test "sorts by colour, dark first and light first" do
+    visit colors_path
+
+    sort_by "Dark first", leading: "ink-black"
+    sort_by "Light first", leading: "paper-white"
+    sort_by "Colour", leading: "ink-black"
+
+    assert_equal "paper-white", card_names.last, "the lightest neutral closes the spectrum"
+  end
+
+  test "sorts by date added and date modified" do
+    latest = Color.create!(name: "brand new", source_space: "rgb", r: 3, g: 200, b: 90)
+    colors(:autumn_ochre).update!(tags: [ "seasonal", "warm" ])
+
+    visit colors_path
+
+    sort_by "Date added", leading: latest.name
+    sort_by "Date modified", leading: "autumn-ochre"
+  end
+
+  test "a sort survives a tag filter" do
+    visit colors_path
+
+    sort_by "Dark first", leading: "ink-black"
+    click_on "brand"
+
+    assert_selector ".color-list > li", count: 3
+    assert_equal [ "ink-black", "signal-red", "paper-white" ], card_names
+    assert_selector ".sort-filter .tag.active", text: "Dark first", exact_text: true
+  end
+
+  test "a search keeps the sort it was run under" do
+    visit colors_path
+
+    sort_by "Light first", leading: "paper-white"
+    fill_in "Search", with: "process"
+    filter_unless_live
+
+    assert_selector ".color-list > li", count: 1
+    assert_equal [ "process-cyan" ], card_names
+    assert_selector ".sort-filter .tag.active", text: "Light first", exact_text: true
+  end
+
   test "creates a colour that belongs to no palette yet" do
     visit colors_path
     click_on "New colour"
@@ -616,4 +668,22 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "#14A028"
     assert_equal before + 1, Color.count
   end
+
+  private
+    # Choosing a sort is a whole navigation, so this waits for the re-sorted
+    # list before handing back: reading the cards does not retry.
+    def sort_by(label, leading:)
+      within(".sort-filter") { click_on label }
+
+      assert_selector ".color-list > li:first-child .color-card__name",
+        text: leading, exact_text: true
+    end
+
+    def filter_unless_live
+      click_on "Filter" unless javascript_driver?
+    end
+
+    def card_names
+      all(".color-card__name").map(&:text)
+    end
 end

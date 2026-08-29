@@ -61,6 +61,26 @@ afterwards:
   needs an approximate answer. Two greys twenty steps apart score 60 and stay
   two swatches.
 
+### Ordering colours
+
+The colour index sorts by name, date added, date modified, colour, dark first
+or light first. The last three turn on what a colour looks like rather than on
+what a column holds, so they are computed in Ruby over rows the page loads
+anyway; name, added and modified stay in SQL.
+
+Dark and light order by Rec. 601 luma — the standard weighted average of the
+channels. It is not a perceptual lightness, but it puts yellow well above blue
+where a plain mid-point calls them equal.
+
+The **colour** sort runs black, then ROYGBIV, then white. Colours with almost
+no chroma are not on the spectrum at all, so they go to the two ends by which
+half of the black-to-white axis they sit on, and everything with a hue runs
+between them in hue order. A wheel has no beginning, so a linear list has to
+cut it somewhere and two neighbours always land at opposite ends; the cut goes
+in the gap between magenta and red rather than at red, because cutting at red
+puts `#E30613` — a red that leans a few degrees blue, at hue 356.5 — after the
+violets.
+
 ## Screens
 
 The UI is for a human curating the library; the API is for machines.

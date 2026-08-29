@@ -235,4 +235,39 @@ class ColorSpaceTest < ActiveSupport::TestCase
   test "distance spans the whole space without overflowing it" do
     assert_operator ColorSpace.distance({ r: 0, g: 0, b: 0 }, { r: 255, g: 255, b: 255 }), :<=, 765
   end
+
+  # --- Luma, chroma and hue ----------------------------------------------
+
+  test "luma weighs green far above blue" do
+    assert_operator ColorSpace.luma(0, 255, 0), :>, ColorSpace.luma(0, 0, 255)
+  end
+
+  test "luma calls yellow lighter than blue, where a mid-point would not" do
+    assert_operator ColorSpace.luma(255, 255, 0), :>, ColorSpace.luma(0, 0, 255)
+  end
+
+  test "luma spans black to white" do
+    assert_in_delta 0.0, ColorSpace.luma(0, 0, 0)
+    assert_in_delta 255.0, ColorSpace.luma(255, 255, 255)
+  end
+
+  test "chroma is the spread between the channels" do
+    assert_equal 0, ColorSpace.chroma(17, 17, 17)
+    assert_equal 255, ColorSpace.chroma(255, 0, 0)
+    assert_equal 5, ColorSpace.chroma(111, 111, 106)
+  end
+
+  test "hue runs red, orange, yellow, green, blue, violet round the wheel" do
+    assert_in_delta 0.0, ColorSpace.hue(255, 0, 0)
+    assert_in_delta 60.0, ColorSpace.hue(255, 255, 0)
+    assert_in_delta 120.0, ColorSpace.hue(0, 255, 0)
+    assert_in_delta 240.0, ColorSpace.hue(0, 0, 255)
+    assert_in_delta 300.0, ColorSpace.hue(255, 0, 255)
+  end
+
+  test "hue is undefined for a colour with no hue in it" do
+    assert_nil ColorSpace.hue(17, 17, 17)
+    assert_nil ColorSpace.hue(0, 0, 0)
+    assert_nil ColorSpace.hue(255, 255, 255)
+  end
 end

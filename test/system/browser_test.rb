@@ -151,6 +151,55 @@ class BrowserTest < ApplicationSystemTestCase
     assert_visible "[data-source='new']"
   end
 
+  # A row of controls added under the search is one declaration away from
+  # pushing the search field or its button out of place.
+
+  test "the search field and its button share a line" do
+    [ colors_path, palettes_path ].each do |path|
+      visit path
+
+      field = rect_of(".filter-form > .field")
+      button = rect_of(".filter-form input[type=submit]")
+      row = rect_of(".filters")
+
+      # The field against the whole row, not against its own form: the form
+      # collapses along with the field, so comparing the two would agree they
+      # are fine.
+      assert_operator field["width"], :>, row["width"] / 3, "#{path}: the search field collapsed"
+      assert_operator button["left"], :>=, field["left"] + field["width"] - 1,
+        "#{path}: the Filter button wrapped under the search field"
+    end
+  end
+
+  test "the sort options sit on one line of their own, below the search" do
+    visit colors_path
+
+    field = rect_of(".filter-form > .field")
+    sort = rect_of(".sort-filter")
+
+    assert_equal 1, tops_of(".sort-filter li").uniq.size,
+      "the sort options wrapped onto more than one line"
+    assert_operator sort["top"], :>=, field["top"] + field["height"] - 1,
+      "the sort options crowded onto the search line"
+    assert_equal 0, evaluate_script("document.documentElement.scrollWidth - document.documentElement.clientWidth"),
+      "the sort row pushed the page sideways"
+  end
+
+  # The tag links live outside the results frame, so an order that only swapped
+  # that frame would leave them carrying the old one.
+  test "choosing an order keeps it through a tag filter" do
+    visit colors_path
+
+    within(".sort-filter") { click_on "Dark first" }
+    assert_selector ".color-list > li:first-child", text: "ink-black"
+
+    click_on "brand"
+
+    assert_selector ".color-list > li", count: 3
+    assert_equal [ "ink-black", "signal-red", "paper-white" ],
+      all(".color-card__name").map(&:text)
+  end
+
   test "search filters as you type, without pressing Filter" do
     visit palettes_path
 
@@ -183,6 +232,13 @@ class BrowserTest < ApplicationSystemTestCase
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "lookup" => lookup_path(q: "#E30613")
       }
+    end
+
+    def rect_of(selector)
+      evaluate_script(
+        "(({top, left, width, height}) => ({top, left, width, height}))" \
+        "(document.querySelector(#{selector.to_json}).getBoundingClientRect())"
+      )
     end
 
     def width_of(selector)

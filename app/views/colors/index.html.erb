@@ -15,6 +15,9 @@
   <%= form_with url: colors_path, method: :get, class: "filter-form",
         data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "colors" } do %>
     <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+    <%# Searching keeps the order you were reading in. Choosing an order is a
+        whole navigation rather than a frame swap, so this is never stale. %>
+    <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
     <div class="field">
       <%= label_tag :q, "Search" %>
       <%= text_field_tag :q, params[:q], autocomplete: "off" %>
@@ -23,14 +26,33 @@
   <% end %>
 
   <ul class="tag-filter">
-    <li><%= link_to "All", colors_path(q: params[:q]), class: class_names("tag", active: params[:tag].blank?) %></li>
+    <li>
+      <%= link_to "All", colors_path(q: params[:q], sort: params[:sort]),
+            class: class_names("tag", active: params[:tag].blank?) %>
+    </li>
     <% @tags.each do |tag| %>
       <li>
-        <%= link_to tag, colors_path(tag: tag, q: params[:q]),
+        <%= link_to tag, colors_path(tag: tag, q: params[:q], sort: params[:sort]),
               class: class_names("tag", active: params[:tag] == tag) %>
       </li>
     <% end %>
   </ul>
+
+  <%# Links, not a control inside the search form: the tag filter above is
+      outside the results frame, so a sort that only swapped the frame would
+      leave those links carrying the old order and quietly lose it on the
+      next click. A navigation re-renders every one of them. %>
+  <div class="sort-filter">
+    <span class="sort-filter__label">Sort by</span>
+    <ul class="tag-filter">
+      <% Color::SORTS.each do |key, label| %>
+        <li>
+          <%= link_to label, colors_path(q: params[:q], tag: params[:tag], sort: key),
+                class: class_names("tag", active: color_sort == key) %>
+        </li>
+      <% end %>
+    </ul>
+  </div>
 </section>
 
 <%= turbo_frame_tag "colors", data: { turbo_action: "replace" }, target: "_top" do %>

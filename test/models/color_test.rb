@@ -381,4 +381,67 @@ class ColorTest < ActiveSupport::TestCase
   test "nearest_to searches only the scope it is called on" do
     assert_equal colors(:process_cyan), Color.tagged("print").nearest_to({ r: 255, g: 255, b: 255 })
   end
+
+  # --- Sorting ------------------------------------------------------------
+
+  test "sorts by name by default, and for anything it does not recognise" do
+    [ nil, "", "sideways" ].each do |key|
+      assert_equal Color.order(:name).pluck(:name), Color.sorted(key).map(&:name),
+        "expected #{key.inspect} to fall back to name order"
+    end
+  end
+
+  test "sorts by date added, newest first" do
+    latest = Color.create!(name: "brand new", source_space: "rgb", r: 3, g: 200, b: 90)
+
+    assert_equal latest, Color.sorted("added").first
+  end
+
+  test "sorts by date modified, newest first" do
+    touched = colors(:autumn_ochre)
+    touched.update!(name: "autumn-ochre-ii")
+
+    assert_equal touched, Color.sorted("modified").first
+  end
+
+  test "sorts dark first" do
+    order = Color.sorted("dark").map(&:name)
+
+    assert_equal "ink-black", order.first
+    assert_equal "paper-white", order.last
+  end
+
+  test "sorts light first" do
+    assert_equal Color.sorted("dark").map(&:name).reverse, Color.sorted("light").map(&:name)
+  end
+
+  test "the colour sort runs black, then the spectrum, then white" do
+    order = Color.sorted("spectrum").map(&:name)
+
+    assert_equal "ink-black", order.first, "the darkest neutral leads"
+    assert_equal "paper-white", order.last, "the lightest neutral closes"
+    assert_operator order.index("signal-red"), :<, order.index("autumn-ochre"), "red before orange"
+    assert_operator order.index("autumn-ochre"), :<, order.index("process-cyan"), "orange before cyan"
+    assert_operator order.index("process-cyan"), :<, order.index("deep-indigo"), "cyan before blue"
+  end
+
+  # #E30613 is a red that leans a few degrees towards magenta, so on a wheel
+  # cut at red it lands at 356 and sorts after violet. The cut sits in the
+  # magenta-to-red gap instead, where a linear list has to break anyway.
+  test "a red that leans blue still sorts with the reds" do
+    order = Color.sorted("spectrum").map(&:name)
+
+    assert_operator order.index("signal-red"), :<, order.index("deep-indigo"),
+      "a red sorting after a blue means the wheel was cut in the wrong place"
+  end
+
+  test "sorting applies to the scope it is called on" do
+    assert_equal [ "process-cyan" ], Color.tagged("print").sorted("spectrum").map(&:name)
+  end
+
+  test "every offered sort is one the model answers to" do
+    Color::SORTS.each_key do |key|
+      assert_equal Color.count, Color.sorted(key).size, "#{key} lost or duplicated rows"
+    end
+  end
 end

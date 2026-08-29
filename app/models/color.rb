@@ -17,6 +17,32 @@ class Color < ApplicationRecord
   # than refuses.
   SIMILARITY_THRESHOLD = 32
 
+  # What the colour index offers to sort by, in the order it offers them.
+  SORTS = {
+    "name" => "Name",
+    "added" => "Date added",
+    "modified" => "Date modified",
+    "spectrum" => "Colour",
+    "dark" => "Dark first",
+    "light" => "Light first"
+  }.freeze
+
+  # Below this much chroma there is not enough hue to place on the spectrum,
+  # so the colour belongs on the black-to-white axis instead. It clears the
+  # off-whites and the warm greys without catching a muted olive.
+  NEUTRAL_CHROMA = 24
+
+  # Half of 255: which end of the black-to-white axis a neutral belongs on.
+  NEUTRAL_MIDPOINT = 127.5
+
+  # A wheel has no beginning, so a linear list has to cut it somewhere, and
+  # wherever the cut falls two neighbouring colours end up at opposite ends.
+  # Cutting at red would do it between #FF0010 and #FF0000 — putting a red
+  # that leans a few degrees blue, like #E30613 at 356.5, after the violets.
+  # The gap between magenta and red is the emptiest place to break, so the
+  # cut goes there and every red stays with the reds.
+  SPECTRUM_ORIGIN = 345
+
   has_many :palette_colors, dependent: :destroy
   has_many :palettes, through: :palette_colors
 
@@ -98,6 +124,60 @@ class Color < ApplicationRecord
           g: (color.g - SIMILARITY_THRESHOLD / 2.0)..(color.g + SIMILARITY_THRESHOLD / 2.0),
           b: (color.b - reach)..(color.b + reach))
   }
+
+  # Ordering is domain knowledge — which end black goes, where a red that
+  # leans blue belongs — so it lives here rather than in the controller that
+  # reads a parameter. Callable on a scope, so filtering and sorting compose.
+  #
+  # The three that a database can express stay in SQL. The three that turn on
+  # what a colour looks like are done in Ruby: expressing hue in SQL would
+  # mean a CASE over which channel is largest, written once here and again in
+  # anything else that ever needs it, and this index loads every row it shows
+  # regardless.
+  def self.sorted(key)
+    case key
+    when "added"    then order(created_at: :desc, name: :asc)
+    when "modified" then order(updated_at: :desc, name: :asc)
+    when "spectrum" then by(&:spectrum_position)
+    when "dark"     then by(&:luma)
+    when "light"    then by { |color| -color.luma }
+    else                 order(:name)
+    end
+  end
+
+  # Name breaks every tie, so the order is total: two colours of the same
+  # luma do not swap places between one request and the next.
+  def self.by(&position)
+    order(:name).to_a.sort_by { |color| [ *position.call(color), color.name ] }
+  end
+  private_class_method :by
+
+  def luma
+    ColorSpace.luma(r, g, b)
+  end
+
+  def hue
+    ColorSpace.hue(r, g, b)
+  end
+
+  def chroma
+    ColorSpace.chroma(r, g, b)
+  end
+
+  # A colour with too little hue to place on the spectrum.
+  def neutral?
+    chroma < NEUTRAL_CHROMA
+  end
+
+  # Black, then ROYGBIV, then white: the neutrals split to the two ends of
+  # the list by which half of the black-to-white axis they sit on, and
+  # everything with a hue runs between them in spectral order.
+  def spectrum_position
+    return [ 0, luma ] if neutral? && luma < NEUTRAL_MIDPOINT
+    return [ 2, luma ] if neutral?
+
+    [ 1, (hue - SPECTRUM_ORIGIN) % 360 ]
+  end
 
   def hex
     ColorSpace.to_hex(r, g, b)

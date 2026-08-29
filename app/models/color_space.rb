@@ -86,6 +86,38 @@ module ColorSpace
     Math.sqrt((2 + mean / 256) * dr**2 + 4 * dg**2 + (2 + (255 - mean) / 256) * db**2)
   end
 
+  # Rec. 601 luma: the standard weighted average of the channels, on 0..255.
+  # It is not a perceptual lightness — it does not linearise the gamma — but it
+  # puts yellow well above blue where (max + min) / 2 calls them equal, which
+  # is the whole of what a dark-to-light sort is for.
+  def luma(r, g, b)
+    0.299 * r + 0.587 * g + 0.114 * b
+  end
+
+  # How much colour there is in a colour: the spread between its channels, on
+  # 0..255. Zero is a grey, and everything near zero reads as one.
+  def chroma(r, g, b)
+    [ r, g, b ].max - [ r, g, b ].min
+  end
+
+  # Where the colour sits on the wheel, in degrees from red, or nil when there
+  # is no hue to speak of.
+  def hue(r, g, b)
+    high = [ r, g, b ].max
+    low = [ r, g, b ].min
+    return nil if high == low
+
+    span = (high - low).to_f
+    sixths =
+      case high
+      when r then (g - b) / span
+      when g then 2 + (b - r) / span
+      else        4 + (r - g) / span
+      end
+
+    (sixths * 60) % 360
+  end
+
   def parse_triple(input)
     channels = input.to_s.scan(/-?\d+/).map(&:to_i)
     return nil unless channels.length == 3 && channels.all? { |channel| (0..255).cover?(channel) }
