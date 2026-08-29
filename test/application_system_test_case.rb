@@ -100,9 +100,16 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
   # Choosing an order is a whole navigation, so this waits for the reordered
   # list before handing back: reading the names does not retry.
+  #
+  # In two steps, because they fail for different reasons and the difference
+  # is the whole diagnosis. If the sort never becomes the active one, the
+  # navigation did not land and the list is still in whatever order it was.
+  # Asserting straight on the list conflates that with a sort that landed and
+  # ordered wrongly, and reports the second when it means the first.
   def sort_by(label, leading:, list: ".color-list", name: ".color-card__name")
     within("[data-filter=sort]") { click_on label }
 
+    assert_selector "[data-filter=sort] .tag.active", text: label, exact_text: true
     assert_selector "#{list} > li:first-child #{name}", text: leading, exact_text: true
   end
 
@@ -122,5 +129,28 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # rack_test has no JavaScript, so a live-filtering form needs its button.
   def filter_unless_live
     click_on "Filter" unless javascript_driver?
+  end
+
+  # Where the browser actually was, added to whatever the failure said. Every
+  # CI failure in this suite so far has been some form of "the click did not
+  # take effect", and the page it was left on separates a navigation that
+  # never happened from one that happened and rendered the wrong thing. Runs
+  # before super, because Rails resets the Capybara session in its own
+  # before_teardown and there is nothing to ask afterwards.
+  def before_teardown
+    annotate_failures_with_location if javascript_driver?
+
+    super
+  end
+
+  def annotate_failures_with_location
+    return if passed?
+
+    failures.each do |failure|
+      failure.message << "\n  the browser was at: #{page.current_url}"
+    end
+  rescue StandardError => e
+    # Diagnosis must never become the reason a run fails.
+    Rails.logger.debug { "could not read the browser's location: #{e.message}" }
   end
 end
