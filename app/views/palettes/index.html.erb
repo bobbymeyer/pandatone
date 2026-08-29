@@ -6,7 +6,8 @@
 </header>
 
 <section class="filters">
-  <%= form_with url: palettes_path, method: :get, class: "filter-form" do %>
+  <%= form_with url: palettes_path, method: :get, class: "filter-form",
+        data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "palettes" } do %>
     <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
     <div class="field">
       <%= label_tag :q, "Search" %>
@@ -28,10 +29,14 @@
   <%= link_to "New palette", new_palette_path, class: "button button--primary" %>
 </section>
 
-<% if @palettes.empty? %>
-  <p class="empty">No palettes match.</p>
-<% else %>
-  <ul class="palette-list">
-    <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>
-  </ul>
+<%# Only the results live in the frame; the form stays outside it so typing
+    does not replace the field under the cursor. %>
+<%= turbo_frame_tag "palettes", data: { turbo_action: "replace" } do %>
+  <% if @palettes.empty? %>
+    <p class="empty">No palettes match.</p>
+  <% else %>
+    <ul class="palette-list">
+      <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>
+    </ul>
+  <% end %>
 <% end %>

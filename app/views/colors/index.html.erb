@@ -8,7 +8,8 @@
 </header>
 
 <section class="filters">
-  <%= form_with url: colors_path, method: :get, class: "filter-form" do %>
+  <%= form_with url: colors_path, method: :get, class: "filter-form",
+        data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "colors" } do %>
     <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
     <div class="field">
       <%= label_tag :q, "Search" %>
@@ -28,10 +29,12 @@
   </ul>
 </section>
 
-<% if @colors.empty? %>
-  <p class="empty">No colours match.</p>
-<% else %>
-  <ul class="color-list">
-    <%= render partial: "colors/card", collection: @colors, as: :color %>
-  </ul>
+<%= turbo_frame_tag "colors", data: { turbo_action: "replace" } do %>
+  <% if @colors.empty? %>
+    <p class="empty">No colours match.</p>
+  <% else %>
+    <ul class="color-list">
+      <%= render partial: "colors/card", collection: @colors, as: :color %>
+    </ul>
+  <% end %>
 <% end %>
