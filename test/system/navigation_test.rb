@@ -57,6 +57,18 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
+  # The panda is decoration, so it is kept out of the accessible name: the
+  # wordmark already says what this is, and "panda face Pandatone" says it
+  # twice to anyone listening rather than looking.
+  test "leads the wordmark with a panda without putting it in the name" do
+    visit root_path
+
+    assert_equal "Pandatone", find(".masthead__mark a").text
+    assert_equal "🐼", find(".masthead__mark [aria-hidden=true]", visible: :all).text
+    assert_match(/\A🐼\s*Pandatone\z/, find(".masthead__mark").text.strip,
+      "the panda leads the wordmark rather than trailing it")
+  end
+
   # The three library screens lead, in the order you work in them. The account
   # is last because it is about you rather than about the library.
   test "leads the nav with colors" do

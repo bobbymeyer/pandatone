@@ -14,6 +14,10 @@
   letter-spacing: -0.015em;
 }
 
+/* Off the ladder like every other gap in the app, rather than a space
+   character whose width is the font's business and not ours. */
+.masthead__panda { margin-inline-end: var(--space-1); }
+
 /* Off the left edge rather than pushed to the right: the asymmetry is the
    point, and it lines the nav up with the body column below. */
 .masthead__nav { grid-column: 3 / -1; }

@@ -25,7 +25,11 @@
 
   <body>
     <header class="masthead grid">
-      <p class="masthead__mark"><%= link_to "Pandatone", root_path %></p>
+      <%# The panda is decoration and hidden from a screen reader: the wordmark
+          beside it already says the name. %>
+      <p class="masthead__mark">
+        <span class="masthead__panda" aria-hidden="true">🐼</span><%= link_to "Pandatone", root_path %>
+      </p>
       <nav class="masthead__nav">
         <%= link_to "Colors", colors_path %>
         <%= link_to "Palettes", palettes_path %>
