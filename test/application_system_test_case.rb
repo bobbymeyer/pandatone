@@ -56,12 +56,20 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
 
   # Turbo and Stimulus arrive over an importmap, after the HTML they act on.
   # Waiting for markup is not waiting for behavior, and the gap between the
-  # two is where three rounds of CI failures lived: the first test in a
-  # process, on a cold browser, clicked a data-turbo-confirm button before
-  # Turbo was listening, so the form submitted with no dialog for
-  # accept_confirm to find. Nothing here is slower once the browser is warm —
-  # the check passes on its first poll — and no test can start before the
-  # behavior it is about exists.
+  # two is where round after round of CI failures lived: a click landing
+  # before Turbo was listening submitted the form itself, with no dialog for
+  # accept_confirm to find and no frame swap to wait on.
+  #
+  # Asked precisely, because the objects exist before either of them is doing
+  # anything: Turbo sets window.Turbo when its module evaluates and starts
+  # intercepting only at Turbo.start, and Stimulus is an application with no
+  # controllers registered until it has read the DOM. Waiting on the objects
+  # alone still let a test into that window.
+  # An expression, not a statement: evaluate_script wraps what it is given and
+  # a `return` here is a syntax error in the wrapper.
+  READY = "!!(window.Turbo?.session?.started && window.Stimulus?.router?.modules?.length)"
+
+
   def visit(*)
     super
 
@@ -71,8 +79,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   def await_javascript
     deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Capybara.default_max_wait_time
 
-    until page.evaluate_script("!!(window.Turbo && window.Stimulus)")
-      raise "Turbo and Stimulus never booted" if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+    until page.evaluate_script(READY)
+      raise "Turbo never started or Stimulus registered nothing" if
+        Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
 
       sleep 0.05
     end
