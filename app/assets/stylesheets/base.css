@@ -24,6 +24,12 @@ body {
   margin: 0;
   background: var(--ground);
   color: var(--ink);
+  /* Names and tags are free text, and a swatch called
+     "Supercalifragilistic" has nowhere to break. anywhere rather than
+     break-word because only anywhere lowers a box's minimum width: a tag
+     chip and a strip's name link are inline-block, so break-word would let
+     the text wrap and leave the box itself sticking off the page. */
+  overflow-wrap: anywhere;
 }
 
 h1, h2, h3, p, ul, ol, dl, dd, figure, fieldset, legend {
