@@ -56,6 +56,23 @@ class GridTest < ActiveSupport::TestCase
     assert_match(/grid-column:\s*span var\(--card-wide\)/, grid)
   end
 
+  # --- Type ----------------------------------------------------------------
+
+  # A label is a label wherever it stands. The filter block's two new ones
+  # came out a step larger than the choices they label, which is backwards,
+  # and a step larger than every other label in the app.
+  test "every register label is set in the one micro register" do
+    # The rule that uses the micro size and tracks it, not the :root block
+    # that declares the size.
+    selectors = type[/([^{}]+)\{[^}]*font-size:\s*var\(--size-1\)[^}]*letter-spacing[^}]*\}/m, 1]
+
+    assert selectors, "expected one rule setting the micro register"
+    [ ".field label", ".filter-row__label", ".mode-toggle legend", ".source-toggle legend" ].each do |label|
+      assert_includes selectors, label,
+        "#{label} is not in the micro register, so it is set differently from every other label"
+    end
+  end
+
   # --- Signals -------------------------------------------------------------
 
   # This is a colour tool, so it is the last place that should lean on colour
@@ -93,5 +110,9 @@ class GridTest < ActiveSupport::TestCase
   private
     def components
       @components ||= File.read(Rails.root.join("app/assets/stylesheets/components.css"))
+    end
+
+    def type
+      @type ||= File.read(Rails.root.join("app/assets/stylesheets/type.css"))
     end
 end

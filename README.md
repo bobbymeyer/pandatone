@@ -226,7 +226,10 @@ is. Both are pinned by stylesheet tests, and the separation by a rendered one
 wraps its button in a form and an auto margin belongs to the flex child.
 
 Searching, filtering and ordering are three registers of one block: a label
-in a shared column, then the control. The column width is a single custom
+in a shared column, then the control. Every one of those labels is set in the
+same micro register as every other label in the app, pinned by a test — the
+two newest came out a step larger than the choices they label, which is
+backwards. The column width is a single custom
 property, so all three line up by construction rather than by coincidence.
 Filtering and ordering are also the same kind of control — pick one of a
 handful — so they are built from one partial. Tags

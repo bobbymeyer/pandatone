@@ -77,6 +77,7 @@ h3 {
    the wide tracking it used to have is a convention of capitals and reads as
    a gap in lowercase. */
 .field label,
+.filter-row__label,
 .mode-toggle legend,
 .source-toggle legend,
 .channels dt,
