@@ -14,7 +14,7 @@ module Palettes
       spec = params[:color_id].present? ? { id: params[:color_id] } : swatch_spec
 
       if spec.nil?
-        @palette.errors.add(:colors, "need a name and some values")
+        @palette.errors.add(:base, "A swatch needs a name and some values")
         return render_new
       end
 

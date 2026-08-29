@@ -70,7 +70,7 @@ class PaletteComposition
 
       if spec[:id].present?
         existing = Color.find_by(id: spec[:id])
-        @palette.errors.add(:colors, "reference #{spec[:id]} does not exist") if existing.nil?
+        @palette.errors.add(:base, "No colour with id #{spec[:id]}") if existing.nil?
         existing
       else
         color = Color.new(spec.except(:id))
@@ -80,6 +80,8 @@ class PaletteComposition
     end
 
     def add_errors_from(record)
-      record.errors.full_messages.each { |message| @palette.errors.add(:colors, message) }
+      # :base, not :colors — the palette's own full_messages would otherwise
+      # prefix every one of these with the association name.
+      record.errors.full_messages.each { |message| @palette.errors.add(:base, message) }
     end
 end

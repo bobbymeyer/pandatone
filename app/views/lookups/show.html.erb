@@ -18,7 +18,12 @@
     <p class="empty">Could not read <q><%= @query %></q> as a hex or an RGB triple.</p>
   <% else %>
     <section class="lookup-result">
-      <%= swatch_tag @hex, transition_name: "lookup-#{@hex.delete('#')}", class: "swatch--large" %>
+      <%# When the lookup lands on exactly one stored colour, the swatch takes
+          that colour's transition name, so following the link morphs the
+          swatch across instead of crossfading the page under it. %>
+      <% found = @colors.one? ? @colors.first : nil %>
+      <%= swatch_tag @hex, class: "swatch--large",
+            transition_name: found ? "color-#{found.id}" : "lookup-#{@hex.delete('#')}" %>
 
       <div class="lookup-result__body">
         <p class="hex hex--large"><%= @hex %></p>

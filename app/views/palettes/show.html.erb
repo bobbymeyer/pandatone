@@ -13,7 +13,9 @@
   <p class="page-actions">
     <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button" %>
     <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
-    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--quiet" %>
+    <%# The only thing in this app that cannot be undone. %>
+    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--quiet",
+          data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colours stay in the library." } %>
   </p>
 </header>
 

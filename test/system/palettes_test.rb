@@ -159,7 +159,8 @@ class PalettesTest < ApplicationSystemTestCase
 
     click_on "Create palette"
 
-    assert_text "must be less than or equal to 255"
+    assert_text "Red must be less than or equal to 255"
+    assert_no_text "Colors Red"
     assert_equal "Half Filled", find_field("Name").value
     assert_not Palette.exists?(name: "Half Filled")
   end
@@ -492,10 +493,17 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text "Press Check 2027"
   end
 
+  test "asks before deleting a palette" do
+    visit palette_path(palettes(:press))
+
+    assert_equal "Delete Press Check and its swatch order? The colours stay in the library.",
+      find("button", text: "Delete palette")[:"data-turbo-confirm"]
+  end
+
   test "deletes a palette" do
     visit palette_path(palettes(:press))
 
-    click_on "Delete palette"
+    confirming { click_on "Delete palette" }
 
     assert_text "Palettes"
     assert_no_text "Press Check"

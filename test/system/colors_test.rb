@@ -349,6 +349,28 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Not in the library"
   end
 
+  # The one navigation on this screen is to the colour it found, so the swatch
+  # takes that colour's transition name and morphs across rather than fading.
+  test "a found colour keeps its transition name through to its page" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#E30613"
+    click_on "Look up"
+
+    swatch = find(".lookup-result > .swatch")
+    assert_match(/view-transition-name:\s*color-#{colors(:signal_red).id}\b/, swatch[:style])
+  end
+
+  test "an unmatched lookup names its swatch by the colour itself" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#ABCDEF"
+    click_on "Look up"
+
+    swatch = find(".lookup-result > .swatch")
+    assert_match(/view-transition-name:\s*lookup-ABCDEF\b/, swatch[:style])
+  end
+
   test "reports an unreadable lookup" do
     visit lookup_path
 

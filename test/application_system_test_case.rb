@@ -11,4 +11,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   else
     driven_by :rack_test
   end
+
+  # Turbo's confirmation is a real dialog in a browser and a no-op under
+  # rack_test, which ignores the data attribute and just submits. Wrapping the
+  # click keeps the flow identical under either driver.
+  def confirming(&block)
+    return yield if Capybara.current_driver == :rack_test
+
+    accept_confirm(&block)
+  end
 end

@@ -16,10 +16,23 @@ class Color < ApplicationRecord
 
   validates :name, presence: true
   validates :source_space, inclusion: { in: SOURCE_SPACES }
-  validates :r, :g, :b, presence: true,
-    numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 255 }
-  validates :c, :m, :y, :k, presence: true,
-    numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100 }
+  # Only the space being authored in is validated. The other one is derived,
+  # so it is correct by construction when the source is, and unset when the
+  # source is not — where reporting it as well would bury the one mistake
+  # under a dozen complaints about channels nobody typed in.
+  # allow_nil keeps a blank field to a single "can't be blank" rather than
+  # that plus "is not a number".
+  with_options if: :rgb_source? do
+    validates :r, :g, :b, presence: true, numericality: {
+      only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 255, allow_nil: true
+    }
+  end
+
+  with_options if: :cmyk_source? do
+    validates :c, :m, :y, :k, presence: true, numericality: {
+      greater_than_or_equal_to: 0, less_than_or_equal_to: 100, allow_nil: true
+    }
+  end
   validate :assigned_hex_must_be_readable
 
   scope :by_hex, ->(hex) {
@@ -59,6 +72,10 @@ class Color < ApplicationRecord
 
   def rgb_source?
     source_space == RGB
+  end
+
+  def cmyk_source?
+    source_space == CMYK
   end
 
   private

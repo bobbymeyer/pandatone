@@ -29,3 +29,19 @@
 
 en:
   hello: "Hello world"
+
+  activerecord:
+    attributes:
+      color:
+        r: Red
+        g: Green
+        b: Blue
+        c: Cyan
+        m: Magenta
+        y: Yellow
+        k: Key
+        hex: Hex
+        source_space: Source space
+        tag_list: Tags
+      palette:
+        tag_list: Tags
