@@ -63,12 +63,14 @@ module SwatchesHelper
       "Delete it and take it out of #{palettes.one? ? "that palette" : "those palettes"}?"
   end
 
-  # Returns each space's channels as separate values rather than one string,
-  # so a narrow card wraps between them instead of splitting "K 11.0" in half.
+  # Each space with its channels as name-and-value pairs: separate values so a
+  # narrow card wraps between them instead of splitting "K 11.0" in half, and
+  # the name kept apart from the number so the two can be told apart by weight
+  # rather than by counting characters.
   def channel_pairs(color)
     [
-      [ "RGB", color.rgb.map { |channel, value| "#{channel.to_s.upcase} #{value}" } ],
-      [ "CMYK", color.cmyk.map { |channel, value| "#{channel.to_s.upcase} #{value}" } ]
+      [ "RGB", color.rgb.map { |channel, value| [ channel.to_s.upcase, value ] } ],
+      [ "CMYK", color.cmyk.map { |channel, value| [ channel.to_s.upcase, value ] } ]
     ]
   end
 end

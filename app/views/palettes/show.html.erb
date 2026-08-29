@@ -41,7 +41,7 @@
         <dl class="channels">
           <% channel_pairs(color).each do |space, values| %>
             <dt><%= space %></dt>
-            <dd><% values.each do |value| %><span class="channel"><%= value %></span><% end %></dd>
+            <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
           <% end %>
         </dl>
 

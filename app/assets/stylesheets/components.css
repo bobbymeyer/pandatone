@@ -160,7 +160,15 @@
   margin-top: var(--space-1);
 }
 
-.channels dt { color: var(--ink-quiet); align-self: center; }
+/* The names carry the weight and the numbers do not, so "R" and "227" are
+   told apart at a glance rather than by counting characters. */
+.channels dt {
+  color: var(--ink-quiet);
+  align-self: center;
+  font-weight: 700;
+}
+
+.channels .channel__key { font-weight: 700; }
 
 .channels dd {
   display: flex;

@@ -277,6 +277,33 @@ class BrowserTest < ApplicationSystemTestCase
     assert_operator large, :>, card, "the large hex is no bigger than one on a card"
   end
 
+  # A channel reads as a name and a number in one breath, so the name carries
+  # the weight: computed, not declared, since the two sit inside one element
+  # and a rule on the wrong one would look right in the stylesheet.
+  test "a channel's name is bolder than its value" do
+    visit color_path(colors(:signal_red))
+
+    weights = evaluate_script(<<~JS)
+      (() => {
+        const channel = document.querySelector('.channels .channel');
+        const key = channel.querySelector('.channel__key');
+        return [getComputedStyle(key).fontWeight, getComputedStyle(channel).fontWeight,
+                getComputedStyle(document.querySelector('.channels dt')).fontWeight];
+      })()
+    JS
+
+    key, value, space = weights.map(&:to_i)
+    assert_operator key, :>, value, "the channel name is no bolder than its value"
+    assert_operator space, :>, value, "the space name is no bolder than the values under it"
+  end
+
+  test "a channel still holds its name and value on one line" do
+    visit color_path(colors(:signal_red))
+
+    assert_equal 1, tops_of(".channels dd:first-of-type .channel:first-child > *").uniq.size
+    assert_equal "R 227", find(".channels dd", match: :first).first(".channel").text
+  end
+
   # The clipboard needs a real browser, a secure origin and a granted
   # permission, so this is the only place the copying itself can be proven.
   test "clicking a hex copies it" do
