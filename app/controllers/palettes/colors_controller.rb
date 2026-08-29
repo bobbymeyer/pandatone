@@ -25,6 +25,24 @@ module Palettes
       end
     end
 
+    # Swaps a swatch with its neighbour. Moving one swatch is a whole
+    # interaction on its own, rather than something you compose by typing a
+    # column of integers and then remembering to save them.
+    def move
+      membership = @palette.palette_colors.find_by!(color_id: params[:id])
+      neighbour = neighbour_of(membership)
+
+      if neighbour
+        PaletteColor.transaction do
+          position = membership.position
+          membership.update!(position: neighbour.position)
+          neighbour.update!(position: position)
+        end
+      end
+
+      redirect_to @palette
+    end
+
     # Removes the swatch from this palette only. The colour stays in the
     # library, because it may well sit in other palettes.
     def destroy
@@ -35,6 +53,16 @@ module Palettes
     private
       def set_palette
         @palette = Palette.friendly_find(params[:palette_id])
+      end
+
+      def neighbour_of(membership)
+        scope = @palette.palette_colors.where.not(id: membership.id)
+
+        if params[:direction] == "up"
+          scope.where(position: ...membership.position).order(:position).last
+        else
+          scope.where(position: (membership.position + 1)..).order(:position).first
+        end
       end
 
       def current_memberships

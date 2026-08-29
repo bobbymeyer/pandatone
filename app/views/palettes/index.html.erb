@@ -2,7 +2,11 @@
 
 <header class="page-head">
   <h1 class="page-title">Palettes</h1>
-  <p class="page-lede"><%= pluralize(@palettes.size, "palette") %> in the library.</p>
+
+  <%# Making a palette is an action on this page, not one of its filters. %>
+  <p class="page-actions">
+    <%= link_to "New palette", new_palette_path, class: "button button--primary" %>
+  </p>
 </header>
 
 <section class="filters">
@@ -25,13 +29,15 @@
       </li>
     <% end %>
   </ul>
-
-  <%= link_to "New palette", new_palette_path, class: "button button--primary" %>
 </section>
 
 <%# Only the results live in the frame; the form stays outside it so typing
     does not replace the field under the cursor. %>
 <%= turbo_frame_tag "palettes", data: { turbo_action: "replace" } do %>
+  <%# The count belongs with the results: outside the frame it would still
+      read "4 palettes" after a search narrowed the list to one. %>
+  <p class="count"><%= result_count(@palettes.size, @total, "palette") %></p>
+
   <% if @palettes.empty? %>
     <p class="empty">No palettes match.</p>
   <% else %>

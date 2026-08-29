@@ -25,6 +25,15 @@ module SwatchesHelper
     end
   end
 
+  # "4 palettes in the library" when nothing is filtered, "1 of 4 palettes"
+  # when something is. Saying "1 palette in the library" over a filtered list
+  # was a plain falsehood about the library.
+  def result_count(shown, total, noun)
+    return "#{pluralize(total, noun)} in the library" if shown == total
+
+    "#{shown} of #{pluralize(total, noun)}"
+  end
+
   def channel_pairs(color)
     [
       [ "RGB", color.rgb.map { |channel, value| "#{channel.to_s.upcase} #{value}" }.join("  ") ],

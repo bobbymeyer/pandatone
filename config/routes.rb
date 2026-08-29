@@ -14,9 +14,11 @@ Rails.application.routes.draw do
   # The human side. Colours are only ever created in the context of a palette
   # or read on their own; the API is the place for bulk work.
   resources :palettes do
-    patch :reorder, on: :member
     resource :tags, only: %i[ edit update ], controller: "palettes/tags"
-    resources :colors, only: %i[ new create destroy ], controller: "palettes/colors"
+
+    resources :colors, only: %i[ new create destroy ], controller: "palettes/colors" do
+      patch :move, on: :member
+    end
   end
 
   resources :colors, only: %i[ index show edit update ]

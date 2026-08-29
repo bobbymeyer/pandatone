@@ -20,11 +20,9 @@
 <% if @palette.palette_colors.empty? %>
   <p class="empty">No swatches yet.</p>
 <% else %>
-  <%# The position fields reference the reorder form by id rather than sitting
-      inside it, so that each swatch can carry its own delete form without
-      nesting one form in another. Both work with JavaScript off. %>
   <ol class="swatch-grid">
-    <% @palette.palette_colors.each do |membership| %>
+    <% memberships = @palette.palette_colors.to_a %>
+    <% memberships.each_with_index do |membership, index| %>
       <% color = membership.color %>
       <li class="swatch-detail" id="<%= dom_id(membership) %>">
         <%= link_to color, class: "swatch-link" do %>
@@ -42,19 +40,24 @@
         </dl>
 
         <div class="swatch-detail__controls">
-          <%= label_tag "position_#{membership.id}", "Position", class: "visually-hidden" %>
-          <%= number_field_tag "positions[#{membership.id}]", membership.position,
-                id: "position_#{membership.id}", min: 0, class: "position-field",
-                form: "reorder_form" %>
+          <%# No control where there is nowhere to go, rather than one that
+              silently does nothing at the ends of the row. %>
+          <% if index.positive? %>
+            <%= button_to "Up", move_palette_color_path(@palette, color, direction: "up"),
+                  method: :patch, class: "button button--quiet",
+                  aria: { label: "Move #{color.name} earlier" } %>
+          <% end %>
+
+          <% if index < memberships.size - 1 %>
+            <%= button_to "Down", move_palette_color_path(@palette, color, direction: "down"),
+                  method: :patch, class: "button button--quiet",
+                  aria: { label: "Move #{color.name} later" } %>
+          <% end %>
+
           <%= button_to "Remove", palette_color_path(@palette, color),
                 method: :delete, class: "button button--quiet" %>
         </div>
       </li>
     <% end %>
   </ol>
-
-  <%= form_with url: reorder_palette_path(@palette), method: :patch,
-        id: "reorder_form", class: "reorder-form" do %>
-    <%= submit_tag "Save order", name: nil, class: "button" %>
-  <% end %>
 <% end %>

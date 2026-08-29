@@ -16,18 +16,31 @@
 :root {
   --font: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-  --size-1: 0.6875rem;
-  --size-2: 0.8125rem;
-  --size-3: 1rem;
-  --size-4: 1.375rem;
-  --size-5: 2.875rem;
+  /* Five sizes on a 1.33/1.5 alternating ratio, every one a multiple of four
+     and most of eight. The old scale crowded two near-identical small sizes
+     at the bottom and then jumped 2.09x to the display size, which left no
+     rung between a section heading and a page title. */
+  --size-1: 0.75rem;   /* 12 — labels, metadata */
+  --size-2: 1rem;      /* 16 — body */
+  --size-3: 1.5rem;    /* 24 — section */
+  --size-4: 2rem;      /* 32 — subhead, large values */
+  --size-5: 3rem;      /* 48 — page title */
+
+  /* Leading in eighths. Every line box below resolves to a whole number of
+     baseline units, so text sits on the same grid the spacing is measured
+     in. Before this, not one line-height in the app did. */
+  --lead-1: 1rem;      /* 16 = 2 units */
+  --lead-2: 1.5rem;    /* 24 = 3 */
+  --lead-3: 2rem;      /* 32 = 4 */
+  --lead-4: 2.5rem;    /* 40 = 5 */
+  --lead-5: 3rem;      /* 48 = 6 */
 }
 
 body {
   font-family: var(--font);
-  font-size: var(--size-3);
+  font-size: var(--size-2);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: var(--lead-2);
   text-align: left;
   font-synthesis: none;
 }
@@ -37,8 +50,8 @@ h1, h2, h3, p, dd, dt, li, label, legend { text-align: left; }
 
 .page-title {
   font-size: var(--size-5);
+  line-height: var(--lead-5);
   font-weight: 700;
-  line-height: 1.02;
   letter-spacing: -0.028em;
   text-wrap: balance;
 }
@@ -52,43 +65,56 @@ h1, h2, h3, p, dd, dt, li, label, legend { text-align: left; }
 .page-lede { margin-top: var(--space-2); }
 
 h2 {
-  font-size: var(--size-4);
+  font-size: var(--size-3);
+  line-height: var(--lead-3);
   font-weight: 700;
-  line-height: 1.15;
   letter-spacing: -0.015em;
 }
 
 h3 {
-  font-size: var(--size-3);
+  font-size: var(--size-2);
+  line-height: var(--lead-2);
   font-weight: 700;
-  line-height: 1.3;
 }
 
-/* The micro register: labels, tags, meta. Set open and upper against the
-   tight display sizes, which is most of the contrast in the app. */
+/* The micro register: labels and metadata only. Set open and upper against
+   the tight display sizes, which is most of the contrast in the app.
+   Deliberately excludes buttons and navigation — an action set in the same
+   type as the word "Position" reads as a caption, and 12px is a poor target.
+   Excludes tags too: a tag is content, and displaying it in a case it was
+   not typed in is a small lie about the data. */
 .field label,
 .mode-toggle legend,
+.source-toggle legend,
 .channels dt,
-.masthead__nav a,
-.button,
-.count,
-.tag {
+.count {
   font-size: var(--size-1);
+  line-height: var(--lead-1);
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  line-height: 1.4;
 }
 
+.tag,
 .tags,
 .hint,
-.count { font-size: var(--size-2); }
+.link-quiet {
+  font-size: var(--size-1);
+  line-height: var(--lead-1);
+}
 
-.hint { text-transform: none; letter-spacing: 0; }
+.hint { line-height: var(--lead-2); }
+
+/* Navigation and actions read at body size. They are how the app is used,
+   not annotations on it. */
+.masthead__nav a,
+.button {
+  font-size: var(--size-2);
+  line-height: var(--lead-2);
+}
 
 /* Colour values are read as columns of digits, so they get tabular figures. */
 .hex,
-.channels dd,
-.position-field {
+.channels dd {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.01em;
 }
@@ -97,6 +123,7 @@ h3 {
 
 .hex--large {
   font-size: var(--size-4);
+  line-height: var(--lead-4);
   letter-spacing: 0.02em;
 }
 

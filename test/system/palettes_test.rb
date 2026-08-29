@@ -22,6 +22,37 @@ class PalettesTest < ApplicationSystemTestCase
     end
   end
 
+  test "counts the whole library when nothing is filtered" do
+    visit palettes_path
+
+    assert_text "4 palettes in the library"
+  end
+
+  test "counts the matches, not the library, when filtered" do
+    visit palettes_path
+
+    fill_in "Search", with: "autumn"
+    click_on "Filter"
+
+    assert_text "1 of 4 palettes"
+    assert_no_text "1 palette in the library"
+  end
+
+  test "the count sits inside the frame the search replaces" do
+    visit palettes_path
+
+    within "turbo-frame#palettes" do
+      assert_text "4 palettes in the library"
+    end
+  end
+
+  test "creating a palette is an action on the page, not a filter control" do
+    visit palettes_path
+
+    assert_selector ".page-head", text: "New palette"
+    assert_no_selector ".filters", text: "New palette"
+  end
+
   test "filters the index by tag" do
     visit palettes_path
 
@@ -379,17 +410,49 @@ class PalettesTest < ApplicationSystemTestCase
     assert Color.exists?(colors(:ink_black).id)
   end
 
-  test "reorders the swatches in a palette" do
+  test "moves a swatch later in the palette" do
     visit palette_path(palettes(:brand))
 
-    fill_in "position_#{palette_colors(:brand_paper_white).id}", with: "0"
-    fill_in "position_#{palette_colors(:brand_signal_red).id}", with: "1"
-    fill_in "position_#{palette_colors(:brand_ink_black).id}", with: "2"
+    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+      click_on "Down"
+    end
 
-    click_on "Save order"
+    assert_equal [ "ink-black", "signal-red", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
+    assert_equal [ "ink-black", "signal-red", "paper-white" ], all(".swatch-detail .swatch-name").map(&:text)
+  end
 
-    assert_equal [ "paper-white", "signal-red", "ink-black" ], palettes(:brand).reload.colors.map(&:name)
-    assert_equal [ "paper-white", "signal-red", "ink-black" ], all(".swatch-detail .swatch-name").map(&:text)
+  test "moves a swatch earlier in the palette" do
+    visit palette_path(palettes(:brand))
+
+    within "#palette_color_#{palette_colors(:brand_paper_white).id}" do
+      click_on "Up"
+    end
+
+    assert_equal [ "signal-red", "paper-white", "ink-black" ], palettes(:brand).reload.colors.map(&:name)
+  end
+
+  test "offers no way to move the first swatch up or the last one down" do
+    visit palette_path(palettes(:brand))
+
+    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+      assert_no_selector "button", text: "Up"
+      assert_selector "button", text: "Down"
+    end
+
+    within "#palette_color_#{palette_colors(:brand_paper_white).id}" do
+      assert_selector "button", text: "Up"
+      assert_no_selector "button", text: "Down"
+    end
+  end
+
+  test "moving a swatch leaves the other palettes holding it alone" do
+    visit palette_path(palettes(:brand))
+
+    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+      click_on "Down"
+    end
+
+    assert_equal [ "autumn-ochre", "signal-red" ], palettes(:autumn).reload.colors.map(&:name)
   end
 
   test "edits palette tags inline" do

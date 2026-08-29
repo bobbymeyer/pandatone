@@ -30,6 +30,8 @@
 </section>
 
 <%= turbo_frame_tag "colors", data: { turbo_action: "replace" } do %>
+  <p class="count"><%= result_count(@colors.size, @total, "colour") %></p>
+
   <% if @colors.empty? %>
     <p class="empty">No colours match.</p>
   <% else %>

@@ -59,8 +59,6 @@
 
 /* --- Palette index ----------------------------------------------------- */
 
-.palette-strip__name { margin-bottom: var(--space-1); }
-
 .palette-strip__name a { text-decoration: none; }
 
 .palette-strip__name a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
@@ -99,10 +97,14 @@
    card grid below. */
 .current-swatches h2 { margin-bottom: var(--space-2); }
 
+/* Card titles on the palette index and the colour index are the same thing
+   and now read the same. The palette one used to inherit h2 by omission and
+   came out a full step larger. */
+.palette-strip__name,
 .color-card__name {
-  font-size: var(--size-3);
+  font-size: var(--size-2);
+  line-height: var(--lead-2);
   font-weight: 700;
-  line-height: 1.3;
   margin-bottom: var(--space-1);
 }
 
@@ -110,7 +112,8 @@
   margin-top: var(--space-1);
   padding-top: var(--space-1);
   border-top: 1px solid var(--keyline);
-  font-size: var(--size-2);
+  font-size: var(--size-1);
+  line-height: var(--lead-1);
   color: var(--ink-quiet);
 }
 
@@ -150,18 +153,6 @@
   padding-top: var(--space-1);
   border-top: 1px solid var(--keyline);
 }
-
-.position-field {
-  width: 3.5rem;
-  border: 0;
-  border-bottom: 1px solid var(--ink);
-  background: transparent;
-  font: inherit;
-  padding-block: 2px;
-  color: inherit;
-}
-
-.reorder-form { margin-top: calc(var(--space-4) * -1 + var(--space-5)); }
 
 .channels {
   display: grid;
@@ -428,17 +419,16 @@
   padding: var(--space-1) var(--space-2);
 }
 
-.button--primary:hover { background: var(--accent); }
+.button--primary:hover { background: var(--ink-quiet); }
 
 .button--quiet { color: var(--ink-quiet); }
 
-.button--quiet:hover { color: var(--accent); }
+.button--quiet:hover { color: var(--ink); }
 
 form.button_to { display: inline; }
 
 .link-quiet {
   color: var(--ink-quiet);
-  font-size: var(--size-2);
   text-underline-offset: 0.25em;
 }
 

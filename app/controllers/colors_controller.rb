@@ -5,6 +5,7 @@ class ColorsController < ApplicationController
     @colors = Color.order(:name).name_matching(params[:q]).includes(:palettes)
     @colors = @colors.tagged(params[:tag]) if params[:tag].present?
     @tags = Color.all_tags
+    @total = Color.count
   end
 
   def show

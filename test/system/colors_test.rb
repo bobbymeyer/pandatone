@@ -32,6 +32,15 @@ class ColorsTest < ApplicationSystemTestCase
     end
   end
 
+  test "counts the matches, not the library, when filtered" do
+    visit colors_path
+
+    fill_in "Search", with: "ink"
+    click_on "Filter"
+
+    assert_text "1 of 6 colours"
+  end
+
   test "filters the colour index by tag" do
     visit colors_path
 
