@@ -1,6 +1,8 @@
 module Api
   module V1
     class PalettesController < BaseController
+      include PaletteExports
+
       before_action :set_palette, only: %i[ show colors update destroy ]
 
       def index
@@ -12,7 +14,11 @@ module Api
       end
 
       def show
-        render json: PaletteSerializer.one(@palette)
+        respond_to do |format|
+          format.json { render json: PaletteSerializer.one(@palette) }
+          format.ase { send_palette(@palette, :ase) }
+          format.css { send_palette(@palette, :css) }
+        end
       end
 
       # The workhorse endpoint for consuming tools. Unlike the indexes this

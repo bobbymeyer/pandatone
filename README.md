@@ -145,7 +145,8 @@ to be black.
 The UI is for a human curating the library; the API is for machines.
 
 - **Palettes** — the index as strips of swatches, filtered by tag and name; a
-  palette page where swatches are reordered, removed and added in place.
+  palette page where swatches are reordered, removed and added in place, and
+  where the palette can be taken away as a file.
 - **Colors** — the whole library as swatches, filtered by tag and name, each
   showing the palettes it sits in; a color page with both spaces, its tags
   and its member palettes, editable from there. Editing a color changes it
@@ -163,6 +164,32 @@ The UI is for a human curating the library; the API is for machines.
   match is on the color it renders to, not on the build itself.
 - **Account** — who you are signed in as, the API token your scripts carry,
   and the two buttons that end either one: regenerate, and sign out.
+
+## Exports
+
+A palette leaves this app in two formats, because between them they cover
+where these colors actually go: a design tool, and a stylesheet. They are the
+same URL as the palette itself, asked for by extension.
+
+```sh
+curl -H "Authorization: Bearer $PANDATONE_TOKEN" \
+     -O https://pandatone.example.com/api/v1/palettes/Brand%20Core.ase
+```
+
+**`.ase`** is Adobe Swatch Exchange, which Illustrator, Photoshop and InDesign
+read. The palette becomes a named group so the swatches land together rather
+than loose. Each color goes out **in the space it was authored in** — a CMYK
+build exports as CMYK, an RGB color as RGB — because flattening everything to
+RGB would throw away the one thing the row knows that its hex does not.
+
+**`.css`** is custom properties on `:root`, in the palette's own order. CSS has
+no CMYK, so a color authored in inks goes out as the hex it renders to and says
+so in a comment beside it; that conversion is lossy and the file should not
+pretend otherwise. Names are made safe to be property names, and two swatches
+sharing a name are kept apart rather than one silently winning.
+
+There is no export of the whole library. A palette is the unit that has a name
+and an order, which is what both of these formats are for.
 
 ## API
 
@@ -186,6 +213,8 @@ page on the internet drive this API from a signed-in browser.
 | ------ | --------------------------- | --------------------------------------------------------- |
 | GET    | `/palettes`                 | Filters: `?q=` (name), `?tag=`, `?color=RRGGBB` (with or without `#`), combinable |
 | GET    | `/palettes/:id`             | Colors inline in position order. `:id` may be an id or a name |
+| GET    | `/palettes/:id.ase`         | The palette as an Adobe swatch file                       |
+| GET    | `/palettes/:id.css`         | The palette as custom properties on `:root`               |
 | GET    | `/palettes/:id/colors`      | Just the colors. The workhorse endpoint                   |
 | POST   | `/palettes`                 | Creates a palette with nested colors in one request       |
 | PATCH  | `/palettes/:id`             | Updates name/tags; adds, removes and reorders colors      |
@@ -239,6 +268,7 @@ the colors alone. The whole write is one transaction.
 | ---- | ---- | ----- |
 | GET | `/lookup?q=` | What the lookup screen answers, in one call: the value read as hex, RGB or a CMYK build, the colors that match, the palettes holding them, and the nearest color on file when nothing matched |
 | GET | `/tags` | Every tag in use, by collection — what a client needs to offer the same filters |
+| GET | `/palettes/:id.ase`, `.css` | The two downloads the palette page offers, on the same route the interface uses |
 
 Both collections take the same three filters the filter bar does — `?q=` for
 a name, `?tag=`, and `?color=` for a value written any of the three ways — and

@@ -8,7 +8,11 @@ Rails.application.routes.draw do
   resource :api_token, only: :update
   # The API is versioned from the first commit: other tools depend on this
   # contract, and the way to change it is to add v2, not to edit v1.
-  namespace :api do
+  #
+  # JSON by default, so a request that names no format gets the one this API
+  # published itself as. An explicit .ase or .css still wins over the default,
+  # which is how a palette can be fetched as a file on the same route.
+  namespace :api, defaults: { format: :json } do
     namespace :v1 do
       resources :palettes, only: %i[ index show create update destroy ] do
         get :colors, on: :member

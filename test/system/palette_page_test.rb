@@ -128,4 +128,21 @@ class PalettePageTest < ApplicationSystemTestCase
     assert_no_text "Press Check"
     assert Color.exists?(colors(:process_cyan).id)
   end
+
+  # The two places these colors actually go: a design tool, and a stylesheet.
+  test "offers the palette as a file, in both formats" do
+    visit palette_path(palettes(:brand))
+
+    within(".export") do
+      assert_equal [ "ASE", "CSS variables" ], all("a").map(&:text)
+    end
+  end
+
+  test "each export link asks for the palette in that format" do
+    visit palette_path(palettes(:brand))
+
+    paths = within(".export") { all("a").map { |link| URI.parse(link[:href]).path } }
+
+    assert_equal [ "/palettes/#{palettes(:brand).id}.ase", "/palettes/#{palettes(:brand).id}.css" ], paths
+  end
 end

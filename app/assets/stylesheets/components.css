@@ -27,7 +27,7 @@
 
 .masthead__nav a, .palette-strip__meta, .result-count,
 .color-card__palettes, .channels dt, .channels dd, .provenance, .tag,
-.tags, .filter-row__label, .field label, .mode-toggle legend,
+.tags, .filter-row__label, .export__label, .field label, .mode-toggle legend,
 .source-toggle legend, .button--quiet, .button--danger, .link-quiet,
 .empty, .errors ul {
   color: var(--ink-quiet);
@@ -63,6 +63,7 @@
 .swatch-detail__controls,
 .channels dd,
 .link-list,
+.export,
 .filters,
 .filter-form,
 .tag-filter,

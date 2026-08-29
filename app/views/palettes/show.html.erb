@@ -67,3 +67,15 @@
     <% end %>
   </ol>
 <% end %>
+
+<%# Last on the page, because it is the one thing here that takes the palette
+    somewhere else rather than changing it. Two formats, because between them
+    they cover where these colors actually go: a design tool, and a
+    stylesheet. %>
+<div class="export">
+  <span class="export__label">Export</span>
+  <ul class="link-list">
+    <li><%= link_to "ASE", palette_path(@palette, format: :ase), class: "link-quiet" %></li>
+    <li><%= link_to "CSS variables", palette_path(@palette, format: :css), class: "link-quiet" %></li>
+  </ul>
+</div>

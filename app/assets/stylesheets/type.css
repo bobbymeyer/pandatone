@@ -78,6 +78,7 @@ h3 {
    a gap in lowercase. */
 .field label,
 .filter-row__label,
+.export__label,
 .mode-toggle legend,
 .source-toggle legend,
 .channels dt,

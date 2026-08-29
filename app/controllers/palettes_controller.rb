@@ -1,5 +1,6 @@
 class PalettesController < ApplicationController
   include Sorting
+  include PaletteExports
 
   before_action :set_palette, only: %i[ show edit update destroy ]
   before_action :set_source, only: %i[ new create ]
@@ -13,6 +14,11 @@ class PalettesController < ApplicationController
   end
 
   def show
+    respond_to do |format|
+      format.html
+      format.ase { send_palette(@palette, :ase) }
+      format.css { send_palette(@palette, :css) }
+    end
   end
 
   # A palette can be started from another one. The swatches are carried into
