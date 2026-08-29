@@ -278,6 +278,24 @@
   max-width: var(--measure);
 }
 
+/* The search is the first of the filter block's three registers, so it is
+   built like the other two rather than as a stacked field sitting above
+   them: the label in the shared column, the control where the choices start.
+   Scoped to the block, since a search with no registers under it has nothing
+   to line up with. */
+.filters .filter-form > .field {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.filters .filter-form > .field > label { min-width: var(--register-label); }
+
+.filters .filter-form > .field > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 /* Its own line under the filters it reorders, rather than a seventh thing
    competing for the row. Built from the same links as the tag filter,
    because it is the same kind of control: pick one of a handful. */

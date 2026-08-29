@@ -203,19 +203,28 @@ class BrowserTest < ApplicationSystemTestCase
       "remove sits as close to down as down does to up: #{lefts.inspect}"
   end
 
-  # Two registers that read as parallel have to line up as parallel: the
-  # labels differ in width, so without a shared column the choices start a
-  # few pixels apart.
-  test "the filter registers share a label column" do
-    visit colors_path
+  # Three registers that read as parallel have to line up as parallel. The
+  # labels differ in width, so without a shared column their controls start a
+  # few pixels apart — and the search was a stacked field above them rather
+  # than one of them at all.
+  test "search, tags and sort are three registers sharing a label column" do
+    [ colors_path, palettes_path ].each do |path|
+      visit path
 
-    starts = evaluate_script(
-      "Array.from(document.querySelectorAll('.filter-row'))" \
-      ".map(row => Math.round(row.querySelector('.tag').getBoundingClientRect().left))"
-    )
+      lefts = evaluate_script(<<~JS)
+        [
+          ['.filters .filter-form > .field > label', '.filters .filter-form > .field > input'],
+          ...Array.from(document.querySelectorAll('.filter-row')).map(row =>
+            [row.querySelector('.filter-row__label'), row.querySelector('.tag')])
+        ].map(pair => pair.map(el =>
+          Math.round((typeof el === 'string' ? document.querySelector(el) : el)
+            .getBoundingClientRect().left)))
+      JS
 
-    assert_equal 2, starts.size, "expected a tag register and a sort register"
-    assert_equal 1, starts.uniq.size, "the registers' choices start in different columns: #{starts.inspect}"
+      assert_equal 3, lefts.size, "#{path}: expected a search, a tag and a sort register"
+      assert_equal 1, lefts.map(&:first).uniq.size, "#{path}: labels start in different columns: #{lefts.inspect}"
+      assert_equal 1, lefts.map(&:last).uniq.size, "#{path}: controls start in different columns: #{lefts.inspect}"
+    end
   end
 
   test "the sort options sit on one line of their own, below the search" do

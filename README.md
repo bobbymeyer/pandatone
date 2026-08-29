@@ -225,8 +225,11 @@ is. Both are pinned by stylesheet tests, and the separation by a rendered one
 — the rule for it existed and did nothing for a while, since `button_to`
 wraps its button in a form and an auto margin belongs to the flex child.
 
-Filtering and ordering are the same kind of control — pick one of a handful —
-so they are built from one partial, labelled, and share a label column. Tags
+Searching, filtering and ordering are three registers of one block: a label
+in a shared column, then the control. The column width is a single custom
+property, so all three line up by construction rather than by coincidence.
+Filtering and ordering are also the same kind of control — pick one of a
+handful — so they are built from one partial. Tags
 on a card are the same links as the tags in the filter bar, because they are
 the same thing: the library's whole discovery mechanism.
 
