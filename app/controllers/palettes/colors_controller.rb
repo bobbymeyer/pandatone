@@ -1,5 +1,7 @@
 module Palettes
   class ColorsController < ApplicationController
+    SOURCES = %w[ new library ].freeze
+
     before_action :set_palette
 
     def new
@@ -16,6 +18,14 @@ module Palettes
       if spec.nil?
         @palette.errors.add(:base, "A swatch needs a name and some values")
         return render_new
+      end
+
+      # Only a colour being described from scratch can be a near-duplicate;
+      # one picked out of the library is by definition already in it.
+      if spec[:id].blank?
+        @candidate = Color.new(spec)
+        @similar = similar_swatch_for(@candidate)
+        return render_new if @similar
       end
 
       if PaletteComposition.new(@palette, attributes: {}, append: [ spec ]).save
@@ -45,9 +55,23 @@ module Palettes
 
     # Removes the swatch from this palette only. The colour stays in the
     # library, because it may well sit in other palettes.
+    #
+    # Expressed as a replacement rather than a delete so that it goes through
+    # the same check as every other write: taking a swatch out can land this
+    # palette on the same set of colours as another one, and that is a
+    # duplicate however it came about. It also closes the gap the removed
+    # swatch left in the positions.
     def destroy
-      @palette.palette_colors.find_by!(color_id: params[:id]).destroy!
-      redirect_to @palette
+      membership = @palette.palette_colors.find_by!(color_id: params[:id])
+      remaining = @palette.palette_colors.order(:position)
+        .reject { |other| other.id == membership.id }
+        .map { |other| { id: other.color_id } }
+
+      if PaletteComposition.new(@palette, attributes: {}, colors: remaining).save
+        redirect_to @palette
+      else
+        render "palettes/show", status: :unprocessable_content
+      end
     end
 
     private
@@ -81,12 +105,20 @@ module Palettes
         render :new, status: :unprocessable_content
       end
 
-      # Which panel the page opens on. A rejected submission comes back on the
-      # panel it came from rather than resetting to the default.
+      # Which panel the page opens on. Reaching for a swatch the library
+      # already holds is the default, because a library of near-identical
+      # colours is the failure mode this app exists to avoid, and a default
+      # that starts you typing a new one every time is how you get there.
+      # Describing a new colour leads only when there is nothing to pick.
+      #
+      # A rejected submission comes back on the panel it came from rather than
+      # resetting to the default.
       def swatch_source
         return "library" if params[:color_id].present?
+        return "new" if params[:swatch].present?
+        return params[:source] if SOURCES.include?(params[:source])
 
-        params[:source] == "library" ? "library" : "new"
+        @available.any? ? "library" : "new"
       end
       helper_method :swatch_source
   end

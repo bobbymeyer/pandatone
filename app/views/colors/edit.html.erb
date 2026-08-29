@@ -15,6 +15,7 @@
 
 <%= form_with url: color_path(@color), method: :patch, class: "form" do %>
   <%= render "shared/errors", record: @color %>
+  <%= render "shared/similar_swatch", similar: @similar, color: @color if @similar %>
   <%= render "shared/swatch_fields", color: @color %>
-  <%= submit_tag "Save colour", name: nil, class: "button button--primary" %>
+  <%= submit_tag @similar ? "Save anyway" : "Save colour", name: nil, class: "button button--primary" %>
 <% end %>

@@ -200,4 +200,39 @@ class ColorSpaceTest < ActiveSupport::TestCase
       assert_nil ColorSpace.parse(bad), "expected #{bad.inspect} to be unreadable"
     end
   end
+
+  # --- Distance ----------------------------------------------------------
+
+  test "distance is zero between a colour and itself" do
+    assert_equal 0.0, ColorSpace.distance({ r: 227, g: 6, b: 19 }, { r: 227, g: 6, b: 19 })
+  end
+
+  test "distance is symmetric" do
+    a = { r: 12, g: 200, b: 90 }
+    b = { r: 240, g: 30, b: 130 }
+
+    assert_in_delta ColorSpace.distance(a, b), ColorSpace.distance(b, a), 0.0001
+  end
+
+  test "distance grows with how far apart two colours look" do
+    base = { r: 128, g: 128, b: 128 }
+
+    near = ColorSpace.distance(base, { r: 133, g: 133, b: 133 })
+    far = ColorSpace.distance(base, { r: 168, g: 168, b: 168 })
+
+    assert_operator near, :<, far
+  end
+
+  test "distance weighs green more heavily than red or blue" do
+    base = { r: 100, g: 100, b: 100 }
+
+    green = ColorSpace.distance(base, { r: 100, g: 130, b: 100 })
+    red = ColorSpace.distance(base, { r: 130, g: 100, b: 100 })
+
+    assert_operator green, :>, red
+  end
+
+  test "distance spans the whole space without overflowing it" do
+    assert_operator ColorSpace.distance({ r: 0, g: 0, b: 0 }, { r: 255, g: 255, b: 255 }), :<=, 765
+  end
 end

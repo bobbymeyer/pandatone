@@ -9,6 +9,14 @@ class Color < ApplicationRecord
   CMYK = "cmyk".freeze
   SOURCE_SPACES = [ RGB, CMYK ].freeze
 
+  # Below this redmean distance two swatches are near enough that having both
+  # is more likely a mistake than a decision: #FAFAF8 against #FFFFFF scores
+  # 17, a red mistyped as #E01020 instead of #E30613 scores 28. Two greys
+  # twenty steps apart score 60 and stay two swatches. The line is a judgement
+  # about a library, not a perceptual constant, which is why it warns rather
+  # than refuses.
+  SIMILARITY_THRESHOLD = 32
+
   has_many :palette_colors, dependent: :destroy
   has_many :palettes, through: :palette_colors
 
@@ -34,6 +42,7 @@ class Color < ApplicationRecord
     }
   end
   validate :assigned_hex_must_be_readable
+  validate :must_not_duplicate_a_swatch
 
   scope :by_hex, ->(hex) {
     rgb = ColorSpace.parse_hex(hex)
@@ -44,6 +53,33 @@ class Color < ApplicationRecord
 
   scope :in_palette, ->(key) {
     where(id: PaletteColor.where(palette_id: Palette.friendly(key).select(:id)).select(:color_id))
+  }
+
+  # The nearest swatch already on file that this one is close enough to be a
+  # duplicate of, or nil. Exact matches are a validation, not a warning, so by
+  # the time this is consulted the answer is always a genuinely distinct
+  # colour that merely looks the same.
+  def self.similar_to(color)
+    return nil unless [ color.r, color.g, color.b ].all?(Integer)
+
+    scope = near(color)
+    scope = scope.where.not(id: color.id) if color.persisted?
+
+    scope.map { |other| [ ColorSpace.distance(color.rgb, other.rgb), other ] }
+         .select { |distance, _| distance <= SIMILARITY_THRESHOLD }
+         .min_by(&:first)&.last
+  end
+
+  # A bounding box, so the search is an indexed range scan over a handful of
+  # rows rather than a walk of the whole library. Every weight in the distance
+  # is at least 2, and green's is exactly 4, so nothing inside the threshold
+  # can fall outside this box.
+  scope :near, ->(color) {
+    reach = SIMILARITY_THRESHOLD / Math.sqrt(2)
+
+    where(r: (color.r - reach)..(color.r + reach),
+          g: (color.g - SIMILARITY_THRESHOLD / 2.0)..(color.g + SIMILARITY_THRESHOLD / 2.0),
+          b: (color.b - reach)..(color.b + reach))
   }
 
   def hex
@@ -79,6 +115,22 @@ class Color < ApplicationRecord
   end
 
   private
+    # One value, one swatch. Two rows rendering the same hex are one colour
+    # under two names, which breaks the reverse lookup ("which palettes contain
+    # #E30613") into an arbitrary choice between them. A CMYK recipe that lands
+    # on a colour already on file is held to the same line: on screen, and in
+    # this library, it is that colour.
+    def must_not_duplicate_a_swatch
+      return unless [ r, g, b ].all?(Integer)
+
+      scope = Color.where(r: r, g: g, b: b)
+      scope = scope.where.not(id: id) if persisted?
+      twin = scope.first
+      return if twin.nil?
+
+      errors.add(:base, %(#{hex} is already in the library as "#{twin.name}"))
+    end
+
     def assigned_hex_must_be_readable
       return if @assigned_hex.blank? || ColorSpace.parse_hex(@assigned_hex)
 

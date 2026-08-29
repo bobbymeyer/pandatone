@@ -19,6 +19,8 @@
   </div>
 </header>
 
+<%= render "shared/errors", record: @palette %>
+
 <% if @palette.palette_colors.empty? %>
   <p class="empty">No swatches yet.</p>
 <% else %>

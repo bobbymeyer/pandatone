@@ -71,6 +71,21 @@ module ColorSpace
     to_hex(rgb[:r], rgb[:g], rgb[:b]) if rgb
   end
 
+  # How different two colours look, on a 0..765 scale. This is "redmean": a
+  # weighted RGB distance that tracks perception far better than the plain
+  # Euclidean one — which reads a shift in green as no bigger than the same
+  # shift in blue — while staying pure arithmetic. No profiles, no Lab, no
+  # colour-science apparatus for a question that only needs an approximate
+  # answer.
+  def distance(a, b)
+    mean = (a[:r] + b[:r]) / 2.0
+    dr = a[:r] - b[:r]
+    dg = a[:g] - b[:g]
+    db = a[:b] - b[:b]
+
+    Math.sqrt((2 + mean / 256) * dr**2 + 4 * dg**2 + (2 + (255 - mean) / 256) * db**2)
+  end
+
   def parse_triple(input)
     channels = input.to_s.scan(/-?\d+/).map(&:to_i)
     return nil unless channels.length == 3 && channels.all? { |channel| (0..255).cover?(channel) }

@@ -129,11 +129,11 @@ class ColorsTest < ApplicationSystemTestCase
 
     fill_in "Swatch name", with: "loose-blue"
     choose "Hex"
-    fill_in "Hex value", with: "#2B4A8A"
+    fill_in "Hex value", with: "#1E5AAA"
     click_on "Create colour"
 
     assert_text "loose-blue"
-    assert_text "#2B4A8A"
+    assert_text "#1E5AAA"
     assert_text "No palettes hold this colour yet"
   end
 
@@ -182,22 +182,23 @@ class ColorsTest < ApplicationSystemTestCase
   test "edits a colour by its rgb values" do
     visit edit_color_path(colors(:deep_indigo))
 
-    fill_in "R", with: "227"
-    fill_in "G", with: "6"
-    fill_in "B", with: "19"
+    fill_in "R", with: "213"
+    fill_in "G", with: "22"
+    fill_in "B", with: "43"
     click_on "Save colour"
 
-    assert_text "#E30613"
+    assert_text "#D5162B"
+    assert_equal [ 213, 22, 43 ], colors(:deep_indigo).reload.rgb.values
   end
 
   test "edits a colour by hex" do
     visit edit_color_path(colors(:deep_indigo))
 
     choose "Hex"
-    fill_in "Hex value", with: "#C4842C"
+    fill_in "Hex value", with: "#C77A1A"
     click_on "Save colour"
 
-    assert_text "#C4842C"
+    assert_text "#C77A1A"
     assert_text "Authored in RGB"
   end
 
@@ -392,5 +393,108 @@ class ColorsTest < ApplicationSystemTestCase
 
     assert_text "#C4842C"
     assert_text "Autumn 2026"
+  end
+
+  # --- Near duplicates ---------------------------------------------------
+  #
+  # paper-white is #FAFAF8. A plain #FFFFFF is 17 apart on the redmean scale:
+  # near enough that a library holding both is almost certainly holding one
+  # colour twice.
+
+  test "asks before adding a colour that is nearly one already in the library" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "off-white"
+    choose "Hex"
+    fill_in "Hex value", with: "#FFFFFF"
+
+    before = Color.count
+    click_on "Create colour"
+
+    assert_text "This is similar to paper-white"
+    assert_text "#FAFAF8"
+    assert_selector ".warning .swatch", count: 2
+    assert_equal before, Color.count, "nothing should have been written while the question stands"
+  end
+
+  test "adds it anyway once the question is answered" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "off-white"
+    choose "Hex"
+    fill_in "Hex value", with: "#FFFFFF"
+    click_on "Create colour"
+
+    assert_text "This is similar to paper-white"
+    before = Color.count
+    click_on "Create anyway"
+
+    assert_text "off-white"
+    assert_text "#FFFFFF"
+    assert_equal before + 1, Color.count
+  end
+
+  test "asks again when the colour changes after the warning" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "off-white"
+    choose "Hex"
+    fill_in "Hex value", with: "#FFFFFF"
+    click_on "Create colour"
+
+    assert_text "This is similar to paper-white"
+    fill_in "Hex value", with: "#FDFDFD"
+
+    before = Color.count
+    click_on "Create anyway"
+
+    assert_text "This is similar to paper-white"
+    assert_equal before, Color.count
+  end
+
+  test "refuses an exact duplicate rather than asking about it" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "red again"
+    choose "Hex"
+    fill_in "Hex value", with: "#E30613"
+
+    before = Color.count
+    click_on "Create colour"
+
+    assert_text %(#E30613 is already in the library as "signal-red")
+    assert_no_text "This is similar to"
+    assert_equal before, Color.count
+  end
+
+  test "asks before editing a colour into a near duplicate" do
+    visit edit_color_path(colors(:deep_indigo))
+
+    choose "Hex"
+    fill_in "Hex value", with: "#FFFFFF"
+    click_on "Save colour"
+
+    assert_text "This is similar to paper-white"
+    assert_equal [ 43, 74, 138 ], colors(:deep_indigo).reload.rgb.values
+
+    click_on "Save anyway"
+
+    assert_text "#FFFFFF"
+    assert_equal [ 255, 255, 255 ], colors(:deep_indigo).reload.rgb.values
+  end
+
+  test "says nothing about a colour that resembles nothing on file" do
+    visit new_color_path
+
+    fill_in "Swatch name", with: "grass"
+    choose "Hex"
+    fill_in "Hex value", with: "#14A028"
+
+    before = Color.count
+    click_on "Create colour"
+
+    assert_text "grass"
+    assert_text "#14A028"
+    assert_equal before + 1, Color.count
   end
 end

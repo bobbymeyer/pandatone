@@ -183,10 +183,10 @@ class Api::V1::PalettesControllerTest < ActionDispatch::IntegrationTest
   test "derives cmyk for a nested rgb colour" do
     post api_v1_palettes_url, as: :json, params: { palette: {
       name: "Derived",
-      colors: [ { name: "red", source_space: "rgb", r: 227, g: 6, b: 19 } ]
+      colors: [ { name: "red", source_space: "rgb", r: 220, g: 20, b: 60 } ]
     } }
 
-    assert_equal({ "c" => 0.0, "m" => 97.4, "y" => 91.6, "k" => 11.0 }, json["colors"].first["cmyk"])
+    assert_equal({ "c" => 0.0, "m" => 90.9, "y" => 72.7, "k" => 13.7 }, json["colors"].first["cmyk"])
   end
 
   test "rejects a palette with no name" do
@@ -349,4 +349,16 @@ class Api::V1::PalettesControllerTest < ActionDispatch::IntegrationTest
     def json
       JSON.parse(response.body)
     end
+
+  test "refuses a palette holding exactly another palette's colours" do
+    assert_no_difference "Palette.count" do
+      post api_v1_palettes_url, as: :json, params: { palette: {
+        name: "Brand Core Copy",
+        colors: palettes(:brand).color_ids.map { |id| { id: id } }
+      } }
+    end
+
+    assert_response :unprocessable_content
+    assert_includes json["errors"]["base"], %("Brand Core" already holds exactly these colours)
+  end
 end

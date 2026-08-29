@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_28_120003) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_041244) do
   create_table "colors", force: :cascade do |t|
     t.integer "b", null: false
     t.decimal "c", precision: 5, scale: 1, null: false
@@ -25,7 +25,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_28_120003) do
     t.datetime "updated_at", null: false
     t.decimal "y", precision: 5, scale: 1, null: false
     t.index ["name"], name: "index_colors_on_name"
-    t.index ["r", "g", "b"], name: "index_colors_on_r_and_g_and_b"
+    t.index ["r", "g", "b"], name: "index_colors_on_r_and_g_and_b", unique: true
   end
 
   create_table "palette_colors", force: :cascade do |t|

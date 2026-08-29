@@ -36,6 +36,31 @@ recorded rather than inferred.
 There is no `active` boolean anywhere. An active palette is one tagged
 `active`. Tags are normalised to stripped, downcased, deduped strings.
 
+### One swatch per colour, one palette per set
+
+A library nobody trusts to be free of near-identical swatches is a library
+nobody looks in, so duplication is stopped at the write rather than tidied up
+afterwards:
+
+* **A colour is its value.** No two `Color` rows may render the same hex —
+  enforced by a validation and a unique index on `(r, g, b)`. A CMYK recipe
+  that lands on a colour already on file is held to the same line, because on
+  screen it *is* that colour. Without this the reverse lookup ("which palettes
+  contain `#E30613`") would be an arbitrary choice between rows.
+* **A palette is its set of colours.** No two palettes may hold exactly the
+  same colours; a name is a label on a set, not part of it. Order is not part
+  of the identity, and empty palettes do not duplicate one another. The check
+  runs inside the same transaction as every other write, so removing a swatch
+  is refused too if it would leave a duplicate behind.
+* **Near-duplicates are a question, not a rule.** Anything within a redmean
+  distance of 32 of an existing swatch — `#FFFFFF` against `#FAFAF8` scores
+  17 — is put back to you with both swatches side by side and a "create
+  anyway" button. Redmean is a weighted RGB distance: it tracks how different
+  two colours look far better than plain Euclidean RGB while staying pure
+  arithmetic. No profiles, no Lab, no colour science for a question that only
+  needs an approximate answer. Two greys twenty steps apart score 60 and stay
+  two swatches.
+
 ## Screens
 
 The UI is for a human curating the library; the API is for machines.
@@ -99,6 +124,21 @@ to a colour already in the library, or a full definition to create:
 On `PATCH`, the array **replaces** the whole list in the order given, so one
 request shape covers adding, removing and reordering. Omit the key to leave
 the colours alone. The whole write is one transaction.
+
+### Duplicates over the API
+
+The API applies the same rules as the interface. An exact duplicate colour, or
+a palette holding exactly another palette's colours, comes back `422` with the
+reason under `errors.base`.
+
+A near-duplicate colour also comes back `422`, with the swatch it resembles
+serialised under a `similar` key so the client can show it. Send the same
+request again with a top-level `"confirm_similar": true` to create it anyway:
+
+```json
+{ "confirm_similar": true,
+  "color": { "name": "off-white", "source_space": "rgb", "r": 255, "g": 255, "b": 255 } }
+```
 
 ## Conventions
 

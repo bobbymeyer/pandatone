@@ -82,12 +82,12 @@ class ColorTest < ActiveSupport::TestCase
   # --- Conversion at write time ------------------------------------------
 
   test "derives cmyk from rgb on save" do
-    color = Color.create!(name: "derived", source_space: "rgb", r: 227, g: 6, b: 19)
+    color = Color.create!(name: "derived", source_space: "rgb", r: 220, g: 20, b: 60)
 
     assert_in_delta 0.0, color.c.to_f
-    assert_in_delta 97.4, color.m.to_f
-    assert_in_delta 91.6, color.y.to_f
-    assert_in_delta 11.0, color.k.to_f
+    assert_in_delta 90.9, color.m.to_f
+    assert_in_delta 72.7, color.y.to_f
+    assert_in_delta 13.7, color.k.to_f
   end
 
   test "derives rgb from cmyk on save" do
@@ -124,13 +124,13 @@ class ColorTest < ActiveSupport::TestCase
   end
 
   test "persists both spaces to the database" do
-    color = Color.create!(name: "roundtrip", source_space: "rgb", r: 196, g: 132, b: 44)
+    color = Color.create!(name: "roundtrip", source_space: "rgb", r: 100, g: 150, b: 200)
     reloaded = Color.find(color.id)
 
-    assert_equal [ 196, 132, 44 ], [ reloaded.r, reloaded.g, reloaded.b ]
-    assert_in_delta 32.7, reloaded.m.to_f
-    assert_in_delta 77.6, reloaded.y.to_f
-    assert_in_delta 23.1, reloaded.k.to_f
+    assert_equal [ 100, 150, 200 ], [ reloaded.r, reloaded.g, reloaded.b ]
+    assert_in_delta 50.0, reloaded.c.to_f
+    assert_in_delta 25.0, reloaded.m.to_f
+    assert_in_delta 21.6, reloaded.k.to_f
   end
 
   # --- Hex ---------------------------------------------------------------
@@ -150,17 +150,17 @@ class ColorTest < ActiveSupport::TestCase
   # field or the system colour picker, both of which are RGB sources.
 
   test "sets rgb channels from an assigned hex" do
-    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#E30613")
+    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#3366CC")
 
-    assert_equal [ 227, 6, 19 ], [ color.r, color.g, color.b ]
-    assert_equal "#E30613", color.hex
+    assert_equal [ 51, 102, 204 ], [ color.r, color.g, color.b ]
+    assert_equal "#3366CC", color.hex
   end
 
   test "derives cmyk from an assigned hex" do
-    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#E30613")
+    color = Color.create!(name: "from hex", source_space: "rgb", hex: "#3366CC")
 
-    assert_in_delta 97.4, color.m.to_f
-    assert_in_delta 11.0, color.k.to_f
+    assert_in_delta 75.0, color.c.to_f
+    assert_in_delta 20.0, color.k.to_f
   end
 
   test "accepts hex without a hash, in any case, and in shorthand" do
@@ -183,9 +183,9 @@ class ColorTest < ActiveSupport::TestCase
   end
 
   test "an assigned hex wins over separately assigned rgb channels" do
-    color = Color.create!(name: "both", source_space: "rgb", r: 0, g: 0, b: 0, hex: "#E30613")
+    color = Color.create!(name: "both", source_space: "rgb", r: 0, g: 0, b: 0, hex: "#3366CC")
 
-    assert_equal [ 227, 6, 19 ], [ color.r, color.g, color.b ]
+    assert_equal [ 51, 102, 204 ], [ color.r, color.g, color.b ]
   end
 
   # --- Tags --------------------------------------------------------------
@@ -296,5 +296,62 @@ class ColorTest < ActiveSupport::TestCase
 
   test "in_palette returns nothing for an unknown palette" do
     assert_empty Color.in_palette("No Such Palette")
+  end
+
+  # --- Uniqueness --------------------------------------------------------
+
+  test "refuses a second colour with the same value" do
+    twin = Color.new(name: "another red", source_space: "rgb", r: 227, g: 6, b: 19)
+
+    assert_not twin.valid?
+    assert_includes twin.errors[:base], %(#E30613 is already in the library as "signal-red")
+  end
+
+  test "refuses a duplicate however the colour was authored" do
+    twin = Color.new(name: "cyan again", source_space: "cmyk", c: 100, m: 0, y: 0, k: 0)
+
+    assert_not twin.valid?, "a cmyk recipe landing on an existing colour is still that colour"
+    assert_includes twin.errors[:base], %(#00FFFF is already in the library as "process-cyan")
+  end
+
+  test "a colour does not collide with itself on re-save" do
+    color = colors(:signal_red)
+    color.name = "signal red"
+
+    assert color.save, color.errors.full_messages.to_sentence
+  end
+
+  test "the database refuses a duplicate value too" do
+    assert_raises ActiveRecord::RecordNotUnique do
+      Color.insert!({ name: "sneaky", source_space: "rgb", r: 227, g: 6, b: 19,
+        c: 0, m: 97.4, y: 91.6, k: 11.0, tags: [] })
+    end
+  end
+
+  # --- Similarity --------------------------------------------------------
+
+  test "similar_to finds a near-identical colour already in the library" do
+    near = Color.new(name: "off white", source_space: "rgb", r: 255, g: 255, b: 255)
+
+    assert_equal colors(:paper_white), Color.similar_to(near)
+  end
+
+  test "similar_to ignores colours that plainly differ" do
+    assert_nil Color.similar_to(Color.new(name: "grass", source_space: "rgb", r: 20, g: 160, b: 40))
+  end
+
+  test "similar_to never returns the colour itself" do
+    assert_nil Color.similar_to(colors(:signal_red))
+  end
+
+  test "similar_to returns the nearest when several are close" do
+    Color.create!(name: "near white", source_space: "rgb", r: 246, g: 246, b: 244)
+    nearer = Color.create!(name: "nearer white", source_space: "rgb", r: 249, g: 249, b: 247)
+
+    assert_equal nearer, Color.similar_to(Color.new(name: "q", source_space: "rgb", r: 248, g: 249, b: 247))
+  end
+
+  test "similar_to says nothing about a colour with no values yet" do
+    assert_nil Color.similar_to(Color.new(name: "blank", source_space: "rgb"))
   end
 end

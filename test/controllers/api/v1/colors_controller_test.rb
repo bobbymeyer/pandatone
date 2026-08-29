@@ -109,13 +109,13 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
   test "creates a standalone rgb colour and derives its cmyk" do
     assert_difference "Color.count", 1 do
       post api_v1_colors_url, as: :json, params: { color: {
-        name: "signal-blue", source_space: "rgb", r: 43, g: 74, b: 138, tags: [ "Cool", "brand" ]
+        name: "signal-blue", source_space: "rgb", r: 30, g: 90, b: 170, tags: [ "Cool", "brand" ]
       } }
     end
 
     assert_response :created
-    assert_equal "#2B4A8A", json["hex"]
-    assert_equal({ "c" => 68.8, "m" => 46.4, "y" => 0.0, "k" => 45.9 }, json["cmyk"])
+    assert_equal "#1E5AAA", json["hex"]
+    assert_equal({ "c" => 82.4, "m" => 47.1, "y" => 0.0, "k" => 33.3 }, json["cmyk"])
     assert_equal [ "cool", "brand" ], json["tags"]
     assert_equal [], json["palettes"]
   end
@@ -174,11 +174,11 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
   test "updates rgb values and rederives cmyk" do
     patch api_v1_color_url(colors(:signal_red)), as: :json,
-      params: { color: { r: 43, g: 74, b: 138 } }
+      params: { color: { r: 30, g: 90, b: 170 } }
 
     assert_response :success
-    assert_equal "#2B4A8A", json["hex"]
-    assert_equal({ "c" => 68.8, "m" => 46.4, "y" => 0.0, "k" => 45.9 }, json["cmyk"])
+    assert_equal "#1E5AAA", json["hex"]
+    assert_equal({ "c" => 82.4, "m" => 47.1, "y" => 0.0, "k" => 33.3 }, json["cmyk"])
   end
 
   test "switching source space to cmyk rederives rgb" do
@@ -234,4 +234,62 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
     def json
       JSON.parse(response.body)
     end
+
+  # --- Duplicates and near duplicates ------------------------------------
+
+  test "refuses a colour the library already holds" do
+    assert_no_difference "Color.count" do
+      post api_v1_colors_url, as: :json, params: { color: {
+        name: "red again", source_space: "rgb", r: 227, g: 6, b: 19
+      } }
+    end
+
+    assert_response :unprocessable_content
+    assert_includes json["errors"]["base"], %(#E30613 is already in the library as "signal-red")
+  end
+
+  test "refuses a near duplicate and names what it resembles" do
+    assert_no_difference "Color.count" do
+      post api_v1_colors_url, as: :json, params: { color: {
+        name: "off-white", source_space: "rgb", r: 255, g: 255, b: 255
+      } }
+    end
+
+    assert_response :unprocessable_content
+    assert_match "paper-white", json["errors"]["base"].first
+    assert_equal "#FAFAF8", json["similar"]["hex"]
+    assert_equal colors(:paper_white).id, json["similar"]["id"]
+  end
+
+  test "accepts a near duplicate when the client confirms it" do
+    assert_difference "Color.count", 1 do
+      post api_v1_colors_url, as: :json, params: {
+        confirm_similar: true,
+        color: { name: "off-white", source_space: "rgb", r: 255, g: 255, b: 255 }
+      }
+    end
+
+    assert_response :created
+    assert_equal "#FFFFFF", json["hex"]
+  end
+
+  test "refuses an update that walks a colour onto a near duplicate" do
+    patch api_v1_color_url(colors(:deep_indigo)), as: :json,
+      params: { color: { r: 255, g: 255, b: 255 } }
+
+    assert_response :unprocessable_content
+    assert_equal colors(:paper_white).id, json["similar"]["id"]
+    assert_equal [ 43, 74, 138 ], colors(:deep_indigo).reload.rgb.values
+  end
+
+  test "leaves a plainly distinct colour alone" do
+    assert_difference "Color.count", 1 do
+      post api_v1_colors_url, as: :json, params: { color: {
+        name: "grass", source_space: "rgb", r: 20, g: 160, b: 40
+      } }
+    end
+
+    assert_response :created
+    assert_nil json["similar"]
+  end
 end

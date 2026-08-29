@@ -21,8 +21,9 @@ class ColorsController < ApplicationController
 
   def create
     @color = Color.new(swatch_attributes)
+    @similar = similar_swatch_for(@color)
 
-    if @color.save
+    if @similar.nil? && @color.save
       redirect_to @color
     else
       render :new, status: :unprocessable_content
@@ -35,7 +36,10 @@ class ColorsController < ApplicationController
   # A colour is shared, so this edits it everywhere at once. That is the point
   # of one row per colour, and the form says so before you commit to it.
   def update
-    if @color.update(swatch_attributes)
+    @color.assign_attributes(swatch_attributes)
+    @similar = similar_swatch_for(@color)
+
+    if @similar.nil? && @color.save
       redirect_to @color
     else
       render :edit, status: :unprocessable_content

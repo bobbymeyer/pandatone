@@ -22,7 +22,7 @@
 <div class="add-swatch">
   <fieldset class="source-toggle">
     <legend>Add</legend>
-    <% { "new" => "New colour", "library" => "Existing swatch" }.each do |source, label| %>
+    <% { "library" => "Existing swatch", "new" => "New colour" }.each do |source, label| %>
       <span class="radio">
         <%= radio_button_tag :source, source, swatch_source == source, id: "swatch_source_#{source}" %>
         <%= label_tag "swatch_source_#{source}", label %>
@@ -32,8 +32,9 @@
 
   <section class="new-color" data-source="new">
     <%= form_with url: palette_colors_path(@palette), class: "form" do %>
+      <%= render "shared/similar_swatch", similar: @similar, color: @candidate if @similar %>
       <%= render "shared/swatch_fields" %>
-      <%= submit_tag "Add swatch", name: nil, class: "button button--primary" %>
+      <%= submit_tag @similar ? "Add anyway" : "Add swatch", name: nil, class: "button button--primary" %>
     <% end %>
   </section>
 

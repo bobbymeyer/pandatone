@@ -26,6 +26,7 @@ class PaletteComposition
 
       replace_colors unless @colors.nil?
       append_colors if @append.present?
+      ensure_composition_is_distinct
     end
 
     true
@@ -34,6 +35,36 @@ class PaletteComposition
   end
 
   private
+    # A palette is the set of colours it holds; its name is a label on that
+    # set, not part of it. Two palettes holding the same colours are one
+    # palette filed twice, so the second is refused rather than saved and
+    # left to be noticed later. Order is not part of the identity — the same
+    # five colours resequenced are the same palette — and empty palettes do
+    # not duplicate one another, or a second one could never be started.
+    def ensure_composition_is_distinct
+      color_ids = @palette.palette_colors.reload.pluck(:color_id)
+      twin = palette_holding(color_ids)
+      return if twin.nil?
+
+      @palette.errors.add(:base, %("#{twin.name}" already holds exactly these colours))
+      raise Invalid
+    end
+
+    def palette_holding(color_ids)
+      return nil if color_ids.empty?
+
+      # (palette_id, color_id) is unique, so a palette with this many rows, all
+      # of them in this set, holds this set and nothing else.
+      twin_id = PaletteColor.where.not(palette_id: @palette.id)
+        .group(:palette_id)
+        .having("COUNT(*) = :size AND SUM(CASE WHEN color_id IN (:ids) THEN 1 ELSE 0 END) = :size",
+          size: color_ids.size, ids: color_ids)
+        .pluck(:palette_id)
+        .first
+
+      Palette.find_by(id: twin_id)
+    end
+
     def append_colors
       resolved = @append.map { |spec| resolve(spec) }
       raise Invalid if @palette.errors.any?

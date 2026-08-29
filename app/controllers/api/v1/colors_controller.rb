@@ -16,6 +16,8 @@ module Api
 
       def create
         color = Color.new(color_attributes)
+        twin = unconfirmed_twin(color)
+        return render_too_similar(twin) if twin
 
         if color.save
           render json: ColorSerializer.one(color, palettes: true), status: :created
@@ -26,8 +28,11 @@ module Api
 
       def update
         color = Color.find(params[:id])
+        color.assign_attributes(color_attributes)
+        twin = unconfirmed_twin(color)
+        return render_too_similar(twin) if twin
 
-        if color.update(color_attributes)
+        if color.save
           render json: ColorSerializer.one(color, palettes: true)
         else
           render_invalid(color)
@@ -35,6 +40,25 @@ module Api
       end
 
       private
+        # The same near-duplicate check the interface makes, in the shape a
+        # client can act on: refused with the swatch it resembles attached, and
+        # accepted on a second call carrying confirm_similar. Silently letting
+        # machines fill the library with colours no human would have added
+        # would make the rule decorative.
+        def unconfirmed_twin(color)
+          return nil if ActiveModel::Type::Boolean.new.cast(params[:confirm_similar])
+          return nil unless color.valid?
+
+          Color.similar_to(color)
+        end
+
+        def render_too_similar(twin)
+          render json: {
+            errors: { base: [ %(too similar to "#{twin.name}" (#{twin.hex}); resend with confirm_similar to add it anyway) ] },
+            similar: ColorSerializer.one(twin)
+          }, status: :unprocessable_content
+        end
+
         def color_attributes
           attributes = color_params.permit(:name, :source_space, :r, :g, :b, :c, :m, :y, :k, tags: []).to_h
           attributes[:tags] = color_params[:tags] if color_params[:tags].is_a?(String)

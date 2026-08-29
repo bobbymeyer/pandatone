@@ -18,6 +18,23 @@ module SwatchParameters
   end
 
   private
+    # The swatch already on file that this one is close enough to be a
+    # duplicate of, or nil. A near-duplicate is a judgement call, not a
+    # mistake, so it is put as a question rather than refused outright — but
+    # it is put before the row is written, because a library nobody trusts to
+    # be free of near-identical swatches is a library nobody looks in.
+    #
+    # The confirmation carries the value it was given for, so changing the
+    # colour after seeing the warning asks again about the new one instead of
+    # waving through something nobody looked at. An exact duplicate is a
+    # validation, not a warning, and is left to speak for itself.
+    def similar_swatch_for(color)
+      return nil if color.hex.present? && params[:confirm_similar] == color.hex
+      return nil unless color.valid?
+
+      Color.similar_to(color)
+    end
+
     # Returns nil when the row was left empty, so an untouched entry row does
     # not become a validation error on an otherwise fine palette. Only the
     # chosen mode's own fields count towards that: the colour picker always

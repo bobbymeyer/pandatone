@@ -473,3 +473,22 @@ form.button_to { display: inline; }
   margin-top: var(--space-1);
   color: var(--ink-quiet);
 }
+
+/* A question, not a refusal, so it keeps the accent keyline of an error but
+   none of its finality: the swatches do the arguing and the submit button
+   below already says "create anyway". */
+.warning {
+  width: 100%;
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--accent);
+}
+
+.warning__title { font-weight: 700; }
+
+.warning__swatches {
+  display: flex;
+  gap: var(--gutter);
+  margin-top: var(--space-2);
+}
+
+.warning__swatches > li { flex: 0 1 12rem; }

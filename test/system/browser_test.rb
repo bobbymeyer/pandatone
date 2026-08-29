@@ -92,7 +92,7 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   test "the preview appears only once there is something to preview" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     assert_hidden ".preview"
 
@@ -104,7 +104,7 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   test "the swatch preview paints as values are typed" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "R", with: "227"
     fill_in "G", with: "6"
@@ -115,7 +115,7 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   test "the preview follows a change of space" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     choose "CMYK"
     fill_in "C", with: "0"
@@ -127,7 +127,7 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   test "choosing a space shows only that space's fields" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     assert_visible "[data-mode='rgb']"
     assert_hidden "[data-mode='cmyk']"
@@ -142,13 +142,13 @@ class BrowserTest < ApplicationSystemTestCase
   test "the source switch shows one panel at a time" do
     visit new_palette_color_path(palettes(:press))
 
-    assert_visible "[data-source='new']"
-    assert_hidden "[data-source='library']"
-
-    choose "Existing swatch"
-
-    assert_hidden "[data-source='new']"
     assert_visible "[data-source='library']"
+    assert_hidden "[data-source='new']"
+
+    choose "New colour"
+
+    assert_hidden "[data-source='library']"
+    assert_visible "[data-source='new']"
   end
 
   test "search filters as you type, without pressing Filter" do

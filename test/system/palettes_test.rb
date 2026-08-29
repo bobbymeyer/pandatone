@@ -169,6 +169,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "adds a swatch to an existing palette in cmyk" do
     visit palette_path(palettes(:press))
     click_on "Add a swatch"
+    choose "New colour"
 
     fill_in "Swatch name", with: "process-magenta"
     choose "CMYK"
@@ -186,14 +187,35 @@ class PalettesTest < ApplicationSystemTestCase
   # --- Adding an existing swatch -----------------------------------------
   #
   # One colour row shared across palettes is the whole point of the join
-  # table, so reaching for a colour already in the library has to be at least
-  # as easy as typing a new one.
+  # table, so reaching for a colour already in the library leads — and a
+  # library of near-identical swatches is what a "new colour" default builds.
 
-  test "opens on the new colour form" do
+  test "opens on the library" do
     visit new_palette_color_path(palettes(:press))
+
+    assert find("#swatch_source_library", visible: :all).checked?
+    assert_not find("#swatch_source_new", visible: :all).checked?
+  end
+
+  test "opens on the new colour form when there is nothing left to pick" do
+    palette = palettes(:press)
+    PaletteComposition.new(palette, attributes: {}, colors: Color.ids.map { |id| { id: id } }).save
+
+    visit new_palette_color_path(palette)
 
     assert find("#swatch_source_new", visible: :all).checked?
     assert_not find("#swatch_source_library", visible: :all).checked?
+  end
+
+  test "comes back on the new colour form after it is refused" do
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    fill_in "Swatch name", with: ""
+    choose "Hex"
+    fill_in "Hex value", with: "nope"
+    click_on "Add swatch"
+
+    assert find("#swatch_source_new", visible: :all).checked?
   end
 
   test "offers a switch to the existing library" do
@@ -221,7 +243,7 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "stays on the new colour form when it is rejected" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "impossible"
     choose "Hex"
@@ -311,7 +333,7 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "still offers a new colour alongside the library" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     assert_text "New colour"
     assert_selector "#swatch_name"
@@ -336,19 +358,22 @@ class PalettesTest < ApplicationSystemTestCase
   test "adds a swatch entered as hex" do
     visit palette_path(palettes(:press))
     click_on "Add a swatch"
+    choose "New colour"
 
-    fill_in "Swatch name", with: "signal-red"
+    fill_in "Swatch name", with: "signal-blue"
     choose "Hex"
-    fill_in "Hex value", with: "#E30613"
+    fill_in "Hex value", with: "#1E5AAA"
 
+    before = Color.count
     click_on "Add swatch"
 
-    assert_text "signal-red"
-    assert_text "#E30613"
+    assert_text "signal-blue"
+    assert_text "#1E5AAA"
+    assert_equal before + 1, Color.count
   end
 
   test "accepts hex without a leading hash" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "shorthand"
     choose "Hex"
@@ -360,7 +385,7 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "reports a hex it cannot read" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "nonsense"
     choose "Hex"
@@ -372,32 +397,34 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "adds a swatch chosen with the system picker" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "picked"
     choose "Picker"
-    fill_in "Pick a colour", with: "#2b4a8a"
+    fill_in "Pick a colour", with: "#1e5aaa"
 
     click_on "Add swatch"
 
     assert_text "picked"
-    assert_text "#2B4A8A"
+    assert_text "#1E5AAA"
   end
 
   test "ignores the fields of the spaces not chosen" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "hex wins"
     fill_in "R", with: "1"
     fill_in "G", with: "2"
     fill_in "B", with: "3"
     choose "Hex"
-    fill_in "Hex value", with: "#E30613"
+    fill_in "Hex value", with: "#D5162B"
 
+    before = Color.count
     click_on "Add swatch"
 
-    assert_text "#E30613"
+    assert_text "#D5162B"
     assert_no_text "#010203"
+    assert_equal before + 1, Color.count
   end
 
   test "still leaves an untouched entry row alone even though the picker always has a value" do
@@ -411,11 +438,11 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "records a hex entered colour as an rgb source" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "new")
 
     fill_in "Swatch name", with: "hex sourced"
     choose "Hex"
-    fill_in "Hex value", with: "#E30613"
+    fill_in "Hex value", with: "#D5162B"
     click_on "Add swatch"
 
     click_on "hex sourced"
@@ -530,5 +557,65 @@ class PalettesTest < ApplicationSystemTestCase
 
     assert_text "signal-red"
     assert_text "#E30613"
+  end
+
+  # --- Duplicates --------------------------------------------------------
+
+  test "asks before adding a new swatch that is nearly one in the library" do
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    fill_in "Swatch name", with: "off-white"
+    choose "Hex"
+    fill_in "Hex value", with: "#FFFFFF"
+
+    before = Color.count
+    click_on "Add swatch"
+
+    assert_text "This is similar to paper-white"
+    assert_equal before, Color.count
+
+    click_on "Add anyway"
+
+    assert_text "off-white"
+    assert_equal before + 1, Color.count
+  end
+
+  test "says nothing about a swatch picked out of the library" do
+    visit new_palette_color_path(palettes(:press), source: "library")
+
+    within "#color_#{colors(:paper_white).id}" do
+      click_on "Add"
+    end
+
+    assert_no_text "This is similar to"
+    assert_text "paper-white"
+  end
+
+  test "refuses a palette that would hold exactly another palette's colours" do
+    palettes(:brand).colors.each do |color|
+      visit new_palette_color_path(palettes(:empty), source: "library")
+      within "#color_#{color.id}" do
+        click_on "Add"
+      end
+    end
+
+    assert_text %("Brand Core" already holds exactly these colours)
+    assert_equal 2, palettes(:empty).palette_colors.reload.size,
+      "the swatch that would have completed the duplicate must not have landed"
+  end
+
+  test "refuses to remove a swatch that would leave a duplicate palette" do
+    press = palettes(:press)
+    PaletteComposition.new(press, attributes: {},
+      colors: palettes(:brand).color_ids.map { |id| { id: id } } + [ { id: colors(:process_cyan).id } ]).save
+
+    visit palette_path(press)
+
+    within "#palette_color_#{press.palette_colors.find_by(color: colors(:process_cyan)).id}" do
+      click_on "Remove"
+    end
+
+    assert_text %("Brand Core" already holds exactly these colours)
+    assert_equal 4, press.palette_colors.reload.size
   end
 end
