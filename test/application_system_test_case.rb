@@ -7,9 +7,24 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # that already submits. Set SYSTEM_TEST_DRIVER=selenium to run the same
   # flows in a real browser, where the frames and the live preview engage.
   if ENV["SYSTEM_TEST_DRIVER"] == "selenium"
-    driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ]
+    # CHROME_BINARY / CHROMEDRIVER let a machine point at browsers it already
+    # has instead of downloading a pair. CI leaves both unset and Selenium
+    # Manager sorts it out.
+    Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER"] if ENV["CHROMEDRIVER"]
+
+    driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ] do |options|
+      options.binary = ENV["CHROME_BINARY"] if ENV["CHROME_BINARY"]
+      options.add_argument("--no-sandbox")
+      options.add_argument("--disable-dev-shm-usage")
+    end
   else
     driven_by :rack_test
+  end
+
+  # rack_test has no CSS, no box model and no JavaScript, so anything about
+  # layout or behaviour has to say so and stand aside.
+  def javascript_driver?
+    Capybara.current_driver != :rack_test
   end
 
   # Turbo's confirmation is a real dialog in a browser and a no-op under

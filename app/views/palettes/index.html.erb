@@ -33,7 +33,7 @@
 
 <%# Only the results live in the frame; the form stays outside it so typing
     does not replace the field under the cursor. %>
-<%= turbo_frame_tag "palettes", data: { turbo_action: "replace" } do %>
+<%= turbo_frame_tag "palettes", data: { turbo_action: "replace" }, target: "_top" do %>
   <%# The count belongs with the results: outside the frame it would still
       read "4 palettes" after a search narrowed the list to one. %>
   <p class="result-count"><%= result_count(@palettes.size, @total, "palette") %></p>

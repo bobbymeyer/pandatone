@@ -1,0 +1,160 @@
+require "application_system_test_case"
+
+# What only a real browser can answer.
+#
+# The rest of the suite asserts text and selectors, which are true at any
+# width — a list crushed into one column of six passes every one of them. That
+# is exactly how the palette index shipped collapsed. These measure instead,
+# and they only run under SYSTEM_TEST_DRIVER=selenium.
+class BrowserTest < ApplicationSystemTestCase
+  setup do
+    skip "needs a real browser; run with SYSTEM_TEST_DRIVER=selenium" unless javascript_driver?
+  end
+
+  # --- Layout ------------------------------------------------------------
+
+  test "the palette results fill the field the filters fill" do
+    visit palettes_path
+
+    assert_in_delta width_of(".filters"), width_of(".palette-list"), 1,
+      "the results are not spanning the field — something between them and the grid is unplaced"
+  end
+
+  test "the colour results fill the field the filters fill" do
+    visit colors_path
+
+    assert_in_delta width_of(".filters"), width_of(".color-list"), 1
+  end
+
+  test "palette cards sit three to a row on a wide window" do
+    visit palettes_path
+
+    tops = tops_of(".palette-strip")
+    assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"
+  end
+
+  test "the page head stops short of the right edge" do
+    visit palettes_path
+
+    assert width_of(".page-head") < width_of(".filters"),
+      "the head should span four fields against the filter bar's six"
+  end
+
+  test "no page scrolls sideways" do
+    pages.each do |name, path|
+      visit path
+
+      overflow = evaluate_script("document.documentElement.scrollWidth - document.documentElement.clientWidth")
+      assert overflow <= 1, "#{name} overflows its width by #{overflow}px"
+    end
+  end
+
+  # --- Behaviour the no-JS suite cannot reach ----------------------------
+
+  test "the swatch preview paints as values are typed" do
+    visit new_palette_color_path(palettes(:press))
+
+    fill_in "R", with: "227"
+    fill_in "G", with: "6"
+    fill_in "B", with: "19"
+
+    assert_equal "rgb(227, 6, 19)", preview_background
+    assert_text "#E30613"
+  end
+
+  test "the preview follows a change of space" do
+    visit new_palette_color_path(palettes(:press))
+
+    choose "CMYK"
+    fill_in "C", with: "0"
+    fill_in "M", with: "0"
+    fill_in "Y", with: "100"
+    fill_in "K", with: "0"
+
+    assert_equal "rgb(255, 255, 0)", preview_background
+  end
+
+  test "choosing a space shows only that space's fields" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_visible "[data-mode='rgb']"
+    assert_hidden "[data-mode='cmyk']"
+    assert_hidden "[data-mode='hex']"
+
+    choose "Hex"
+
+    assert_hidden "[data-mode='rgb']"
+    assert_visible "[data-mode='hex']"
+  end
+
+  test "the source switch shows one panel at a time" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_visible "[data-source='new']"
+    assert_hidden "[data-source='library']"
+
+    choose "Existing swatch"
+
+    assert_hidden "[data-source='new']"
+    assert_visible "[data-source='library']"
+  end
+
+  test "search filters as you type, without pressing Filter" do
+    visit palettes_path
+
+    fill_in "Search", with: "autumn"
+
+    assert_text "1 of 4 palettes"
+    assert_no_text "Brand Core"
+  end
+
+  test "tags are edited in place rather than on their own page" do
+    visit palette_path(palettes(:press))
+
+    click_on "Edit tags"
+    fill_in "Tags", with: "print, archive"
+    click_on "Save tags"
+
+    assert_text "archive"
+    assert_current_path palette_path(palettes(:press))
+  end
+
+  private
+    def pages
+      {
+        "palette index" => palettes_path,
+        "palette show" => palette_path(palettes(:brand)),
+        "palette form" => new_palette_path,
+        "colour index" => colors_path,
+        "colour show" => color_path(colors(:signal_red)),
+        "colour form" => new_color_path,
+        "add a swatch" => new_palette_color_path(palettes(:press)),
+        "lookup" => lookup_path(q: "#E30613")
+      }
+    end
+
+    def width_of(selector)
+      evaluate_script("document.querySelector(#{selector.to_json}).getBoundingClientRect().width")
+    end
+
+    def tops_of(selector)
+      evaluate_script(
+        "Array.from(document.querySelectorAll(#{selector.to_json}))" \
+        ".map(el => Math.round(el.getBoundingClientRect().top))"
+      )
+    end
+
+    def preview_background
+      evaluate_script(
+        "getComputedStyle(document.querySelector('[data-swatch-preview-target=\"preview\"]')).backgroundColor"
+      )
+    end
+
+    def assert_visible(selector)
+      assert find(selector, visible: :all).visible?, "#{selector} should be showing"
+    end
+
+    def assert_hidden(selector)
+      assert_not find(selector, visible: :all).visible?, "#{selector} should be hidden"
+    end
+end

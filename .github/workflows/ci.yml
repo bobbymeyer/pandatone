@@ -128,3 +128,37 @@ jobs:
           name: screenshots
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore
+
+  browser-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # The suite above runs through rack_test, which has no CSS, no box model
+      # and no JavaScript: a list collapsed into one column of six passes every
+      # assertion in it. This one drives the runner's Chrome, so the Stimulus
+      # preview, the :has() panels, Turbo's frames and the measured layout are
+      # all actually exercised.
+      - name: Run system tests in a real browser
+        env:
+          RAILS_ENV: test
+          SYSTEM_TEST_DRIVER: selenium
+        run: bin/rails db:test:prepare test:system
+
+      - name: Keep screenshots from failed browser tests
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-screenshots
+          path: ${{ github.workspace }}/tmp/screenshots
+          if-no-files-found: ignore

@@ -33,7 +33,7 @@
   </ul>
 </section>
 
-<%= turbo_frame_tag "colors", data: { turbo_action: "replace" } do %>
+<%= turbo_frame_tag "colors", data: { turbo_action: "replace" }, target: "_top" do %>
   <p class="result-count"><%= result_count(@colors.size, @total, "colour") %></p>
 
   <% if @colors.empty? %>

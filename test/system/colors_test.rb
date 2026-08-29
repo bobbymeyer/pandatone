@@ -84,6 +84,8 @@ class ColorsTest < ApplicationSystemTestCase
     visit colors_path
 
     click_on "brand"
+    assert_text "3 of 6 colours"
+
     fill_in "Search", with: "ink"
     click_on "Filter"
 
@@ -96,7 +98,8 @@ class ColorsTest < ApplicationSystemTestCase
 
     within "#color_#{colors(:signal_red).id}" do
       assert_selector "a", count: 1
-      assert_equal "/colors/#{colors(:signal_red).id}", find("a")[:href]
+      # href comes back absolute in a browser and raw under rack_test.
+      assert_equal "/colors/#{colors(:signal_red).id}", URI.parse(find("a")[:href]).path
     end
   end
 
@@ -138,10 +141,11 @@ class ColorsTest < ApplicationSystemTestCase
     visit new_color_path
 
     fill_in "Swatch name", with: "impossible"
-    fill_in "R", with: "999"
+    choose "Hex"
+    fill_in "Hex value", with: "not-a-colour"
     click_on "Create colour"
 
-    assert_text "must be less than or equal to 255"
+    assert_text "is not a colour we can read"
     assert_equal "impossible", find_field("Swatch name").value
   end
 
@@ -215,11 +219,12 @@ class ColorsTest < ApplicationSystemTestCase
     visit edit_color_path(colors(:deep_indigo))
 
     fill_in "Swatch name", with: ""
-    fill_in "R", with: "999"
+    choose "Hex"
+    fill_in "Hex value", with: "not-a-colour"
     click_on "Save colour"
 
-    assert_text "must be less than or equal to 255"
-    assert_equal "999", find_field("R").value
+    assert_text "is not a colour we can read"
+    assert_equal "not-a-colour", find_field("Hex value").value
     assert_equal 43, colors(:deep_indigo).reload.r
   end
 

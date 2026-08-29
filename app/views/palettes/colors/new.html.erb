@@ -48,7 +48,12 @@
       <%= submit_tag "Filter", name: nil, class: "button" %>
     <% end %>
 
-    <%= turbo_frame_tag "library" do %>
+    <%# target: "_top" because this frame holds results, not an editable region:
+    a link or an Add button inside it is going somewhere else entirely, and
+    the destination has no frame by this name. Without it Turbo looks for one
+    and renders "Content missing". The search form still drives the frame,
+    since it names it explicitly. %>
+<%= turbo_frame_tag "library", target: "_top" do %>
       <% if @available.empty? %>
         <p class="empty">
           <%= params[:q].present? ? "No colours match." : "Every colour in the library is already in this palette." %>

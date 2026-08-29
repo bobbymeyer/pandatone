@@ -126,8 +126,24 @@ the morph. `prefers-reduced-motion` turns transitions off entirely.
 System tests run through `rack_test` by default, so the suite needs no browser
 binary. That also keeps the app working with JavaScript off: Turbo Frames fall
 back to full navigations, and the Stimulus live preview is enhancement on top
-of a form that already submits. To run the same flows in a real browser:
+of a form that already submits.
+
+`rack_test` has no CSS, no box model and no JavaScript, though, so it will
+happily pass a page whose layout has collapsed. The same flows run in a real
+browser too, and `test/system/browser_test.rb` adds the checks that only mean
+something there — measured widths, the live preview, the `:has()` panels:
 
 ```sh
 SYSTEM_TEST_DRIVER=selenium bin/rails test:system
 ```
+
+Selenium Manager will fetch a driver to match the browser it finds. On a
+machine that already has both, point at them instead:
+
+```sh
+SYSTEM_TEST_DRIVER=selenium \
+  CHROME_BINARY=/path/to/chrome CHROMEDRIVER=/path/to/chromedriver \
+  bin/rails test:system
+```
+
+CI runs both: `system-test` through `rack_test`, `browser-test` in Chrome.

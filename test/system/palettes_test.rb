@@ -155,12 +155,13 @@ class PalettesTest < ApplicationSystemTestCase
 
     fill_in "Name", with: "Half Filled"
     fill_in "Swatch name", with: "impossible"
-    fill_in "R", with: "999"
+    choose "Hex"
+    fill_in "Hex value", with: "not-a-colour"
 
     click_on "Create palette"
 
-    assert_text "Red must be less than or equal to 255"
-    assert_no_text "Colors Red"
+    assert_text "Hex is not a colour we can read"
+    assert_no_text "Colors Hex"
     assert_equal "Half Filled", find_field("Name").value
     assert_not Palette.exists?(name: "Half Filled")
   end
@@ -196,7 +197,7 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "offers a switch to the existing library" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "library")
 
     assert_text "Existing swatch"
     assert_selector "#color_#{colors(:signal_red).id}"
@@ -223,15 +224,16 @@ class PalettesTest < ApplicationSystemTestCase
     visit new_palette_color_path(palettes(:press))
 
     fill_in "Swatch name", with: "impossible"
-    fill_in "R", with: "999"
+    choose "Hex"
+    fill_in "Hex value", with: "not-a-colour"
     click_on "Add swatch"
 
-    assert_text "must be less than or equal to 255"
+    assert_text "is not a colour we can read"
     assert find("#swatch_source_new", visible: :all).checked?
   end
 
   test "leaves out colours the palette already holds" do
-    visit new_palette_color_path(palettes(:brand))
+    visit new_palette_color_path(palettes(:brand), source: "library")
 
     assert_no_selector "#color_#{colors(:signal_red).id}"
     assert_no_selector "#color_#{colors(:ink_black).id}"
@@ -239,22 +241,25 @@ class PalettesTest < ApplicationSystemTestCase
   end
 
   test "adds an existing colour without making a second copy of it" do
-    assert_no_difference "Color.count" do
-      assert_difference "PaletteColor.count", 1 do
-        visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "library")
+    colors_before, memberships_before = Color.count, PaletteColor.count
 
-        within "#color_#{colors(:signal_red).id}" do
-          click_on "Add"
-        end
-      end
+    within "#color_#{colors(:signal_red).id}" do
+      click_on "Add"
     end
 
+    # Wait for the palette page before reading the records: in a browser the
+    # click returns as soon as it is dispatched.
+    assert_selector ".swatch-grid"
     assert_text "signal-red"
+
+    assert_equal colors_before, Color.count
+    assert_equal memberships_before + 1, PaletteColor.count
     assert_equal [ "process-cyan", "signal-red" ], palettes(:press).reload.colors.map(&:name)
   end
 
   test "an added colour keeps its place in the palettes it already belonged to" do
-    visit new_palette_color_path(palettes(:press))
+    visit new_palette_color_path(palettes(:press), source: "library")
 
     within "#color_#{colors(:signal_red).id}" do
       click_on "Add"
@@ -300,7 +305,7 @@ class PalettesTest < ApplicationSystemTestCase
     palette = Palette.create!(name: "Everything")
     Color.find_each { |color| palette.palette_colors.create!(color: color) }
 
-    visit new_palette_color_path(palette)
+    visit new_palette_color_path(palette, source: "library")
 
     assert_text "already in this palette"
   end
@@ -435,8 +440,9 @@ class PalettesTest < ApplicationSystemTestCase
       click_on "Down"
     end
 
-    assert_equal [ "ink-black", "signal-red", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
+    assert_selector ".swatch-grid > li:first-child .swatch-name", text: "ink-black"
     assert_equal [ "ink-black", "signal-red", "paper-white" ], all(".swatch-detail .swatch-name").map(&:text)
+    assert_equal [ "ink-black", "signal-red", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
   end
 
   test "moves a swatch earlier in the palette" do
@@ -446,6 +452,8 @@ class PalettesTest < ApplicationSystemTestCase
       click_on "Up"
     end
 
+    assert_selector ".swatch-grid > li:nth-child(2) .swatch-name", text: "paper-white"
+    assert_equal [ "signal-red", "paper-white", "ink-black" ], all(".swatch-detail .swatch-name").map(&:text)
     assert_equal [ "signal-red", "paper-white", "ink-black" ], palettes(:brand).reload.colors.map(&:name)
   end
 
@@ -470,6 +478,7 @@ class PalettesTest < ApplicationSystemTestCase
       click_on "Down"
     end
 
+    assert_selector ".swatch-grid > li:first-child .swatch-name", text: "ink-black"
     assert_equal [ "autumn-ochre", "signal-red" ], palettes(:autumn).reload.colors.map(&:name)
   end
 
