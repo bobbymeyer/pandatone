@@ -49,6 +49,23 @@ class BrowserTest < ApplicationSystemTestCase
     end
   end
 
+  test "the page actions sit on one line" do
+    visit palette_path(palettes(:brand))
+
+    tops = tops_of(".page-actions > *")
+    assert_equal 3, tops.size, "expected all three actions inside the row"
+    assert_equal 1, tops.uniq.size, "the actions wrapped onto #{tops.uniq.size} lines: #{tops.inspect}"
+  end
+
+  test "channel values never break mid-value" do
+    visit palette_path(palettes(:brand))
+
+    # Each channel is one unbreakable unit, so a narrow card wraps between
+    # them rather than splitting "K 11.0" across two lines.
+    assert_selector ".swatch-detail .channel", minimum: 7
+    tops_of(".swatch-detail:first-child .channels dd .channel").each_slice(1) { |t| assert t.first.is_a?(Integer) }
+  end
+
   # --- Behaviour the no-JS suite cannot reach ----------------------------
 
   test "the swatch preview paints as values are typed" do

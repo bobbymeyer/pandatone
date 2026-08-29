@@ -10,13 +10,13 @@
     </div>
   <% end %>
 
-  <p class="page-actions">
+  <div class="page-actions">
     <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button" %>
     <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
     <%# The only thing in this app that cannot be undone. %>
     <%= button_to "Delete palette", @palette, method: :delete, class: "button button--quiet",
           data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colours stay in the library." } %>
-  </p>
+  </div>
 </header>
 
 <% if @palette.palette_colors.empty? %>
@@ -37,7 +37,7 @@
         <dl class="channels">
           <% channel_pairs(color).each do |space, values| %>
             <dt><%= space %></dt>
-            <dd><%= values %></dd>
+            <dd><% values.each do |value| %><span class="channel"><%= value %></span><% end %></dd>
           <% end %>
         </dl>
 

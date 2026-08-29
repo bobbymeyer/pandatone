@@ -159,12 +159,29 @@
 
 .channels dt { color: var(--ink-quiet); align-self: center; }
 
-.channels dd { color: var(--ink-quiet); }
+.channels dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  color: var(--ink-quiet);
+  /* Metadata beside a metadata label, in a card too narrow for body size. */
+  font-size: var(--size-1);
+  line-height: var(--space-2);
+}
+
+.channels .channel { white-space: nowrap; }
 
 .channels--stacked {
   grid-template-columns: max-content 1fr;
   row-gap: var(--space-1);
   margin-top: var(--space-3);
+}
+
+/* On a colour's own page the values are the content, not a caption on it,
+   and there is room to set them properly. */
+.channels--stacked dd {
+  font-size: var(--size-2);
+  line-height: var(--space-3);
 }
 
 /* --- Colour detail and lookup ------------------------------------------ */

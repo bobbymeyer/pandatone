@@ -34,10 +34,12 @@ module SwatchesHelper
     "#{shown} of #{pluralize(total, noun)}"
   end
 
+  # Returns each space's channels as separate values rather than one string,
+  # so a narrow card wraps between them instead of splitting "K 11.0" in half.
   def channel_pairs(color)
     [
-      [ "RGB", color.rgb.map { |channel, value| "#{channel.to_s.upcase} #{value}" }.join("  ") ],
-      [ "CMYK", color.cmyk.map { |channel, value| "#{channel.to_s.upcase} #{value}" }.join("  ") ]
+      [ "RGB", color.rgb.map { |channel, value| "#{channel.to_s.upcase} #{value}" } ],
+      [ "CMYK", color.cmyk.map { |channel, value| "#{channel.to_s.upcase} #{value}" } ]
     ]
   end
 end

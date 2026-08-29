@@ -10,7 +10,7 @@
     <dl class="channels channels--stacked">
       <% channel_pairs(@color).each do |space, values| %>
         <dt><%= space %></dt>
-        <dd><%= values %></dd>
+        <dd><% values.each do |value| %><span class="channel"><%= value %></span><% end %></dd>
       <% end %>
     </dl>
 
@@ -24,9 +24,9 @@
       <p class="tags"><%= @color.tags.join(" · ") %></p>
     <% end %>
 
-    <p class="page-actions">
+    <div class="page-actions">
       <%= link_to "Edit colour", edit_color_path(@color), class: "button" %>
-    </p>
+    </div>
   </div>
 </article>
 
