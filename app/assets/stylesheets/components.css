@@ -89,7 +89,10 @@
 .color-card form.button_to { margin-top: var(--space-2); }
 
 /* The result count is a sentence, not a label. */
-.result-count { color: var(--ink-quiet); }
+.result-count {
+  color: var(--ink-quiet);
+  margin-bottom: var(--space-3);
+}
 
 .library-picker .filter-form { margin-bottom: var(--space-3); }
 
@@ -229,6 +232,8 @@
 
 .memberships h2 { margin-bottom: var(--space-2); }
 
+.color-detail__body .tags { margin-top: var(--space-2); }
+
 .link-list {
   display: flex;
   flex-wrap: wrap;
@@ -266,6 +271,7 @@
   display: flex;
   align-items: flex-end;
   gap: var(--space-2);
+  max-width: var(--measure);
 }
 
 .tag-filter {
@@ -301,7 +307,7 @@
   flex-direction: row;
   align-items: flex-end;
   gap: var(--space-2);
-  max-width: none;
+  max-width: var(--measure);
 }
 
 .field {
@@ -319,11 +325,12 @@
   background: transparent;
   font: inherit;
   color: inherit;
-  padding-block: var(--space-1);
+  /* No padding above: the rule belongs under the text, not a line's height
+     below it, or the label reads as belonging to nothing. */
+  padding-block: 0 var(--space-1);
   width: 100%;
 }
 
-.field .hint { margin-top: calc(var(--space-1) * -1); }
 
 .swatch-entry {
   width: 100%;
@@ -337,6 +344,7 @@
 }
 
 .swatch-entry__fields {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -395,6 +403,8 @@
   background: transparent;
   cursor: pointer;
 }
+
+.preview[hidden] { display: none; }
 
 .preview {
   display: flex;

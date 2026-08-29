@@ -10,7 +10,7 @@ import { Controller } from "@hotwired/stimulus"
 // It exists to show you what you are typing; the value that gets stored is
 // always the one the server computes.
 export default class extends Controller {
-  static targets = ["mode", "rgb", "cmyk", "hex", "picker", "preview", "readout"]
+  static targets = ["mode", "rgb", "cmyk", "hex", "picker", "preview", "readout", "group"]
   static values = { mode: String }
 
   connect() {
@@ -21,6 +21,10 @@ export default class extends Controller {
     const rgb = this.currentRgb()
     const hex = rgb ? this.toHex(rgb) : ""
 
+    // An empty preview is a stray box on the form; it appears once there is
+    // something to preview. It starts hidden so it never flashes before this
+    // controller connects.
+    this.groupTarget.hidden = hex === ""
     this.previewTarget.style.backgroundColor = hex || "transparent"
     this.readoutTarget.textContent = hex
   }

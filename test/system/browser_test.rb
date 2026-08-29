@@ -68,6 +68,27 @@ class BrowserTest < ApplicationSystemTestCase
 
   # --- Behaviour the no-JS suite cannot reach ----------------------------
 
+  test "a row of a form does not stretch across the page" do
+    visit lookup_path
+
+    # An unbounded row put the field across the whole width and stranded the
+    # button against the right edge.
+    assert width_of(".form--inline") <= width_of(".page-head"),
+      "the inline form is wider than the text column it sits under"
+  end
+
+  test "the preview appears only once there is something to preview" do
+    visit new_palette_color_path(palettes(:press))
+
+    assert_hidden ".preview"
+
+    fill_in "R", with: "227"
+    fill_in "G", with: "6"
+    fill_in "B", with: "19"
+
+    assert_visible ".preview"
+  end
+
   test "the swatch preview paints as values are typed" do
     visit new_palette_color_path(palettes(:press))
 
