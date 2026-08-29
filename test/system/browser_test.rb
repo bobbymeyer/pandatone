@@ -29,10 +29,10 @@ class BrowserTest < ApplicationSystemTestCase
   # merely looked smaller would satisfy any assertion about class names.
   test "a small card is half the width of a large one" do
     [ [ colors_path, ".color-card" ], [ palettes_path, ".palette-strip" ] ].each do |path, card|
-      visit path
+      visit "#{path}?size=large"
       large = rect_of(card)["width"]
 
-      visit "#{path}?size=small"
+      visit path
       small = rect_of(card)["width"]
 
       assert_in_delta large / 2.0, small, large / 12.0,
@@ -46,10 +46,10 @@ class BrowserTest < ApplicationSystemTestCase
   test "small fits twice as many on a row" do
     14.times { |i| Color.create!(name: "filler-#{i}", source_space: Color::RGB, r: i, g: 40 + i, b: 90) }
 
-    visit colors_path
+    visit colors_path(size: "large")
     large = cards_on_the_first_row(".color-card")
 
-    visit colors_path(size: "small")
+    visit colors_path
 
     assert_equal large * 2, cards_on_the_first_row(".color-card")
   end
@@ -69,8 +69,10 @@ class BrowserTest < ApplicationSystemTestCase
     assert_in_delta width_of(".filters"), width_of(".color-list"), 1
   end
 
+  # At large, which is the size this proportion is: two fields of six. Small
+  # is half of it and has its own test.
   test "palette cards sit three to a row on a wide window" do
-    visit palettes_path
+    visit palettes_path(size: "large")
 
     tops = tops_of(".palette-strip")
     assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"

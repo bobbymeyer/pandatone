@@ -5,30 +5,30 @@ require "application_system_test_case"
 # it is remembered on the server, so a link to a small index stays small for
 # whoever it is sent to.
 class CardSizeTest < ApplicationSystemTestCase
-  test "each index offers the two sizes, and starts large" do
+  test "each index offers the two sizes, and starts small" do
     [ colors_path, palettes_path ].each do |path|
       visit path
 
       within("[data-filter=size]") do
         assert_equal [ "Small", "Large" ], all("a").map(&:text)
-        assert_selector ".tag.active", text: "Large", exact_text: true
+        assert_selector ".tag.active", text: "Small", exact_text: true
       end
     end
   end
 
-  test "choosing small says so in the url and on the register" do
+  test "choosing large says so in the url and on the register" do
     visit colors_path
 
-    within("[data-filter=size]") { click_on "Small" }
+    within("[data-filter=size]") { click_on "Large" }
 
-    assert_current_path colors_path(size: "small")
-    assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
+    assert_current_path colors_path(size: "large")
+    assert_selector "[data-filter=size] .tag.active", text: "Large", exact_text: true
   end
 
-  test "a size nobody offers is large, not an error" do
+  test "a size nobody offers is small, not an error" do
     visit colors_path(size: "enormous")
 
-    assert_selector "[data-filter=size] .tag.active", text: "Large", exact_text: true
+    assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
   end
 
   # The three registers are one set of choices, so each has to survive the
