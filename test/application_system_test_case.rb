@@ -65,26 +65,63 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # intercepting only at Turbo.start, and Stimulus is an application with no
   # controllers registered until it has read the DOM. Waiting on the objects
   # alone still let a test into that window.
-  # An expression, not a statement: evaluate_script wraps what it is given and
-  # a `return` here is a syntax error in the wrapper.
-  READY = "!!(window.Turbo?.session?.started && window.Stimulus?.router?.modules?.length)"
+  # What has to be true before a test may touch the page. Expressions, not
+  # statements: evaluate_script wraps what it is given and a `return` is a
+  # syntax error in the wrapper.
+  #
+  # Turbo sets window.Turbo when its module evaluates and starts intercepting
+  # only at Turbo.start; Stimulus is an application with no controllers until
+  # it has read the DOM; data-turbo-preview is Turbo's own flag for "this is a
+  # cached snapshot, the real page is still coming"; and a running
+  # ::view-transition animation means the browser is painting a snapshot of
+  # the page over the page. A click during any of those lands on a DOM that is
+  # about to be replaced, or on an image of one — and afterwards it is
+  # indistinguishable from a click that did nothing, which is what every CI
+  # failure in this suite has looked like.
+  CONDITIONS = {
+    "Turbo started" => "!!window.Turbo?.session?.started",
+    "Stimulus registered a controller" => "!!window.Stimulus?.router?.modules?.length",
+    "no cached preview on screen" => "!document.documentElement.hasAttribute('data-turbo-preview')",
+    "no view transition running" => <<~JS.squish
+      !document.getAnimations().some(a =>
+        String(a.effect?.pseudoElement || '').startsWith('::view-transition'))
+    JS
+  }.freeze
 
+  SETTLED = CONDITIONS.values.map { |condition| "(#{condition})" }.join(" && ").freeze
 
   def visit(*)
     super
 
-    await_javascript if javascript_driver?
+    await_page if javascript_driver?
   end
 
-  def await_javascript
+  # Every way a test reaches for the page, held to the same condition. Gating
+  # only visit was not enough: the interaction that fails is usually the one
+  # after a click, while that click's own navigation is still transitioning.
+  %i[ click_on click_link click_button choose fill_in check uncheck select ].each do |interaction|
+    define_method(interaction) do |*args, **options, &block|
+      await_page if javascript_driver?
+
+      super(*args, **options, &block)
+    end
+  end
+
+  def await_page
     deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + Capybara.default_max_wait_time
 
-    until page.evaluate_script(READY)
-      raise "Turbo never started or Stimulus registered nothing" if
+    until page.evaluate_script(SETTLED)
+      raise "the page never settled: #{unmet_conditions.to_sentence} " if
         Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
 
       sleep 0.05
     end
+  end
+
+  # Which of them is still false, so a timeout names the one that held it up
+  # rather than leaving all four as suspects.
+  def unmet_conditions
+    CONDITIONS.reject { |_, condition| page.evaluate_script(condition) }.keys.map { |name| "never saw #{name}" }
   end
 
   # Turbo's confirmation is a real dialog in a browser and a no-op under
