@@ -527,37 +527,54 @@
 
 /* --- Buttons and quiet links -------------------------------------------- */
 
+/* A button is a block; a link is underlined text. It used to be both at
+   once — a button wore the underline that the quiet links in the prose wear,
+   which left the page saying "follow me" and "press me" in the same breath.
+   The underline belongs to the link. The block belongs to the button.
+
+   Every one of them is the same box, so a row of them sits on one line and
+   the difference between them is only what fills it: still no radius and no
+   shadow, and the keyline is the one already drawn everywhere else. */
 .button {
   display: inline-block;
-  border: 0;
+  border: 1px solid var(--keyline);
   background: transparent;
   color: var(--ink);
   font-family: inherit;
-  padding: 0;
+  padding: var(--space-1) var(--space-2);
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.4em;
-  text-decoration-thickness: 1px;
+  text-decoration: none;
 }
 
-/* A solid block, the way a Swiss poster sets a call to action: still no
-   border, no radius, no shadow. */
+.button:hover { border-color: var(--ink); }
+
+/* A solid block, the way a Swiss poster sets a call to action. */
 .button--primary {
+  border-color: var(--ink);
   background: var(--ink);
   color: var(--ground);
-  padding: var(--space-1) var(--space-2);
 }
 
-.button--primary:hover { background: var(--ink-quiet); }
+.button--primary:hover {
+  border-color: var(--ink-quiet);
+  background: var(--ink-quiet);
+}
+
+/* The ones that sit in a row beside a swatch rather than under a heading.
+   Same box, quieter until you reach for it. */
+.button--quiet,
+.button--danger { color: var(--ink-quiet); }
 
 .button--quiet:hover { color: var(--ink); }
 
 /* Destroying and reordering are one shape apart from each other otherwise.
    The page stays monochrome at rest; the accent arrives at the moment you
    reach for the one that cannot be undone. */
-
 .button--danger:hover,
-.button--danger:focus-visible { color: var(--accent); }
+.button--danger:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
 
 /* Set apart from the actions beside it, not only colored once you arrive:
    at rest, reordering and destroying were the same gray word in a row, and a
