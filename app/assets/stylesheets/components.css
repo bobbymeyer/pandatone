@@ -493,6 +493,14 @@ form.button_to { display: inline; }
 
 .warning__swatches > li { flex: 0 1 12rem; }
 
+/* The answer and what to do about it read as one line, so they sit on one. */
+.lookup-missing {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 /* Sits inside the lookup result's text column, so it takes a card's width
    rather than a field's. */
 .lookup-nearest {

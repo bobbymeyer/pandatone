@@ -29,7 +29,14 @@
         <p class="hex hex--large"><%= @hex %></p>
 
         <% if @colors.empty? %>
-          <p class="empty">Not in the library.</p>
+          <%# The entry form reads the swatch row's own parameters, so handing
+              it the hex here prefills the field and opens the hex panel with
+              no special case at the other end. %>
+          <div class="lookup-missing">
+            <p class="empty">Not in the library.</p>
+            <%= link_to "Add this colour swatch",
+                  new_color_path(swatch: { input_mode: "hex", hex: @hex }), class: "button" %>
+          </div>
 
           <% if @nearest %>
             <h2>Closest stored colour</h2>

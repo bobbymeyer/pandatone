@@ -75,7 +75,8 @@ The UI is for a human curating the library; the API is for machines.
   When the library holds no exact match it offers the closest colour it does
   hold, with no threshold: "we do not have that, but we have this". The two
   swatches are shown, so how close *close* is stays a matter for your eye
-  rather than a number nobody can interpret.
+  rather than a number nobody can interpret. If neither is what you wanted,
+  "Add this colour swatch" opens the entry form with the hex already in it.
 
 ## API
 

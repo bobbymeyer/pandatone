@@ -363,7 +363,51 @@ class ColorsTest < ApplicationSystemTestCase
   end
 
   # "We do not have that" on its own sends you away to look somewhere else.
-  # The nearest thing on file is usually the answer you were after.
+  # The nearest thing on file is usually the answer you were after — and if it
+  # is not, the colour you just pasted is one click from joining the library.
+
+  test "offers to add a colour the library does not hold" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#ABCDEF"
+    click_on "Look up"
+
+    assert_text "Not in the library"
+    click_on "Add this colour swatch"
+
+    assert_current_path(/#{Regexp.escape(new_color_path)}/)
+    assert_equal "#ABCDEF", find_field("Hex value").value
+    assert find("#swatch_input_mode_hex", visible: :all).checked?
+  end
+
+  test "adding from a lookup lands the colour in the library" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#ABCDEF"
+    click_on "Look up"
+    click_on "Add this colour swatch"
+
+    fill_in "Swatch name", with: "sky"
+
+    before = Color.count
+    click_on "Create colour"
+
+    assert_text "No palettes hold this colour yet"
+    assert_text "#ABCDEF"
+    assert_equal before + 1, Color.count
+    assert_equal [ 171, 205, 239 ], Color.find_by(name: "sky").rgb.values
+  end
+
+  test "does not offer to add a colour the library already holds" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#E30613"
+    click_on "Look up"
+
+    assert_text "signal-red"
+    assert_no_link "Add this colour swatch"
+  end
+
 
   test "offers the closest stored colour when the library holds no match" do
     visit lookup_path
