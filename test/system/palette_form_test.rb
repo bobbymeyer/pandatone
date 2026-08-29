@@ -72,7 +72,7 @@ class PaletteFormTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "process-magenta"
     assert_text "#FF00FF"
   end

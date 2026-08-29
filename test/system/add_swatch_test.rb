@@ -93,7 +93,7 @@ class AddSwatchTest < ApplicationSystemTestCase
 
     # Wait for the palette page before reading the records: in a browser the
     # click returns as soon as it is dispatched.
-    assert_selector ".swatch-grid"
+    assert_selector ".swatch-row"
     assert_text "signal-red"
 
     assert_equal colors_before, Color.count
@@ -188,10 +188,24 @@ class AddSwatchTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Add swatch"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "signal-blue"
     assert_text "#1E5AAA"
     assert_equal before + 1, Color.count
+  end
+
+  # A palette page shows one swatch's values at a time, and the one you want
+  # after adding a swatch is the one you just added.
+  test "lands on the swatch it just added" do
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    fill_in "Swatch name", with: "signal-blue"
+    choose "Hex"
+    fill_in "Hex value", with: "#1E5AAA"
+    click_on "Add swatch"
+
+    assert_selector ".swatch-row > li:last-child.selected"
+    assert_selector ".swatch-detail .swatch-name", text: "signal-blue"
   end
 
   test "accepts hex without a leading hash" do
@@ -203,7 +217,7 @@ class AddSwatchTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "#FFCC00"
   end
 
@@ -228,7 +242,7 @@ class AddSwatchTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "picked"
     assert_text "#1E5AAA"
   end
@@ -246,7 +260,7 @@ class AddSwatchTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Add swatch"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "#D5162B"
     assert_no_text "#010203"
     assert_equal before + 1, Color.count
@@ -289,7 +303,7 @@ class AddSwatchTest < ApplicationSystemTestCase
 
     click_on "Add anyway"
 
-    assert_current_path palette_path(palettes(:press))
+    assert_current_path palette_path(palettes(:press)), ignore_query: true
     assert_text "off-white"
     assert_equal before + 1, Color.count
   end

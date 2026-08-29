@@ -123,19 +123,6 @@ class BrowserTest < ApplicationSystemTestCase
     assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"
   end
 
-  # Filling the row and keeping the swatches equal used to be a choice: it
-  # filled, and a palette that wrapped paid for it with one enormous swatch on
-  # the last row. Both, now — they fill while they fit on a line, and past
-  # that they stay the size of the ones above them.
-  test "a palette's swatches are equal, and fill the row while they fit on one" do
-    visit palette_path(palettes(:brand))
-
-    widths = widths_of(".swatch-grid > li")
-    assert_equal 1, widths.uniq.size, "the swatches came out #{widths.inspect}"
-    assert_in_delta width_of(".swatch-grid"),
-      widths.sum + (widths.size - 1) * 24, 2, "three swatches did not fill the row"
-  end
-
   test "the page head stops short of the right edge" do
     visit palettes_path
 
@@ -271,25 +258,6 @@ class BrowserTest < ApplicationSystemTestCase
 
       assert_operator field["width"], :>, row["width"] / 3, "#{path}: the search field collapsed"
     end
-  end
-
-  # The CSS rule for this existed and did nothing for a while: button_to wraps
-  # its button in a form, so the flex child is the form and an auto margin on
-  # the button inside it goes nowhere. Only a rendered position proves it.
-  test "removing a swatch is set apart from reordering it" do
-    visit palette_path(palettes(:brand))
-
-    lefts = evaluate_script(
-      "Array.from(document.querySelectorAll('.swatch-detail:nth-child(2) .swatch-detail__controls > *'))" \
-      ".map(el => Math.round(el.getBoundingClientRect().left))"
-    )
-
-    assert_equal 3, lefts.size, "expected up, down and remove"
-    reorder_gap = lefts[1] - lefts[0]
-    destroy_gap = lefts[2] - lefts[1]
-
-    assert_operator destroy_gap, :>, reorder_gap * 2,
-      "remove sits as close to down as down does to up: #{lefts.inspect}"
   end
 
   # Three registers that read as parallel have to line up as parallel. The
@@ -488,47 +456,9 @@ class BrowserTest < ApplicationSystemTestCase
       }
     end
 
-    # Chrome refuses clipboard writes to an unfocused or unpermitted page.
-    def grant_clipboard
-      page.driver.browser.execute_cdp("Browser.grantPermissions",
-        origin: page.server_url, permissions: %w[ clipboardReadWrite clipboardSanitizedWrite ])
-    end
-
-    def font_size_of(selector)
-      evaluate_script(
-        "parseFloat(getComputedStyle(document.querySelector(#{selector.to_json})).fontSize)"
-      )
-    end
-
-    def rect_of(selector)
-      evaluate_script(
-        "(({top, left, width, height}) => ({top, left, width, height}))" \
-        "(document.querySelector(#{selector.to_json}).getBoundingClientRect())"
-      )
-    end
-
-    def width_of(selector)
-      evaluate_script("document.querySelector(#{selector.to_json}).getBoundingClientRect().width")
-    end
-
-    def tops_of(selector)
-      evaluate_script(
-        "Array.from(document.querySelectorAll(#{selector.to_json}))" \
-        ".map(el => Math.round(el.getBoundingClientRect().top))"
-      )
-    end
-
     def preview_background
       evaluate_script(
         "getComputedStyle(document.querySelector('[data-swatch-preview-target=\"preview\"]')).backgroundColor"
       )
-    end
-
-    def assert_visible(selector)
-      assert find(selector, visible: :all).visible?, "#{selector} should be showing"
-    end
-
-    def assert_hidden(selector)
-      assert_not find(selector, visible: :all).visible?, "#{selector} should be hidden"
     end
 end

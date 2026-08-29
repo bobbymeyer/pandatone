@@ -191,6 +191,46 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     )
   end
 
+  def width_of(selector)
+    evaluate_script("document.querySelector(#{selector.to_json}).getBoundingClientRect().width")
+  end
+
+  def tops_of(selector)
+    evaluate_script(
+      "Array.from(document.querySelectorAll(#{selector.to_json}))" \
+      ".map(el => Math.round(el.getBoundingClientRect().top))"
+    )
+  end
+
+  def rect_of(selector)
+    evaluate_script(
+      "(({top, left, width, height}) => ({top, left, width, height}))" \
+      "(document.querySelector(#{selector.to_json}).getBoundingClientRect())"
+    )
+  end
+
+  def font_size_of(selector)
+    evaluate_script(
+      "parseFloat(getComputedStyle(document.querySelector(#{selector.to_json})).fontSize)"
+    )
+  end
+
+  # Visibility as the browser computes it, not as the markup implies: the
+  # thing being tested is usually a CSS rule deciding what is showing.
+  def assert_visible(selector)
+    assert find(selector, visible: :all).visible?, "#{selector} should be showing"
+  end
+
+  def assert_hidden(selector)
+    assert_not find(selector, visible: :all).visible?, "#{selector} should be hidden"
+  end
+
+  # Chrome refuses clipboard writes to an unfocused or unpermitted page.
+  def grant_clipboard
+    page.driver.browser.execute_cdp("Browser.grantPermissions",
+      origin: page.server_url, permissions: %w[ clipboardReadWrite clipboardSanitizedWrite ])
+  end
+
   # rack_test has no JavaScript, so a live-filtering form needs its button —
   # and a real browser has already submitted by the time this is called, and
   # has taken the button away for saying so.

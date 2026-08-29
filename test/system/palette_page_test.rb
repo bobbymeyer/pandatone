@@ -4,12 +4,12 @@ class PalettePageTest < ApplicationSystemTestCase
   # One palette's own page: its swatches in both spaces, their order, and
   # everything you can do to the palette itself.
 
-  test "shows a palette with every swatch in both color spaces" do
-    visit palette_path(palettes(:brand))
+  test "shows the chosen swatch in both color spaces" do
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_signal_red).id)
 
     assert_text "Brand Core"
 
-    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+    within ".swatch-detail" do
       assert_text "signal-red"
       assert_text "#E30613"
       assert_text "227"       # rgb
@@ -18,11 +18,9 @@ class PalettePageTest < ApplicationSystemTestCase
   end
 
   test "removes a swatch from a palette but keeps the color in the library" do
-    visit palette_path(palettes(:brand))
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_ink_black).id)
 
-    within "#palette_color_#{palette_colors(:brand_ink_black).id}" do
-      click_on "Remove"
-    end
+    within(".swatch-detail") { click_on "Remove" }
 
     assert_no_text "ink-black"
     assert Color.exists?(colors(:ink_black).id)
@@ -33,62 +31,63 @@ class PalettePageTest < ApplicationSystemTestCase
     PaletteComposition.new(press, attributes: {},
       colors: palettes(:brand).color_ids.map { |id| { id: id } } + [ { id: colors(:process_cyan).id } ]).save
 
-    visit palette_path(press)
+    visit palette_path(press, swatch: press.palette_colors.find_by(color: colors(:process_cyan)).id)
 
-    within "#palette_color_#{press.palette_colors.find_by(color: colors(:process_cyan)).id}" do
-      click_on "Remove"
-    end
+    within(".swatch-detail") { click_on "Remove" }
 
     assert_text %("Brand Core" already holds exactly these colors)
     assert_equal 4, press.palette_colors.reload.size
   end
 
   test "moves a swatch later in the palette" do
-    visit palette_path(palettes(:brand))
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_signal_red).id)
 
-    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
-      click_on "Down"
-    end
+    within(".swatch-detail") { click_on "Down" }
 
-    assert_selector ".swatch-grid > li:first-child .swatch-name", text: "ink-black"
-    assert_equal [ "ink-black", "signal-red", "paper-white" ], all(".swatch-detail .swatch-name").map(&:text)
+    assert_row "ink-black", "signal-red", "paper-white"
     assert_equal [ "ink-black", "signal-red", "paper-white" ], palettes(:brand).reload.colors.map(&:name)
   end
 
   test "moves a swatch earlier in the palette" do
-    visit palette_path(palettes(:brand))
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_paper_white).id)
 
-    within "#palette_color_#{palette_colors(:brand_paper_white).id}" do
-      click_on "Up"
-    end
+    within(".swatch-detail") { click_on "Up" }
 
-    assert_selector ".swatch-grid > li:nth-child(2) .swatch-name", text: "paper-white"
-    assert_equal [ "signal-red", "paper-white", "ink-black" ], all(".swatch-detail .swatch-name").map(&:text)
+    assert_row "signal-red", "paper-white", "ink-black"
     assert_equal [ "signal-red", "paper-white", "ink-black" ], palettes(:brand).reload.colors.map(&:name)
   end
 
-  test "offers no way to move the first swatch up or the last one down" do
-    visit palette_path(palettes(:brand))
+  # Moving a swatch is about seeing where it landed, so the page comes back
+  # on it rather than on whatever happens to be first.
+  test "the moved swatch is still the chosen one" do
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_signal_red).id)
 
-    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
+    within(".swatch-detail") { click_on "Down" }
+
+    assert_selector ".swatch-detail .swatch-name", text: "signal-red"
+    assert_selector ".swatch-row > li:nth-child(2).selected"
+  end
+
+  test "offers no way to move the first swatch up or the last one down" do
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_signal_red).id)
+    within(".swatch-detail") do
       assert_no_selector "button", text: "Up"
       assert_selector "button", text: "Down"
     end
 
-    within "#palette_color_#{palette_colors(:brand_paper_white).id}" do
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_paper_white).id)
+    within(".swatch-detail") do
       assert_selector "button", text: "Up"
       assert_no_selector "button", text: "Down"
     end
   end
 
   test "moving a swatch leaves the other palettes holding it alone" do
-    visit palette_path(palettes(:brand))
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_signal_red).id)
 
-    within "#palette_color_#{palette_colors(:brand_signal_red).id}" do
-      click_on "Down"
-    end
+    within(".swatch-detail") { click_on "Down" }
 
-    assert_selector ".swatch-grid > li:first-child .swatch-name", text: "ink-black"
+    assert_row "ink-black", "signal-red", "paper-white"
     assert_equal [ "autumn-ochre", "signal-red" ], palettes(:autumn).reload.colors.map(&:name)
   end
 
@@ -146,32 +145,100 @@ class PalettePageTest < ApplicationSystemTestCase
     assert_equal [ "/palettes/#{palettes(:brand).id}.ase", "/palettes/#{palettes(:brand).id}.css" ], paths
   end
 
-  # A palette that wraps was a full row of swatches and then one enormous one
-  # underneath, because the last row had room to spare and a single item to
-  # give it to. A swatch is not bigger for being last. Equal, and the row ends
-  # where it ends — flush left, ragged right, like everything else here.
-  #
-  # Seven, because that is what it takes to wrap at the width these run at.
-  test "every swatch on a palette is the same size, however many there are" do
+  # A palette is one row divided by its own count, at any count. It used to
+  # wrap, which made a swatch's size depend on where it fell in the order —
+  # and handed the whole of the last row to whatever was left over.
+  test "a palette of nine is nine equal parts of one row" do
     needs_a_browser
 
-    palette = Palette.create!(name: "Seven")
-    7.times do |i|
+    palette = Palette.create!(name: "Nine")
+    9.times do |i|
       palette.palette_colors.create!(position: i,
-        color: Color.create!(name: "seven-#{i}", source_space: Color::RGB, r: 10 * i, g: 60, b: 200))
+        color: Color.create!(name: "nine-#{i}", source_space: Color::RGB, r: 10 * i, g: 60, b: 200))
     end
 
     visit palette_path(palette)
 
-    assert_equal 1, widths_of(".swatch-grid > li").uniq.size,
-      "the swatches came out #{widths_of('.swatch-grid > li').inspect}"
+    widths = widths_of(".swatch-row > li")
+    assert_equal 9, widths.size
+    assert_equal 1, widths.uniq.size, "the swatches came out #{widths.inspect}"
+    assert_equal 1, tops_of(".swatch-row > li").uniq.size, "the row wrapped"
   end
 
-  test "and the same is true of a palette that fills its row exactly" do
+  test "and fills the width whatever that count is" do
     needs_a_browser
 
     visit palette_path(palettes(:brand))
 
-    assert_equal 1, widths_of(".swatch-grid > li").uniq.size
+    widths = widths_of(".swatch-row > li")
+    assert_in_delta width_of(".swatch-row"), widths.sum, 2
   end
+
+  # The CSS rule for this existed and did nothing for a while: button_to wraps
+  # its button in a form, so the flex child is the form and an auto margin on
+  # the button inside it goes nowhere. Only a rendered position proves it.
+  test "removing a swatch is set apart from reordering it" do
+    needs_a_browser
+
+    # A swatch in the middle of the row, so all three controls are there.
+    visit palette_path(palettes(:brand), swatch: palette_colors(:brand_ink_black).id)
+
+    lefts = evaluate_script(
+      "Array.from(document.querySelectorAll('.swatch-detail__controls > *'))" \
+      ".map(el => Math.round(el.getBoundingClientRect().left))"
+    )
+
+    assert_equal 3, lefts.size, "expected up, down and remove"
+    reorder_gap = lefts[1] - lefts[0]
+    destroy_gap = lefts[2] - lefts[1]
+
+    assert_operator destroy_gap, :>, reorder_gap * 2,
+      "remove sits as close to down as down does to up: #{lefts.inspect}"
+  end
+
+  # --- Choosing one -------------------------------------------------------
+
+  test "opens on the first swatch" do
+    visit palette_path(palettes(:brand))
+
+    assert_selector ".swatch-row > li:first-child.selected"
+    assert_selector ".swatch-detail .swatch-name", text: "signal-red"
+  end
+
+  test "choosing a swatch shows its own values" do
+    visit palette_path(palettes(:brand))
+
+    find(".swatch-row a[aria-label^='paper-white']").click
+
+    assert_selector ".swatch-detail .swatch-name", text: "paper-white"
+    assert_text "#FAFAF8"
+    assert_no_selector ".swatch-detail .swatch-name", text: "signal-red"
+  end
+
+  # In the URL, so a reload keeps it and it can be sent to somebody.
+  test "the chosen swatch is in the address" do
+    held = palette_colors(:brand_paper_white)
+
+    visit palette_path(palettes(:brand), swatch: held.id)
+
+    assert_selector ".swatch-detail .swatch-name", text: "paper-white"
+  end
+
+  test "a swatch that is not in this palette is simply the first one" do
+    visit palette_path(palettes(:brand), swatch: "999999")
+
+    assert_selector ".swatch-detail .swatch-name", text: "signal-red"
+  end
+
+  private
+    # A waiting assertion rather than a read of what is there right now: after
+    # a move the row is being replaced, and `all` on a half-swapped page
+    # returns elements that have already been detached from it.
+    def assert_row(*names)
+      names.each_with_index do |name, index|
+        assert_selector %(.swatch-row > li:nth-child(#{index + 1}) a[aria-label^="#{name} "])
+      end
+
+      assert_selector ".swatch-row > li", count: names.size
+    end
 end

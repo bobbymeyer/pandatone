@@ -94,29 +94,30 @@ main.grid {
 .color-list > * { grid-column: span var(--card); }
 
 /* The one thing in the app that is not measured on the field.
-   A palette's own swatches divide the width by their own count, because a
+   A palette is one row, divided by the number of swatches in it, because a
    palette of four should read as a palette of four rather than as four
-   sixths of a row with two empty fields after it.
-
-   auto-fit, which is forbidden everywhere else for sizing tracks from the
-   available width rather than from the field — that is the whole reason it
-   is right here, and only here. It gives equal columns always: they fill the
-   width while they fit on one line, and when there are too many for that the
-   overflow drops to the next row at the same width as the rest. What it does
-   not do is hand the whole of the last row to whatever is left over, which
-   is what flex did — one swatch three times the size of the six above it,
-   for no reason but its position. A swatch is not bigger for being last.
-
-   Fifteen rem, not twelve: a card carries three controls under it and they
-   are boxes now rather than underlined words, so the column that used to fit
-   them no longer did and they wrapped a line. */
-.swatch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--space-5) var(--gutter);
+   sixths of a row with two empty fields after it. It does not wrap: wrapping
+   made a swatch's size depend on where it fell in the order, which is the
+   one thing about a swatch that carries no meaning. */
+.swatch-row {
+  display: flex;
+  height: calc(var(--baseline) * 16);
 }
 
-.swatch-grid > * { min-width: 0; }
+.swatch-row > li {
+  flex: 1 1 0;
+  min-width: 0;
+  /* Reserved on every one of them, so choosing a swatch moves the mark
+     rather than the row. */
+  border-bottom: var(--baseline) solid transparent;
+}
+
+.swatch-row > li.selected { border-bottom-color: var(--ink); }
+
+.swatch-row a {
+  display: block;
+  height: 100%;
+}
 
 /* Everything on the page field runs the full width of it unless it says
    otherwise. This replaces a list that had to name every block in the app,

@@ -26,46 +26,71 @@
 <% if @palette.palette_colors.empty? %>
   <p class="empty">No swatches yet. <%= link_to "Add the first one", new_palette_color_path(@palette) %>.</p>
 <% else %>
-  <ol class="swatch-grid">
-    <% memberships = @palette.palette_colors.to_a %>
-    <% memberships.each_with_index do |membership, index| %>
-      <% color = membership.color %>
-      <li class="swatch-detail" id="<%= dom_id(membership) %>">
-        <%= link_to color, class: "swatch-link" do %>
-          <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}", class: "swatch--card" %>
-          <h2 class="swatch-name"><%= color.name %></h2>
+  <%# The palette itself, one line, however many swatches it holds: a palette
+      of nine is nine equal parts of a row, the way it would be on a chip
+      card. Wrapping made a swatch's size depend on where it fell in the
+      order, which is the one thing about a swatch that carries no meaning.
+
+      Everything a swatch has to say is said below the row rather than under
+      each one, so the row stays a row at any count. Which one is in the URL,
+      so it survives a reload and can be sent to somebody.
+
+      Choosing one is a whole navigation rather than a frame swap: half of
+      what is inside here goes somewhere else entirely — the color's own
+      page — and a frame would have gone looking for itself there. Turbo
+      Drive swaps the body just as quickly, and the swatch keeps its
+      transition name across the visit, so it morphs into place. %>
+  <% memberships = @palette.palette_colors.to_a %>
+  <% selected = memberships.find { |held| held.id.to_s == params[:swatch] } || memberships.first %>
+
+  <section class="palette-swatches">
+    <ol class="swatch-row">
+      <% memberships.each do |membership| %>
+        <% color = membership.color %>
+        <li id="<%= dom_id(membership) %>" class="<%= "selected" if membership == selected %>">
+          <%= link_to palette_path(@palette, swatch: membership.id),
+                aria: { label: "#{color.name} #{color.hex}", current: membership == selected } do %>
+            <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}" %>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+
+    <% color = selected.color %>
+    <div class="swatch-detail">
+      <h2 class="swatch-name"><%= link_to color.name, color %></h2>
+
+      <%= hex_tag color.hex, class: "hex--large" %>
+
+      <dl class="channels">
+        <% channel_pairs(color).each do |space, values| %>
+          <dt><%= space %></dt>
+          <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
+        <% end %>
+      </dl>
+
+      <div class="swatch-detail__controls">
+        <%# No control where there is nowhere to go, rather than one that
+            silently does nothing at the ends of the row. %>
+        <% index = memberships.index(selected) %>
+
+        <% if index.positive? %>
+          <%= button_to "Up", move_palette_color_path(@palette, color, direction: "up"),
+                method: :patch, class: "button button--quiet",
+                aria: { label: "Move #{color.name} earlier" } %>
         <% end %>
 
-        <%= hex_tag color.hex %>
+        <% if index < memberships.size - 1 %>
+          <%= button_to "Down", move_palette_color_path(@palette, color, direction: "down"),
+                method: :patch, class: "button button--quiet",
+                aria: { label: "Move #{color.name} later" } %>
+        <% end %>
 
-        <dl class="channels">
-          <% channel_pairs(color).each do |space, values| %>
-            <dt><%= space %></dt>
-            <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
-          <% end %>
-        </dl>
-
-        <div class="swatch-detail__controls">
-          <%# No control where there is nowhere to go, rather than one that
-              silently does nothing at the ends of the row. %>
-          <% if index.positive? %>
-            <%= button_to "Up", move_palette_color_path(@palette, color, direction: "up"),
-                  method: :patch, class: "button button--quiet",
-                  aria: { label: "Move #{color.name} earlier" } %>
-          <% end %>
-
-          <% if index < memberships.size - 1 %>
-            <%= button_to "Down", move_palette_color_path(@palette, color, direction: "down"),
-                  method: :patch, class: "button button--quiet",
-                  aria: { label: "Move #{color.name} later" } %>
-          <% end %>
-
-          <%= button_to "Remove", palette_color_path(@palette, color),
-                method: :delete, class: "button button--danger" %>
-        </div>
-      </li>
-    <% end %>
-  </ol>
+        <%= button_to "Remove", palette_color_path(@palette, color),
+              method: :delete, class: "button button--danger" %>
+      </div>
+    </div>
+  </section>
 <% end %>
 
 <%# Last on the page, because it is the one thing here that takes the palette

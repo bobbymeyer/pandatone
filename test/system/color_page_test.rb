@@ -55,8 +55,8 @@ class ColorPageTest < ApplicationSystemTestCase
       click_on "Brand Core"
     end
 
-    assert_selector ".swatch-grid"
-    assert_text "paper-white"
+    assert_selector ".swatch-row li", count: 3
+    assert_selector ".swatch-detail", text: "signal-red"
   end
 
   test "reaches a color from the palette it sits in" do

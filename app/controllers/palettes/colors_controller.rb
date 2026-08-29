@@ -29,7 +29,8 @@ module Palettes
       end
 
       if PaletteComposition.new(@palette, attributes: {}, append: [ spec ]).save
-        redirect_to @palette
+        # Onto the swatch just added, which is the one you came here about.
+        redirect_to palette_path(@palette, swatch: @palette.palette_colors.reload.last&.id)
       else
         render_new
       end
@@ -50,7 +51,9 @@ module Palettes
         end
       end
 
-      redirect_to @palette
+      # Back to the same swatch: the point of moving it was to look at where
+      # it now sits, not to be returned to the front of the row.
+      redirect_to palette_path(@palette, swatch: membership.id)
     end
 
     # Removes the swatch from this palette only. The color stays in the
