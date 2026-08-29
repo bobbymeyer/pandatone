@@ -83,7 +83,15 @@ main.grid {
    fields and stop there, leaving two standing empty on the right. */
 .page-head { grid-column: 1 / span 4; }
 
+/* A Turbo Frame is a custom element, so it has no default display and no
+   placement: on the field it arrives as an unplaced inline box and the grid
+   gives it one column, taking whatever it wraps down with it. Frames are
+   transparent wrappers here — they should occupy exactly what their contents
+   would have. */
+turbo-frame { display: block; }
+
 .filters,
+turbo-frame,
 .palette-list,
 .color-list,
 .swatch-grid,
