@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  SCREEN_SIZE = [ 1400, 1400 ].freeze
+
   # These flows are driven through rack_test by default, which means the app
   # has to work with JavaScript switched off: Turbo Frames fall back to full
   # navigations and the Stimulus preview is pure enhancement on top of a form
@@ -12,7 +14,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # Manager sorts it out.
     Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER"] if ENV["CHROMEDRIVER"]
 
-    driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ] do |options|
+    driven_by :selenium, using: :headless_chrome, screen_size: SCREEN_SIZE do |options|
       options.binary = ENV["CHROME_BINARY"] if ENV["CHROME_BINARY"]
       options.add_argument("--no-sandbox")
       options.add_argument("--disable-dev-shm-usage")

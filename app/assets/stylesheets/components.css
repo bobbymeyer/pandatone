@@ -11,26 +11,108 @@
 
 .masthead__mark {
   grid-column: 1 / span 2;
-  font-weight: 700;
   letter-spacing: -0.015em;
 }
 
-.masthead__mark a { text-decoration: none; }
-
 /* Off the left edge rather than pushed to the right: the asymmetry is the
    point, and it lines the nav up with the body column below. */
-.masthead__nav {
-  grid-column: 3 / -1;
-  display: flex;
-  gap: var(--space-3);
-}
+.masthead__nav { grid-column: 3 / -1; }
 
-.masthead__nav a {
-  text-decoration: none;
+.masthead__nav a:hover { color: var(--ink); }
+
+/* --- Registers -----------------------------------------------------------
+   Three things this interface says over and over: this is secondary, this is
+   a name, this is a link not underlined until you reach it. Said once each,
+   so a component below only names itself. */
+
+.masthead__nav a, .palette-strip__meta, .result-count,
+.color-card__palettes, .channels dt, .channels dd, .provenance, .tag,
+.tags, .filter-row__label, .field label, .mode-toggle legend,
+.source-toggle legend, .button--quiet, .button--danger, .link-quiet,
+.empty, .errors ul {
   color: var(--ink-quiet);
 }
 
-.masthead__nav a:hover { color: var(--ink); }
+.masthead__mark, .palette-strip__name, .color-card__name, .channels dt,
+.channels .channel__key, .tag.active, .swatch-entry legend, .errors__title,
+.warning__title {
+  font-weight: 700;
+}
+
+.masthead__mark a, .masthead__nav a, .palette-strip__name a, .swatch-name,
+.tag, .button--primary {
+  text-decoration: none;
+}
+
+.masthead__mark a:hover, .palette-strip__name a:hover, .swatch-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* --- Rows and columns ---------------------------------------------------
+   Almost every horizontal run in this app is one thing: items on a shared
+   baseline, a space apart, wrapping when they must. It is declared once here
+   the way the grid's tracks are, and a component below says only how it
+   differs. Twenty-two separate flex declarations said the same thing before,
+   and drifted by a pixel wherever one of them was written from memory. */
+
+.masthead__nav,
+.palette-strip__meta,
+.page-actions,
+.inline-edit,
+.swatch-detail__controls,
+.channels dd,
+.link-list,
+.filters,
+.filter-form,
+.tag-filter,
+.filter-row,
+.mode-toggle,
+.source-toggle,
+.entry-panel,
+.preview,
+.carried-swatches,
+.carried-swatch,
+.warning__swatches,
+.lookup-missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* A column is the same idea turned ninety degrees. */
+.form,
+.field,
+.swatch-entry__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Only the differences. */
+.masthead__nav,
+.page-actions,
+.filters { gap: var(--space-3); }
+
+.page-actions,
+.swatch-detail__controls,
+.preview { align-items: center; }
+
+.filters,
+.filter-form { align-items: flex-end; }
+
+/* A field and the button that submits it are a pair, not a run: they do not
+   wrap away from each other. */
+.filter-form { flex-wrap: nowrap; }
+
+.palette-strip__meta { justify-content: space-between; }
+.channels dd { gap: 0 var(--space-2); }
+.link-list { gap: var(--space-1) var(--space-3); }
+.carried-swatches { gap: var(--space-3) var(--gutter); }
+.warning__swatches { gap: var(--gutter); }
+.carried-swatch,
+.field { gap: var(--space-1); }
 
 /* --- Swatches ---------------------------------------------------------- */
 
@@ -70,29 +152,18 @@
 
 /* --- Palette index ----------------------------------------------------- */
 
-.palette-strip__name a { text-decoration: none; }
+/* inline-block for the same reason .tag is: the link is the target, and an
+   inline box ignores the leading around it. */
+.palette-strip__name a { display: inline-block; text-decoration: none; }
 
-.palette-strip__name a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-
-.palette-strip__meta {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-top: var(--space-1);
-  color: var(--ink-quiet);
-}
+.palette-strip__meta { margin-top: var(--space-1); }
 
 /* --- Color index ------------------------------------------------------ */
-
-
 
 .color-card form.button_to { margin-top: var(--space-2); }
 
 /* The result count is a sentence, not a label. */
-.result-count {
-  color: var(--ink-quiet);
-  margin-bottom: var(--space-3);
-}
+.result-count { margin-bottom: var(--space-3); }
 
 .library-picker .filter-form { margin-bottom: var(--space-3); }
 
@@ -108,7 +179,6 @@
 .color-card__name {
   font-size: var(--size-2);
   line-height: var(--space-3);
-  font-weight: 700;
   margin-bottom: var(--space-1);
 }
 
@@ -118,37 +188,17 @@
   border-top: 1px solid var(--keyline);
   font-size: var(--size-1);
   line-height: var(--space-2);
-  color: var(--ink-quiet);
 }
 
 /* --- Palette show ------------------------------------------------------ */
 
-.page-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
-}
+.page-actions { margin-top: var(--space-3); }
 
-.inline-edit {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
+.inline-edit { margin-top: var(--space-2); }
 
 .swatch-detail h3 { margin-bottom: var(--space-1); }
 
-.swatch-name { text-decoration: none; }
-
-.swatch-name:hover { text-decoration: underline; text-underline-offset: 0.2em; }
-
-.swatch-detail__controls {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
+.swatch-detail__controls {  margin-top: var(--space-2);
   padding-top: var(--space-1);
   border-top: 1px solid var(--keyline);
 }
@@ -162,20 +212,9 @@
 
 /* The names carry the weight and the numbers do not, so "R" and "227" are
    told apart at a glance rather than by counting characters. */
-.channels dt {
-  color: var(--ink-quiet);
-  align-self: center;
-  font-weight: 700;
-}
+.channels dt { align-self: center; }
 
-.channels .channel__key { font-weight: 700; }
-
-.channels dd {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--space-2);
-  color: var(--ink-quiet);
-  /* Metadata beside a metadata label, in a card too narrow for body size. */
+.channels dd {  /* Metadata beside a metadata label, in a card too narrow for body size. */
   font-size: var(--size-1);
   line-height: var(--space-2);
 }
@@ -233,7 +272,6 @@
 
 .provenance {
   max-width: var(--measure);
-  color: var(--ink-quiet);
   padding-top: var(--space-2);
   border-top: 1px solid var(--keyline);
 }
@@ -242,14 +280,15 @@
 
 .color-detail__body .tags { margin-top: var(--space-2); }
 
-.link-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
-  margin-top: var(--space-1);
-}
+.link-list { margin-top: var(--space-1); }
 
-.link-list a { text-underline-offset: 0.2em; }
+/* Lists of destinations, so each one is a target rather than a word in a
+   sentence — inline-block for the same reason .tag is. */
+.link-list a,
+.lookup-nearest a {
+  display: inline-block;
+  text-underline-offset: 0.2em;
+}
 
 @media (max-width: 48rem) {
   .color-detail > .swatch,
@@ -266,20 +305,11 @@
 
 /* --- Filters and tags --------------------------------------------------- */
 
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--space-3);
-  padding-block: var(--space-2);
+.filters {  padding-block: var(--space-2);
   border-block: 1px solid var(--keyline);
 }
 
-.filter-form {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--space-2);
-  /* A definite basis, not the content width: sharing a row with a long tag
+.filter-form {  /* A definite basis, not the content width: sharing a row with a long tag
      list would otherwise squeeze the search field down to almost nothing,
      which is what nine tags were already doing to the color index. */
   flex: 1 1 var(--measure);
@@ -297,7 +327,22 @@
   gap: var(--space-2);
 }
 
-.filters .filter-form > .field > label { min-width: var(--register-label); }
+/* Narrow, there is no room for a label column beside eight tags, so all three
+   registers stack instead of two of them wrapping while the search keeps its
+   inline label. The block changes as a system or not at all. */
+@media (max-width: 48rem) {
+  .filters .filter-form > .field,
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .filter-row__label,
+  .filters .filter-form > .field > label { min-width: 0; }
+
+  .filter-form { flex-wrap: wrap; }
+}
 
 .filters .filter-form > .field > input {
   flex: 1 1 auto;
@@ -308,56 +353,32 @@
    competing for the row. Built from the same links as the tag filter,
    because it is the same kind of control: pick one of a handful. */
 
+.tag-filter { margin-right: auto; }
 
-.tag-filter {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-right: auto;
-}
-
-.tag {
-  text-decoration: none;
-  color: var(--ink-quiet);
-}
+/* inline-block so the line box is the tap target: an inline box takes its
+   height from the font's metrics and ignores the leading set for it. */
+.tag { display: inline-block; }
 
 .tag:hover { color: var(--ink); }
 
 /* The accent says which one is current, and the weight says it again: this
    is a color tool, and a reader who cannot separate the red from the gray
    would otherwise have no current state at all. */
-.tag.active {
-  color: var(--accent);
-  font-weight: 700;
-}
-
-.tags { color: var(--ink-quiet); }
+.tag.active { color: var(--accent); }
 
 /* A label and its row of choices, in the same two positions every time, so
    filtering and ordering read as the registers they are rather than as two
    rows of identical words. */
-.filter-row {
-  flex-basis: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-}
+.filter-row { flex-basis: 100%; }
 
 /* A width off the ladder, so the two rows' choices start in the same column
    rather than three pixels apart because one word is longer than the other. */
-.filter-row__label {
-  color: var(--ink-quiet);
-  min-width: var(--space-8);
-}
+.filter-row__label,
+.filters .filter-form > .field > label { min-width: var(--register-label); }
 
 /* --- Forms -------------------------------------------------------------- */
 
-.form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
+.form {  align-items: flex-start;
   max-width: var(--measure);
 }
 
@@ -368,14 +389,7 @@
   max-width: var(--measure);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  width: 100%;
-}
-
-.field label { color: var(--ink-quiet); }
+.field { width: 100%; }
 
 .field input {
   border: 0;
@@ -389,32 +403,17 @@
   width: 100%;
 }
 
-
 .swatch-entry {
   width: 100%;
   padding-top: var(--space-2);
   border-top: 1px solid var(--keyline);
 }
 
-.swatch-entry legend {
-  font-weight: 700;
-  padding-inline-end: var(--space-2);
-}
+.swatch-entry legend { padding-inline-end: var(--space-2); }
 
 .swatch-entry__fields {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
   margin-top: var(--space-2);
-}
-
-.mode-toggle,
-.source-toggle {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
 }
 
 .mode-toggle legend,
@@ -430,11 +429,6 @@
 .add-swatch > section { margin-top: var(--space-3); }
 
 .radio { display: inline-flex; align-items: baseline; gap: var(--space-1); }
-
-.entry-panel {
-  display: flex;
-  gap: var(--space-2);
-}
 
 /* Show only the panel whose mode is selected. Written as "hide the others"
    rather than "show the chosen one" so that a browser without :has() falls
@@ -464,12 +458,6 @@
 
 .preview[hidden] { display: none; }
 
-.preview {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .preview .swatch {
   width: calc(var(--baseline) * 9);
   height: calc(var(--baseline) * 9);
@@ -496,20 +484,16 @@
 .button--primary {
   background: var(--ink);
   color: var(--ground);
-  text-decoration: none;
   padding: var(--space-1) var(--space-2);
 }
 
 .button--primary:hover { background: var(--ink-quiet); }
-
-.button--quiet { color: var(--ink-quiet); }
 
 .button--quiet:hover { color: var(--ink); }
 
 /* Destroying and reordering are one shape apart from each other otherwise.
    The page stays monochrome at rest; the accent arrives at the moment you
    reach for the one that cannot be undone. */
-.button--danger { color: var(--ink-quiet); }
 
 .button--danger:hover,
 .button--danger:focus-visible { color: var(--accent); }
@@ -525,10 +509,7 @@
 
 form.button_to { display: inline; }
 
-.link-quiet {
-  color: var(--ink-quiet);
-  text-underline-offset: 0.25em;
-}
+.link-quiet { text-underline-offset: 0.25em; }
 
 .link-quiet:hover { color: var(--ink); }
 
@@ -562,20 +543,13 @@ form.button_to { display: inline; }
 
 /* The swatches a fork carries: a row of choices, each one a swatch you can
    untick, sized like the cards they came from. */
-.carried-swatches {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--gutter);
-  margin-top: var(--space-2);
+.carried-swatches {  margin-top: var(--space-2);
   width: 100%;
 }
 
 .carried-swatch {
   flex: 1 1 8rem;
   min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-1);
 }
 
 .carried-swatch label {
@@ -586,20 +560,13 @@ form.button_to { display: inline; }
 
 /* --- Empty and error states --------------------------------------------- */
 
-.empty { color: var(--ink-quiet); }
-
 .errors {
   width: 100%;
   padding-top: var(--space-2);
   border-top: 2px solid var(--accent);
 }
 
-.errors__title { font-weight: 700; }
-
-.errors ul {
-  margin-top: var(--space-1);
-  color: var(--ink-quiet);
-}
+.errors ul { margin-top: var(--space-1); }
 
 /* A question, not a refusal, so it keeps the accent keyline of an error but
    none of its finality: the swatches do the arguing and the submit button
@@ -610,23 +577,11 @@ form.button_to { display: inline; }
   border-top: 2px solid var(--accent);
 }
 
-.warning__title { font-weight: 700; }
-
-.warning__swatches {
-  display: flex;
-  gap: var(--gutter);
-  margin-top: var(--space-2);
-}
+.warning__swatches { margin-top: var(--space-2); }
 
 .warning__swatches > li { flex: 0 1 12rem; }
 
 /* The answer and what to do about it read as one line, so they sit on one. */
-.lookup-missing {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
 
 /* Sits inside the lookup result's text column, so it takes a card's width
    rather than a field's. */

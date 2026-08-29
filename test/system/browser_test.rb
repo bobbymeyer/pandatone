@@ -277,6 +277,28 @@ class BrowserTest < ApplicationSystemTestCase
     assert_operator large, :>, card, "the large hex is no bigger than one on a card"
   end
 
+  # This is a color tool, so it is the last place that should lean on color
+  # alone to say which of a row of choices is current. Computed, not declared:
+  # the weight comes from a register shared with eight other selectors, and a
+  # stylesheet grep would only ever find where it happens to be written.
+  test "the current filter and sort are marked by more than their color" do
+    visit colors_path(tag: "brand")
+
+    %w[ tag sort ].each do |register|
+      weights = evaluate_script(<<~JS)
+        Array.from(document.querySelectorAll('[data-filter=#{register}] .tag'))
+          .map(el => [el.classList.contains('active'), getComputedStyle(el).fontWeight])
+      JS
+
+      active = weights.select(&:first).map(&:last).map(&:to_i)
+      rest = weights.reject(&:first).map(&:last).map(&:to_i)
+
+      assert_equal 1, active.size, "expected one current choice in the #{register} register"
+      assert_operator active.first, :>, rest.max,
+        "the #{register} register marks its current choice by color alone"
+    end
+  end
+
   # A channel reads as a name and a number in one breath, so the name carries
   # the weight: computed, not declared, since the two sit inside one element
   # and a rule on the wrong one would look right in the stylesheet.

@@ -87,12 +87,20 @@ h3 {
   letter-spacing: 0.01em;
 }
 
-.tag,
 .tags,
-.hint,
-.link-quiet {
+.hint {
   font-size: var(--size-1);
   line-height: var(--space-2);
+}
+
+/* The same size, on a line box one step taller: these two are the only micro
+   type you tap, and at a 16px line box they were 14px targets — under the
+   24px minimum, and 39 of them on a phone. The leading does the work so the
+   type does not have to change. */
+.tag,
+.link-quiet {
+  font-size: var(--size-1);
+  line-height: var(--space-3);
 }
 
 .hint { line-height: var(--space-3); }

@@ -75,16 +75,6 @@ class GridTest < ActiveSupport::TestCase
 
   # --- Signals -------------------------------------------------------------
 
-  # This is a color tool, so it is the last place that should lean on color
-  # alone to say which of a row of choices is current.
-  test "the current filter and sort are marked by more than their color" do
-    rule = components[/\.tag\.active\s*\{([^}]*)\}/m, 1]
-
-    assert rule, "expected a .tag.active rule"
-    assert_match(/font-weight/, rule,
-      "the active state is color and nothing else, which is invisible to a reader who cannot see it")
-  end
-
   test "the destructive register is not the quiet one" do
     assert_match(/\.button--danger[^{]*\{/, components, "expected destructive actions to have their own class")
     assert_match(/\.button--danger:hover,\s*\.button--danger:focus-visible/, components,

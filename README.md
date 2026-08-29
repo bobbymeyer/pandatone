@@ -227,6 +227,20 @@ a font CDN, so the app renders correctly with nothing external reachable. All sp
 `grid.css`; the interface is near-monochrome so that the swatches are the only
 color on the page.
 
+The stylesheet states a thing once. Three registers — quiet, name, and a link
+not underlined until you reach it — carry every repetition of those, and one
+row rule plus one column rule carry every flex arrangement; a component names
+only how it differs. Twenty-two separate flex declarations used to say the
+same thing and disagreed by a pixel wherever one was written from memory.
+
+Every tap target clears 24px. The two pieces of micro type you tap sit on a
+line box one step taller rather than in different type, and links that are
+targets rather than words in a sentence are inline-block, because an inline
+box takes its height from the font and ignores the leading around it. A
+system test runs eight pages at phone and tablet width and fails on anything
+under the minimum, on sideways scroll, or on the filter registers stacking
+out of step with each other.
+
 Two signals never rest on color alone. The current filter and the current
 order carry weight as well as the accent, because this is a color tool and a
 reader who cannot separate red from gray would otherwise have no current

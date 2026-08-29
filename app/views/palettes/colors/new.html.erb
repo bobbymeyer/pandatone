@@ -63,19 +63,8 @@
         </p>
       <% else %>
         <ul class="color-list">
-          <% @available.each do |color| %>
-            <li class="color-card" id="<%= dom_id(color) %>">
-              <%# Not a link: you are picking here, not browsing away. %>
-              <%= swatch_tag color.hex, class: "swatch--card" %>
-
-              <h3 class="color-card__name"><%= color.name %></h3>
-              <p class="hex"><%= color.hex %></p>
-
-              <%= button_to "Add", palette_colors_path(@palette),
-                    params: { color_id: color.id },
-                    class: "button", aria: { label: "Add #{color.name}" } %>
-            </li>
-          <% end %>
+          <%= render partial: "colors/card", collection: @available, as: :color,
+                locals: { level: 3, pick: true, palette: @palette } %>
         </ul>
       <% end %>
     <% end %>
