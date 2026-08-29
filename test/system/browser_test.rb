@@ -33,6 +33,20 @@ class BrowserTest < ApplicationSystemTestCase
     assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"
   end
 
+  test "a palette's swatches fill the width whatever their number" do
+    visit palette_path(palettes(:brand))
+
+    row = width_of(".swatch-grid")
+    cards = evaluate_script(
+      "Array.from(document.querySelectorAll('.swatch-grid > li'))" \
+      ".map(el => el.getBoundingClientRect().width).reduce((a, b) => a + b, 0)"
+    )
+    gutters = (all(".swatch-grid > li").size - 1) * 24
+
+    assert_in_delta row, cards + gutters, 2,
+      "three swatches left #{(row - cards - gutters).round}px of the row unused"
+  end
+
   test "the page head stops short of the right edge" do
     visit palettes_path
 

@@ -50,7 +50,6 @@
 .grid,
 .palette-list,
 .color-list,
-.swatch-grid,
 .color-detail,
 .lookup-result {
   display: grid;
@@ -71,13 +70,29 @@ main.grid {
 }
 
 .palette-list,
-.color-list,
-.swatch-grid { row-gap: var(--space-5); }
+.color-list { row-gap: var(--space-5); }
 
 .palette-list > * { grid-column: span var(--card-wide); }
 
-.color-list > *,
-.swatch-grid > * { grid-column: span var(--card); }
+.color-list > * { grid-column: span var(--card); }
+
+/* The one thing in the app that is not measured on the field.
+   A palette's own swatches divide the width by their own count, because a
+   palette of four should read as a palette of four rather than as four
+   sixths of a row with two empty fields after it. Four does not divide six
+   into whole spans, so filling the width and staying on the field are not
+   both available here; filling wins, and the row still starts and ends on
+   the page margins. */
+.swatch-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--gutter);
+}
+
+.swatch-grid > * {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
 
 /* The field is asymmetric on purpose: heads and prose sit in the left four
    fields and stop there, leaving two standing empty on the right. */
