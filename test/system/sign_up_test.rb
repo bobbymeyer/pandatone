@@ -12,6 +12,43 @@ class SignUpTest < ApplicationSystemTestCase
     assert_text "Open the library"
   end
 
+  # There is nobody to be, so nothing asks you to be anybody. Every door leads
+  # to the one thing that can be done.
+  test "the sign in page sends the first visitor on to sign up" do
+    empty_of_people
+
+    visit new_session_path
+
+    assert_current_path new_registration_path
+    assert_text "Open the library"
+  end
+
+  test "so does the forgotten password page" do
+    empty_of_people
+
+    visit new_password_path
+
+    assert_current_path new_registration_path
+  end
+
+  test "and the root of the app" do
+    empty_of_people
+
+    visit root_path
+
+    assert_current_path new_registration_path
+  end
+
+  # Only while it is empty: once somebody is here, signing in is the way in.
+  test "the sign in page is itself again once an account exists" do
+    sign_out_completely
+
+    visit new_session_path
+
+    assert_current_path new_session_path
+    assert_text "Sign in"
+  end
+
   test "the first account is made an admin and closes sign ups behind it" do
     empty_of_people
 
