@@ -13,6 +13,9 @@
   <%= form_with url: palettes_path, method: :get, class: "filter-form",
         data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "palettes" } do %>
     <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+    <%# Searching keeps the order you were reading in. Choosing an order is a
+        whole navigation rather than a frame swap, so this is never stale. %>
+    <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
     <div class="field">
       <%= label_tag :q, "Search" %>
       <%= text_field_tag :q, params[:q], autocomplete: "off" %>
@@ -21,14 +24,19 @@
   <% end %>
 
   <ul class="tag-filter">
-    <li><%= link_to "All", palettes_path(q: params[:q]), class: class_names("tag", active: params[:tag].blank?) %></li>
+    <li>
+      <%= link_to "All", palettes_path(q: params[:q], sort: params[:sort]),
+            class: class_names("tag", active: params[:tag].blank?) %>
+    </li>
     <% @tags.each do |tag| %>
       <li>
-        <%= link_to tag, palettes_path(tag: tag, q: params[:q]),
+        <%= link_to tag, palettes_path(tag: tag, q: params[:q], sort: params[:sort]),
               class: class_names("tag", active: params[:tag] == tag) %>
       </li>
     <% end %>
   </ul>
+
+  <%= render "shared/sort_filter", sorts: Palette::SORTS %>
 </section>
 
 <%# Only the results live in the frame; the form stays outside it so typing

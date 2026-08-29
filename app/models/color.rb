@@ -4,6 +4,7 @@
 class Color < ApplicationRecord
   include Taggable
   include NameSearchable
+  include Sortable
 
   RGB = "rgb".freeze
   CMYK = "cmyk".freeze
@@ -16,16 +17,6 @@ class Color < ApplicationRecord
   # about a library, not a perceptual constant, which is why it warns rather
   # than refuses.
   SIMILARITY_THRESHOLD = 32
-
-  # What the colour index offers to sort by, in the order it offers them.
-  SORTS = {
-    "name" => "Name",
-    "added" => "Date added",
-    "modified" => "Date modified",
-    "spectrum" => "Colour",
-    "dark" => "Dark first",
-    "light" => "Light first"
-  }.freeze
 
   # Below this much chroma there is not enough hue to place on the spectrum,
   # so the colour belongs on the black-to-white axis instead. It clears the
@@ -125,33 +116,6 @@ class Color < ApplicationRecord
           b: (color.b - reach)..(color.b + reach))
   }
 
-  # Ordering is domain knowledge — which end black goes, where a red that
-  # leans blue belongs — so it lives here rather than in the controller that
-  # reads a parameter. Callable on a scope, so filtering and sorting compose.
-  #
-  # The three that a database can express stay in SQL. The three that turn on
-  # what a colour looks like are done in Ruby: expressing hue in SQL would
-  # mean a CASE over which channel is largest, written once here and again in
-  # anything else that ever needs it, and this index loads every row it shows
-  # regardless.
-  def self.sorted(key)
-    case key
-    when "added"    then order(created_at: :desc, name: :asc)
-    when "modified" then order(updated_at: :desc, name: :asc)
-    when "spectrum" then by(&:spectrum_position)
-    when "dark"     then by(&:luma)
-    when "light"    then by { |color| -color.luma }
-    else                 order(:name)
-    end
-  end
-
-  # Name breaks every tie, so the order is total: two colours of the same
-  # luma do not swap places between one request and the next.
-  def self.by(&position)
-    order(:name).to_a.sort_by { |color| [ *position.call(color), color.name ] }
-  end
-  private_class_method :by
-
   def luma
     ColorSpace.luma(r, g, b)
   end
@@ -177,6 +141,14 @@ class Color < ApplicationRecord
     return [ 2, luma ] if neutral?
 
     [ 1, (hue - SPECTRUM_ORIGIN) % 360 ]
+  end
+
+  def dark_position
+    luma
+  end
+
+  def light_position
+    -luma
   end
 
   def hex

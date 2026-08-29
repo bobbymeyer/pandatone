@@ -1,6 +1,7 @@
 class Palette < ApplicationRecord
   include Taggable
   include NameSearchable
+  include Sortable
 
   has_many :palette_colors, -> { order(:position) }, dependent: :destroy, inverse_of: :palette
   has_many :colors, through: :palette_colors
@@ -25,6 +26,36 @@ class Palette < ApplicationRecord
 
     where(id: PaletteColor.where(color_id: Color.where(rgb).select(:id)).select(:palette_id))
   }
+
+  # The swatches in the order the strip shows them. Read through the join
+  # rows rather than through `colors`, so the index's own preload covers it
+  # and sorting a page of palettes stays one query.
+  def swatches
+    palette_colors.map(&:color)
+  end
+
+  # A palette is dark or light as a whole rather than at its first swatch, so
+  # this averages. Averaging is honest for a scalar like luma in a way it
+  # would never be for a hue, where the mean of red and violet is green.
+  def luma
+    swatches.sum(&:luma) / swatches.size if swatches.any?
+  end
+
+  # Which is why the colour sort reads the swatch the strip leads with: the
+  # one anchoring the palette, and the one you see first on every screen that
+  # shows it. A palette holding nothing has no colour to sort by, so it goes
+  # last rather than pretending to be black.
+  def spectrum_position
+    swatches.any? ? [ 0, *swatches.first.spectrum_position ] : [ 1 ]
+  end
+
+  def dark_position
+    swatches.any? ? [ 0, luma ] : [ 1 ]
+  end
+
+  def light_position
+    swatches.any? ? [ 0, -luma ] : [ 1 ]
+  end
 
   def self.friendly_find(key)
     friendly(key).first || raise(ActiveRecord::RecordNotFound, "Couldn't find Palette matching #{key.inspect}")

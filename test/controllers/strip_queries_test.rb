@@ -11,6 +11,16 @@ class StripQueriesTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # The colour orders read every swatch of every palette in Ruby, which is one
+  # `palette.swatches` away from a query each.
+  test "ordering the palette index by colour does not issue a query per palette" do
+    %w[ spectrum dark light ].each do |key|
+      assert_query_count_flat palettes_path(sort: key) do
+        palette_holding(colors(:deep_indigo))
+      end
+    end
+  end
+
   test "a colour page does not issue a query per palette holding it" do
     color = colors(:signal_red)
 

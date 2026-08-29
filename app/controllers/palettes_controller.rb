@@ -1,9 +1,12 @@
 class PalettesController < ApplicationController
+  include Sorting
+
   before_action :set_palette, only: %i[ show edit update destroy ]
 
   def index
-    @palettes = Palette.order(:name).name_matching(params[:q]).includes(palette_colors: :color)
+    @palettes = Palette.name_matching(params[:q]).includes(palette_colors: :color)
     @palettes = @palettes.tagged(params[:tag]) if params[:tag].present?
+    @palettes = @palettes.sorted(sort_key)
     @tags = Palette.all_tags
     @total = Palette.count
   end

@@ -1,10 +1,12 @@
 class ColorsController < ApplicationController
+  include Sorting
+
   before_action :set_color, only: %i[ show edit update ]
 
   def index
     @colors = Color.name_matching(params[:q]).includes(:palettes)
     @colors = @colors.tagged(params[:tag]) if params[:tag].present?
-    @colors = @colors.sorted(color_sort)
+    @colors = @colors.sorted(sort_key)
     @tags = Color.all_tags
     @total = Color.count
   end
@@ -48,13 +50,6 @@ class ColorsController < ApplicationController
   end
 
   private
-    # An unrecognised sort is not worth an error page; it means name, which is
-    # what the index did before there was anything to choose.
-    def color_sort
-      Color::SORTS.key?(params[:sort]) ? params[:sort] : "name"
-    end
-    helper_method :color_sort
-
     def set_color
       @color = Color.find(params[:id])
     end

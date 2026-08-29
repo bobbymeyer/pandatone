@@ -683,7 +683,13 @@ class ColorsTest < ApplicationSystemTestCase
       click_on "Filter" unless javascript_driver?
     end
 
+    # Reading a collection is two steps — find the nodes, then ask each for its
+    # text — and a view transition can swap them in between. synchronize is
+    # Capybara's own answer to that: it retries the block on a stale node, and
+    # runs it once under rack_test, where nothing moves.
     def card_names
-      all(".color-card__name").map(&:text)
+      page.document.synchronize do
+        all(".color-card__name", minimum: 1).map(&:text)
+      end
     end
 end

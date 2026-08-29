@@ -1,6 +1,49 @@
 require "application_system_test_case"
 
 class PalettesTest < ApplicationSystemTestCase
+  # --- Sorting ------------------------------------------------------------
+
+  test "lists palettes by name until asked otherwise" do
+    visit palettes_path
+
+    assert_equal Palette.order(:name).pluck(:name), strip_names
+    assert_selector ".sort-filter .tag.active", text: "Name", exact_text: true
+  end
+
+  test "sorts palettes by colour, dark first and light first" do
+    visit palettes_path
+
+    sort_by "Dark first", leading: "Autumn 2026"
+    sort_by "Light first", leading: "Press Check"
+    sort_by "Colour", leading: "Brand Core"
+  end
+
+  test "an empty palette sorts last however the colours run" do
+    visit palettes_path
+
+    sort_by "Dark first", leading: "Autumn 2026"
+
+    assert_equal "Unfilled", strip_names.last
+  end
+
+  test "sorts palettes by date added" do
+    latest = Palette.create!(name: "Just Made")
+
+    visit palettes_path
+    sort_by "Date added", leading: latest.name
+  end
+
+  test "a palette order survives a tag filter" do
+    visit palettes_path
+
+    sort_by "Light first", leading: "Press Check"
+    click_on "active"
+
+    assert_selector ".palette-list > li", count: 2
+    assert_equal [ "Brand Core", "Autumn 2026" ], strip_names
+    assert_selector ".sort-filter .tag.active", text: "Light first", exact_text: true
+  end
+
   test "lists palettes as strips of their swatches" do
     visit palettes_path
 
@@ -627,4 +670,25 @@ class PalettesTest < ApplicationSystemTestCase
     assert_text %("Brand Core" already holds exactly these colours)
     assert_equal 4, press.palette_colors.reload.size
   end
+
+
+  private
+    # Choosing an order is a whole navigation, so this waits for the reordered
+    # list before handing back: reading the strips does not retry.
+    def sort_by(label, leading:)
+      within(".sort-filter") { click_on label }
+
+      assert_selector ".palette-list > li:first-child .palette-strip__name",
+        text: leading, exact_text: true
+    end
+
+    # Reading a collection is two steps — find the nodes, then ask each for its
+    # text — and a view transition can swap them in between. synchronize is
+    # Capybara's own answer to that: it retries the block on a stale node, and
+    # runs it once under rack_test, where nothing moves.
+    def strip_names
+      page.document.synchronize do
+        all(".palette-list .palette-strip__name", minimum: 1).map(&:text)
+      end
+    end
 end

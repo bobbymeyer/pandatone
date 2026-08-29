@@ -1,0 +1,20 @@
+<%# locals: (sorts:) %>
+<%# Links, not a control inside the search form: the tag filter beside it is
+    outside the results frame, so an order that only swapped the frame would
+    leave those links carrying the old one, which would then vanish on the
+    next click. Choosing an order is a whole navigation, so every link on the
+    page is rebuilt with it.
+
+    url_for without a controller keeps the index it is rendered on, so one
+    partial serves both. %>
+<div class="sort-filter">
+  <span class="sort-filter__label">Sort by</span>
+  <ul class="tag-filter">
+    <% sorts.each do |key, label| %>
+      <li>
+        <%= link_to label, url_for(sort: key, q: params[:q], tag: params[:tag]),
+              class: class_names("tag", active: sort_key == key) %>
+      </li>
+    <% end %>
+  </ul>
+</div>

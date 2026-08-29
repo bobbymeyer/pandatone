@@ -61,10 +61,10 @@ afterwards:
   needs an approximate answer. Two greys twenty steps apart score 60 and stay
   two swatches.
 
-### Ordering colours
+### Ordering
 
-The colour index sorts by name, date added, date modified, colour, dark first
-or light first. The last three turn on what a colour looks like rather than on
+Both indexes sort by name, date added, date modified, colour, dark first or
+light first. The last three turn on what something looks like rather than on
 what a column holds, so they are computed in Ruby over rows the page loads
 anyway; name, added and modified stay in SQL.
 
@@ -80,6 +80,15 @@ cut it somewhere and two neighbours always land at opposite ends; the cut goes
 in the gap between magenta and red rather than at red, because cutting at red
 puts `#E30613` — a red that leans a few degrees blue, at hue 356.5 — after the
 violets.
+
+A palette has many colours, so it answers those two questions differently.
+**Dark** and **light** average the luma of its swatches, because a palette is
+dark or light as a whole rather than at its first swatch, and a scalar
+averages honestly. **Colour** reads the swatch the strip leads with, because
+a hue cannot be averaged — the mean of red and violet is green — and the lead
+swatch is the one anchoring the palette on every screen that shows it. A
+palette holding no swatches sorts last under all three rather than pretending
+to be black.
 
 ## Screens
 

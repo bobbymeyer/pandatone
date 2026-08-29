@@ -211,4 +211,56 @@ class PaletteTest < ActiveSupport::TestCase
       Palette.friendly_find(nil)
     end
   end
+
+  # --- Sorting ------------------------------------------------------------
+
+  test "sorts by name by default, and for anything it does not recognise" do
+    [ nil, "", "sideways" ].each do |key|
+      assert_equal Palette.order(:name).pluck(:name), Palette.sorted(key).map(&:name),
+        "expected #{key.inspect} to fall back to name order"
+    end
+  end
+
+  test "sorts by date added and date modified, newest first" do
+    latest = Palette.create!(name: "Just Made")
+
+    assert_equal latest, Palette.sorted("added").first
+
+    palettes(:press).update!(tags: [ "print", "archive" ])
+    assert_equal palettes(:press), Palette.sorted("modified").first
+  end
+
+  # A palette is dark or light as a whole, not at its first swatch, so this
+  # averages: Press Check is one bright cyan, Autumn is an ochre and a red.
+  test "sorts dark first and light first by the average of its swatches" do
+    assert_equal [ "Autumn 2026", "Brand Core", "Press Check" ],
+      Palette.sorted("dark").map(&:name).first(3)
+
+    assert_equal [ "Press Check", "Brand Core", "Autumn 2026" ],
+      Palette.sorted("light").map(&:name).first(3)
+  end
+
+  # A hue cannot be averaged — the mean of red and violet is green — so the
+  # colour sort reads the swatch the strip leads with.
+  test "the colour sort reads the swatch each palette leads with" do
+    assert_equal [ "Brand Core", "Autumn 2026", "Press Check" ],
+      Palette.sorted("spectrum").map(&:name).first(3)
+  end
+
+  test "a palette with no swatches sorts last, whichever way the colour runs" do
+    %w[ spectrum dark light ].each do |key|
+      assert_equal "Unfilled", Palette.sorted(key).map(&:name).last,
+        "expected the empty palette to sort last under #{key}"
+    end
+  end
+
+  test "sorting applies to the scope it is called on" do
+    assert_equal [ "Press Check" ], Palette.tagged("print").sorted("dark").map(&:name)
+  end
+
+  test "every offered sort is one the model answers to" do
+    Palette::SORTS.each_key do |key|
+      assert_equal Palette.count, Palette.sorted(key).size, "#{key} lost or duplicated rows"
+    end
+  end
 end
