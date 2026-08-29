@@ -46,9 +46,12 @@ has to be written into a cron line or a CI secret.
 
 The health check at `/up` stays open, because a load balancer has no token.
 
-The generated password-reset flow sends mail, so "Forgot your password?" only
-works once this app has an SMTP server to hand it to. Without one, reset a
-password the same way you would add an account: `bin/rails console`.
+Mail is yours to supply. This is a self-hosted app and it ships with no SMTP
+server and no opinion about which one you use: point
+`config.action_mailer.smtp_settings` in `config/environments/production.rb` at
+whatever you already run. "Forgot your password?" is the one thing that needs
+it — until it is configured, reset a password the same way you add an account,
+in `bin/rails console`.
 
 `app/channels` is there for the same reason: Rails switches Action Cable on by
 default, and that file is what stops a connection being made without a
