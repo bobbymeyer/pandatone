@@ -21,16 +21,8 @@ bin/rails test:all  # models, requests, contract, system
 
 Seeds are idempotent, so `bin/rails db:seed` can be re-run at any time.
 
-Seeding also makes the first account, and only the first — running it again
-leaves an existing one alone. Name it if you like:
-
-```sh
-PANDATONE_EMAIL=you@example.com PANDATONE_PASSWORD=... bin/rails db:seed
-```
-
-Otherwise it uses `you@example.com` and prints a generated password once. There
-is no sign-up page: this is one person's library, and the way to add a second
-account is `User.create!` in `bin/rails console`.
+Seeds make no account. The first person to open the app is sent to a sign-up
+page, and the account they make there is the admin.
 
 ## Signing in
 
@@ -38,11 +30,29 @@ Everything is behind a sign-in — the interface on a session cookie, the API on
 a token. Rails' own `bin/rails generate authentication` provides the session
 half of that; the token is a `has_secure_token` column beside it.
 
-The token is on the account page, and regenerating it there is the whole of
-revocation: whatever held the old one stops working at once, and nothing else
-about the account changes. It is a second credential rather than the password
-so that a tool holding it can be revoked on its own, and so the password never
-has to be written into a cron line or a CI secret.
+### Who gets in
+
+The library starts shut and with nobody holding a key.
+
+The **first** person to open the app is sent to `/sign_up`, and the account
+they make is the admin. Sign-ups close behind them: from then on the only way
+to a second account is an invitation.
+
+An admin invites by address, on **Invitations** (linked from the account page).
+An invited address may sign up, and signing up spends the invitation — so what
+is left on that page is exactly the people who have not arrived yet.
+Withdrawing one takes the address off the list again.
+
+There is one rank. An admin decides who else is here; everyone else is here to
+work on the library rather than on the people.
+
+### Tokens
+
+The API token is on the account page, and regenerating it there is the whole
+of revocation: whatever held the old one stops working at once, and nothing
+else about the account changes. It is a second credential rather than the
+password so that a tool holding it can be revoked on its own, and so the
+password never has to be written into a cron line or a CI secret.
 
 The health check at `/up` stays open, because a load balancer has no token.
 
@@ -50,8 +60,7 @@ Mail is yours to supply. This is a self-hosted app and it ships with no SMTP
 server and no opinion about which one you use: point
 `config.action_mailer.smtp_settings` in `config/environments/production.rb` at
 whatever you already run. "Forgot your password?" is the one thing that needs
-it — until it is configured, reset a password the same way you add an account,
-in `bin/rails console`.
+it — until it is configured, reset a password in `bin/rails console`.
 
 `app/channels` is there for the same reason: Rails switches Action Cable on by
 default, and that file is what stops a connection being made without a
@@ -164,6 +173,8 @@ The UI is for a human curating the library; the API is for machines.
   match is on the color it renders to, not on the build itself.
 - **Account** — who you are signed in as, the API token your scripts carry,
   and the two buttons that end either one: regenerate, and sign out.
+- **Invitations** — admin only: the addresses allowed to make an account and
+  the one field that adds another. Signing up takes an address off it.
 
 ## Exports
 

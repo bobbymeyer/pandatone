@@ -106,6 +106,7 @@
 .carried-swatches,
 .carried-swatch,
 .warning__swatches,
+.invitation-list > li,
 .lookup-missing {
   display: flex;
   flex-wrap: wrap;
@@ -116,6 +117,7 @@
 /* A column is the same idea turned ninety degrees. */
 .form,
 .field,
+.invitation-list,
 .swatch-entry__fields {
   display: flex;
   flex-direction: column;
@@ -407,6 +409,19 @@
    rather than three pixels apart because one word is longer than the other. */
 .filter-row__label,
 .filters .filter-form > .field > label { min-width: var(--register-label); }
+
+/* Each waiting address on its own line, the way the palette strip's meta row
+   puts its name and its count at the two ends of one. */
+.invitation-list {
+  margin-top: var(--space-4);
+  gap: var(--space-1);
+}
+
+.invitation-list > li {
+  justify-content: space-between;
+  padding-block: var(--space-1);
+  border-top: 1px solid var(--keyline);
+}
 
 /* --- Account ------------------------------------------------------------ */
 

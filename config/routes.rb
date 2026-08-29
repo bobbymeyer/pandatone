@@ -2,6 +2,14 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
 
+  # Making an account. Open only to the first person to arrive, and after that
+  # only to an address someone has invited.
+  resource :registration, only: %i[ new create ], path: "sign_up", path_names: { new: "" }
+
+  # The addresses allowed to make one, which is the admin's whole say over who
+  # else is here. Withdrawing is the only edit, so there is no update.
+  resources :invitations, only: %i[ index create destroy ]
+
   # Who you are signed in as, and the credential your scripts carry. The token
   # is its own resource because replacing it is the only thing you do to it.
   resource :account, only: :show

@@ -29,9 +29,13 @@ module Authentication
       Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
     end
 
+    # A library with nobody in it has nobody to sign in as, so the first
+    # visitor is sent to make the account rather than to a form that could
+    # never let them past.
     def request_authentication
       session[:return_to_after_authenticating] = request.url
-      redirect_to new_session_path
+
+      redirect_to User.none? ? new_registration_path : new_session_path
     end
 
     def after_authentication_url

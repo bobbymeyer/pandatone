@@ -38,4 +38,43 @@ class UserTest < ActiveSupport::TestCase
 
     assert_equal "mixed@example.com", user.email_address
   end
+
+  # The library belongs to whoever opened it. Everyone invited afterwards is
+  # an ordinary account until someone says otherwise.
+  test "an account is not an admin unless it is made one" do
+    assert_not User.create!(email_address: "ordinary@example.com", password: "x").admin?
+  end
+
+  test "the first account to exist is the admin" do
+    User.destroy_all
+
+    first = User.sign_up(email_address: "first@example.com", password: "x")
+
+    assert first.admin?
+  end
+
+  test "an account after the first is not" do
+    Invitation.create!(email_address: "invited@example.com", invited_by: users(:keeper))
+
+    invited = User.sign_up(email_address: "invited@example.com", password: "x")
+
+    assert_not invited.admin?
+  end
+
+  # Signing up spends the invitation, so the list left on the invitations page
+  # is exactly the people who have not arrived yet.
+  test "signing up spends the invitation that allowed it" do
+    Invitation.create!(email_address: "spent@example.com", invited_by: users(:keeper))
+
+    assert_difference -> { Invitation.count }, -1 do
+      User.sign_up(email_address: "spent@example.com", password: "x")
+    end
+  end
+
+  test "refuses an address nobody invited, once an account exists" do
+    user = User.sign_up(email_address: "stranger@example.com", password: "x")
+
+    assert_not user.persisted?
+    assert_match(/has not been invited/, user.errors.full_messages.to_sentence)
+  end
 end

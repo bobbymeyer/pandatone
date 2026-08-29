@@ -18,6 +18,9 @@
   <div class="page-actions">
     <%= button_to "Sign out", session_path, method: :delete, class: "button button--quiet" %>
 
+    <%# Only an admin can act on that page, so only an admin is sent to it. %>
+    <%= link_to "Invitations", invitations_path, class: "button" if @user.admin? %>
+
     <%= button_to "Regenerate token", api_token_path, method: :patch,
           class: "button button--danger",
           data: { turbo_confirm: "Every script and tool using the current token stops working until you give it the new one. Regenerate it?" } %>

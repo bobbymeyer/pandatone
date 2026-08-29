@@ -1,0 +1,45 @@
+<% content_for :title, "Invitations" %>
+
+<header class="page-head">
+  <h1 class="page-title">Invitations</h1>
+  <p class="page-lede">
+    Sign ups are closed. An address on this list may make an account, and
+    making one takes it off again.
+  </p>
+</header>
+
+<section class="account">
+  <%= render "shared/flash" %>
+
+  <% if Current.user.admin? %>
+    <%= form_with url: invitations_path, class: "form form--inline" do |form| %>
+      <%= render "shared/errors", record: @invitation %>
+
+      <div class="field">
+        <%= form.label :email_address, "Email" %>
+        <%= form.email_field :email_address, required: true, autocomplete: "off",
+              value: @invitation.email_address %>
+      </div>
+
+      <%= form.submit "Invite", class: "button button--primary" %>
+    <% end %>
+  <% else %>
+    <p class="hint">Only an admin can invite people.</p>
+  <% end %>
+
+  <% if @invitations.any? %>
+    <ul class="invitation-list">
+      <% @invitations.each do |invitation| %>
+        <li>
+          <span><%= invitation.email_address %></span>
+          <% if Current.user.admin? %>
+            <%= button_to "Withdraw", invitation, method: :delete, class: "button button--danger",
+                  data: { turbo_confirm: "#{invitation.email_address} will no longer be able to make an account. Withdraw it?" } %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="empty">Nobody is waiting on an invitation.</p>
+  <% end %>
+</section>

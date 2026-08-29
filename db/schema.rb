@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_180136) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_211823) do
   create_table "colors", force: :cascade do |t|
     t.integer "b", null: false
     t.decimal "c", precision: 5, scale: 1, null: false
@@ -26,6 +26,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_180136) do
     t.decimal "y", precision: 5, scale: 1, null: false
     t.index ["name"], name: "index_colors_on_name"
     t.index ["r", "g", "b"], name: "index_colors_on_r_and_g_and_b", unique: true
+  end
+
+  create_table "invitations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email_address", null: false
+    t.integer "invited_by_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_invitations_on_email_address", unique: true
+    t.index ["invited_by_id"], name: "index_invitations_on_invited_by_id"
   end
 
   create_table "palette_colors", force: :cascade do |t|
@@ -58,6 +67,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_180136) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.boolean "admin", default: false, null: false
     t.string "api_token", null: false
     t.datetime "created_at", null: false
     t.string "email_address", null: false
@@ -67,6 +77,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_180136) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "invitations", "users", column: "invited_by_id"
   add_foreign_key "palette_colors", "colors"
   add_foreign_key "palette_colors", "palettes"
   add_foreign_key "sessions", "users"

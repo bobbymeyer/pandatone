@@ -57,20 +57,4 @@ PALETTES.each do |name, definition|
   ).save || abort("Could not seed #{name}: #{palette.errors.full_messages.to_sentence}")
 end
 
-# The library is shut until somebody can open it, so seeding makes the first
-# account and only the first: running this again leaves an existing one alone,
-# password and token included. Set PANDATONE_EMAIL and PANDATONE_PASSWORD to
-# choose them; otherwise a password is generated and printed here, once.
-if User.none?
-  email = ENV["PANDATONE_EMAIL"].presence || "you@example.com"
-  chosen = ENV["PANDATONE_PASSWORD"].presence
-  password = chosen || SecureRandom.base58(16)
-
-  User.create!(email_address: email, password: password)
-
-  puts "Created the first account: #{email}"
-  puts "Password: #{password}" unless chosen
-  puts "Its API token is on the account page once you are signed in."
-end
-
 puts "Seeded #{Palette.count} palettes and #{Color.count} colors."
