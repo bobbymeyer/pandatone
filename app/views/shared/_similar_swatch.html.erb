@@ -10,12 +10,12 @@
     <li>
       <%= swatch_tag color.hex, class: "swatch--card" %>
       <p class="swatch-name"><%= color.name.presence || "Yours" %></p>
-      <p class="hex"><%= color.hex %></p>
+      <%= hex_tag color.hex %>
     </li>
     <li>
       <%= swatch_tag similar.hex, class: "swatch--card" %>
       <p class="swatch-name"><%= similar.name %></p>
-      <p class="hex"><%= similar.hex %></p>
+      <%= hex_tag similar.hex %>
     </li>
   </ul>
 

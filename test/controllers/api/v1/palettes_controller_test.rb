@@ -361,4 +361,27 @@ class Api::V1::PalettesControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_content
     assert_includes json["errors"]["base"], %("Brand Core" already holds exactly these colours)
   end
+
+  # --- Sorting ------------------------------------------------------------
+
+  test "sorts palettes by the same orders the interface offers" do
+    get api_v1_palettes_url(sort: "light")
+
+    assert_equal [ "Press Check", "Brand Core", "Autumn 2026", "Unfilled" ],
+      json.map { |palette| palette["name"] }
+  end
+
+  # The sequence of a palette's colours is the thing being published, so it
+  # is what you get unless you ask for something else.
+  test "a palette's colours keep their own order by default" do
+    get colors_api_v1_palette_url(palettes(:brand))
+
+    assert_equal [ "signal-red", "ink-black", "paper-white" ], json.map { |color| color["name"] }
+  end
+
+  test "a palette's colours can be asked for in another order" do
+    get colors_api_v1_palette_url(palettes(:brand), sort: "light")
+
+    assert_equal [ "paper-white", "signal-red", "ink-black" ], json.map { |color| color["name"] }
+  end
 end

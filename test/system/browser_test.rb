@@ -209,6 +209,53 @@ class BrowserTest < ApplicationSystemTestCase
     assert_no_text "Brand Core"
   end
 
+  # Making the hex a button brought a button's own font with it, which a
+  # `font: inherit` reset flattened every size modifier to fix.
+  test "a hex keeps its size after becoming a button" do
+    visit color_path(colors(:signal_red))
+    large = font_size_of(".hex--large")
+
+    visit colors_path
+    card = font_size_of(".color-card .hex")
+
+    assert_operator large, :>, card, "the large hex is no bigger than one on a card"
+  end
+
+  # The clipboard needs a real browser, a secure origin and a granted
+  # permission, so this is the only place the copying itself can be proven.
+  test "clicking a hex copies it" do
+    grant_clipboard
+    visit color_path(colors(:signal_red))
+
+    find(".hex--copy", match: :first).click
+
+    assert_selector ".hex--copy[data-copied]"
+    assert_equal "#E30613", evaluate_async_script(
+      "navigator.clipboard.readText().then(arguments[0])"
+    )
+  end
+
+  test "the confirmation clears itself" do
+    grant_clipboard
+    visit color_path(colors(:signal_red))
+
+    find(".hex--copy", match: :first).click
+    assert_selector ".hex--copy[data-copied]"
+
+    assert_no_selector ".hex--copy[data-copied]", wait: 5
+  end
+
+  test "a refused clipboard leaves the value readable" do
+    visit color_path(colors(:signal_red))
+
+    # No permission granted: the copy fails, and the page must not break or
+    # claim to have copied anything.
+    find(".hex--copy", match: :first).click
+
+    assert_no_selector ".hex--copy[data-copied]"
+    assert_text "#E30613"
+  end
+
   test "tags are edited in place rather than on their own page" do
     visit palette_path(palettes(:press))
 
@@ -232,6 +279,18 @@ class BrowserTest < ApplicationSystemTestCase
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "lookup" => lookup_path(q: "#E30613")
       }
+    end
+
+    # Chrome refuses clipboard writes to an unfocused or unpermitted page.
+    def grant_clipboard
+      page.driver.browser.execute_cdp("Browser.grantPermissions",
+        origin: page.server_url, permissions: %w[ clipboardReadWrite clipboardSanitizedWrite ])
+    end
+
+    def font_size_of(selector)
+      evaluate_script(
+        "parseFloat(getComputedStyle(document.querySelector(#{selector.to_json})).fontSize)"
+      )
     end
 
     def rect_of(selector)

@@ -192,7 +192,30 @@ class ColorSpaceTest < ActiveSupport::TestCase
 
   test "rejects a triple that is not three numbers" do
     assert_nil ColorSpace.parse("227, 6")
-    assert_nil ColorSpace.parse("227, 6, 19, 4")
+    assert_nil ColorSpace.parse("227, 6, 19, 4, 8")
+  end
+
+  # Four numbers are a CMYK build, three are an RGB triple. Every colour
+  # stores both spaces, so reading a build back as RGB is what lets a search
+  # in either space find a colour authored in the other.
+
+  test "parses a cmyk build of four numbers" do
+    assert_equal({ r: 0, g: 255, b: 255 }, ColorSpace.parse("100, 0, 0, 0"))
+    assert_equal({ r: 255, g: 255, b: 0 }, ColorSpace.parse("0 0 100 0"))
+  end
+
+  test "parses a cmyk build with decimals and labels" do
+    assert_equal({ r: 0, g: 0, b: 0 }, ColorSpace.parse("C 0 M 0 Y 0 K 100"))
+    assert_equal ColorSpace.cmyk_to_rgb(0, 32.7, 77.6, 23.1), ColorSpace.parse("0, 32.7, 77.6, 23.1")
+  end
+
+  test "rejects a cmyk build outside 0..100" do
+    assert_nil ColorSpace.parse("0, 0, 0, 101")
+    assert_nil ColorSpace.parse("-1, 0, 0, 0")
+  end
+
+  test "three numbers stay an rgb triple" do
+    assert_equal({ r: 0, g: 100, b: 100 }, ColorSpace.parse("0, 100, 100"))
   end
 
   test "returns nil for input it cannot read" do

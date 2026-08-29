@@ -52,6 +52,12 @@ afterwards:
   of the identity, and empty palettes do not duplicate one another. The check
   runs inside the same transaction as every other write, so removing a swatch
   is refused too if it would leave a duplicate behind.
+* **Deleting is the same rule, backwards.** A colour is shared, so deleting
+  one held by palettes rewrites every one of them — more than a button
+  reading "delete colour" suggests. It is refused until the request asks for
+  it in those terms, and the refusal names the palettes. It is refused
+  outright when stripping it would leave two palettes holding exactly the
+  same colours, since that rule cannot be true only on the way in.
 * **Near-duplicates are a question, not a rule.** Anything within a redmean
   distance of 32 of an existing swatch — `#FFFFFF` against `#FAFAF8` scores
   17 — is put back to you with both swatches side by side and a "create
@@ -106,6 +112,11 @@ The UI is for a human curating the library; the API is for machines.
   swatches are shown, so how close *close* is stays a matter for your eye
   rather than a number nobody can interpret. If neither is what you wanted,
   "Add this colour swatch" opens the entry form with the hex already in it.
+  It reads a hex, an RGB triple or a CMYK build — four numbers are inks on
+  0..100, three are channels on 0..255 — and matches on the RGB all three
+  resolve to, so a search in one space finds a colour authored in the other.
+  A build says so on the result, because that conversion is lossy and the
+  match is on the colour it renders to, not on the build itself.
 
 ## API
 
@@ -125,6 +136,7 @@ missing records return `404` with `{"error": "Not found"}`.
 | GET    | `/colors/:id`               | Includes a `palettes` array: the reverse lookup            |
 | POST   | `/colors`                   | Creates a standalone colour                                |
 | PATCH  | `/colors/:id`               | Edits a colour. It is shared, so this changes every palette holding it |
+| DELETE | `/colors/:id`               | Refused while a palette holds it unless `from_palettes` is sent |
 
 A colour is serialised as:
 
@@ -158,6 +170,15 @@ to a colour already in the library, or a full definition to create:
 On `PATCH`, the array **replaces** the whole list in the order given, so one
 request shape covers adding, removing and reordering. Omit the key to leave
 the colours alone. The whole write is one transaction.
+
+### Ordering over the API
+
+Both index endpoints take `?sort=` with the same keys the interface uses:
+`name` (the default), `added`, `modified`, `spectrum`, `dark`, `light`. An
+unrecognised one is name rather than an error.
+
+`GET /palettes/:id/colors` defaults to the palette's own sequence instead,
+because that order is the thing being published; pass `?sort=` to override it.
 
 ### Duplicates over the API
 

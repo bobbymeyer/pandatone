@@ -1,11 +1,13 @@
 <% content_for :title, @color.name %>
 
+<%= render "shared/errors", record: @color %>
+
 <article class="color-detail">
   <%= swatch_tag @color.hex, transition_name: "color-#{@color.id}", class: "swatch--large" %>
 
   <div class="color-detail__body">
     <h1 class="page-title"><%= @color.name %></h1>
-    <p class="hex hex--large"><%= @color.hex %></p>
+    <%= hex_tag @color.hex, class: "hex--large" %>
 
     <dl class="channels channels--stacked">
       <% channel_pairs(@color).each do |space, values| %>
@@ -20,12 +22,23 @@
       conversion, not a profiled one.
     </p>
 
-    <% if @color.tags.any? %>
-      <p class="tags"><%= @color.tags.join(" · ") %></p>
+    <%= turbo_frame_tag "color_tags" do %>
+      <div class="inline-edit">
+        <p class="tags"><%= @color.tags.any? ? @color.tags.join(" · ") : "Untagged" %></p>
+        <%= link_to "Edit tags", edit_color_tags_path(@color), class: "link-quiet" %>
+      </div>
     <% end %>
 
     <div class="page-actions">
       <%= link_to "Edit colour", edit_color_path(@color), class: "button" %>
+
+      <%# The confirmation names the palettes rather than asking twice: the
+          server refuses a bare delete of a held colour, so the page that
+          knows what holds it asks for that permission up front. %>
+      <%= button_to "Delete colour", @color, method: :delete,
+            params: { from_palettes: @palettes.any? || nil }.compact,
+            class: "button button--quiet",
+            data: { turbo_confirm: delete_color_warning(@color, @palettes) } %>
     </div>
   </div>
 </article>

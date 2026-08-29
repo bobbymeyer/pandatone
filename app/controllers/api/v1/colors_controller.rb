@@ -2,12 +2,12 @@ module Api
   module V1
     class ColorsController < BaseController
       def index
-        colors = Color.order(:name)
+        colors = Color.all
         colors = colors.tagged(params[:tag]) if params[:tag].present?
         colors = colors.by_hex(params[:hex]) if params[:hex].present?
         colors = colors.in_palette(params[:palette]) if params[:palette].present?
 
-        render json: ColorSerializer.many(colors)
+        render json: ColorSerializer.many(colors.sorted(sort_key))
       end
 
       def show
@@ -39,14 +39,30 @@ module Api
         end
       end
 
+      # Deleting a shared colour rewrites every palette holding it, so a client
+      # has to say that is what it means: pass from_palettes.
+      def destroy
+        color = Color.find(params[:id])
+
+        if ColorRemoval.new(color, from_palettes: boolean(params[:from_palettes])).destroy
+          head :no_content
+        else
+          render_invalid(color)
+        end
+      end
+
       private
+        def boolean(value)
+          ActiveModel::Type::Boolean.new.cast(value)
+        end
+
         # The same near-duplicate check the interface makes, in the shape a
         # client can act on: refused with the swatch it resembles attached, and
         # accepted on a second call carrying confirm_similar. Silently letting
         # machines fill the library with colours no human would have added
         # would make the rule decorative.
         def unconfirmed_twin(color)
-          return nil if ActiveModel::Type::Boolean.new.cast(params[:confirm_similar])
+          return nil if boolean(params[:confirm_similar])
           return nil unless color.valid?
 
           Color.similar_to(color)

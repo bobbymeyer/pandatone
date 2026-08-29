@@ -8,7 +8,7 @@
     <h2 class="color-card__name swatch-name"><%= color.name %></h2>
   <% end %>
 
-  <p class="hex"><%= color.hex %></p>
+  <%= hex_tag color.hex %>
 
   <p class="color-card__palettes">
     <% if color.palettes.empty? %>

@@ -34,6 +34,27 @@ module SwatchesHelper
     "#{shown} of #{pluralize(total, noun)}"
   end
 
+  # A hex on screen exists to be pasted somewhere else, so it is a button
+  # that copies itself. The value stays visible text inside it, which is what
+  # keeps it usable when the clipboard is unavailable.
+  def hex_tag(hex, **options)
+    options[:class] = Array(options[:class]).unshift("hex", "hex--copy")
+
+    tag.button(hex, type: "button", **options,
+      data: { controller: "clipboard", action: "clipboard#copy", clipboard_text_value: hex },
+      aria: { label: "Copy #{hex}" })
+  end
+
+  # Says what deleting will actually do. A colour no palette holds is a small
+  # act; one that four palettes hold is four palettes changing, and the
+  # confirmation is the last place to say so.
+  def delete_color_warning(color, palettes)
+    return "Delete #{color.name}? No palette holds it." if palettes.empty?
+
+    "#{color.name} is in #{palettes.map(&:name).to_sentence}. " \
+      "Delete it and take it out of #{palettes.one? ? "that palette" : "those palettes"}?"
+  end
+
   # Returns each space's channels as separate values rather than one string,
   # so a narrow card wraps between them instead of splitting "K 11.0" in half.
   def channel_pairs(color)

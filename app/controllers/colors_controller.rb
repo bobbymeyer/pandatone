@@ -1,7 +1,7 @@
 class ColorsController < ApplicationController
   include Sorting
 
-  before_action :set_color, only: %i[ show edit update ]
+  before_action :set_color, only: %i[ show edit update destroy ]
 
   def index
     @colors = Color.name_matching(params[:q]).includes(:palettes)
@@ -12,7 +12,7 @@ class ColorsController < ApplicationController
   end
 
   def show
-    @palettes = @color.palettes.reorder(:name).includes(palette_colors: :color)
+    @palettes = holding_palettes
   end
 
   # Colours are first-class in the domain, so one can be brought into
@@ -49,7 +49,23 @@ class ColorsController < ApplicationController
     end
   end
 
+  # A colour is shared, so this is the one deletion in the app that can rewrite
+  # records the button does not name. ColorRemoval refuses until the request
+  # says so in as many words.
+  def destroy
+    if ColorRemoval.new(@color, from_palettes: params[:from_palettes].present?).destroy
+      redirect_to colors_path
+    else
+      @palettes = holding_palettes
+      render :show, status: :unprocessable_content
+    end
+  end
+
   private
+    def holding_palettes
+      @color.palettes.reorder(:name).includes(palette_colors: :color)
+    end
+
     def set_color
       @color = Color.find(params[:id])
     end

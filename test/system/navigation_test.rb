@@ -98,7 +98,7 @@ class NavigationTest < ApplicationSystemTestCase
     assert_text "signal-red"
 
     click_on "Lookup"
-    assert_text "Hex or RGB"
+    assert_text "Hex, RGB or CMYK"
 
     click_on "Palettes"
     assert_text "Brand Core"

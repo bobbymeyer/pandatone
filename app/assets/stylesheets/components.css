@@ -474,6 +474,31 @@ form.button_to { display: inline; }
 
 .link-quiet:hover { color: var(--ink); }
 
+/* The affordance on the copy button. What makes it look like the text it
+   replaced lives in type.css, ahead of the size modifiers it would otherwise
+   flatten. */
+.hex--copy {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.hex--copy::after {
+  content: "";
+  color: var(--ink-quiet);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.hex--copy:hover::after { content: " copy"; }
+
+/* Says it worked, in the one place you are already looking. */
+.hex--copy[data-copied]::after,
+.hex--copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
+
 /* --- Empty and error states --------------------------------------------- */
 
 .empty { color: var(--ink-quiet); }

@@ -7,6 +7,10 @@ class LookupsController < ApplicationController
     @rgb = ColorSpace.parse(@query)
     return if @rgb.nil?
 
+    # Said out loud on the page, because reading four numbers as inks is an
+    # interpretation, and the conversion to RGB throws information away.
+    @build = ColorSpace.build(@query)
+
     @hex = ColorSpace.to_hex(@rgb[:r], @rgb[:g], @rgb[:b])
     @colors = Color.where(@rgb).order(:name)
     @palettes = Palette.containing_hex(@hex).order(:name)

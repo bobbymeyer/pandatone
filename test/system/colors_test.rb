@@ -123,6 +123,89 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "No colours yet"
   end
 
+  # --- Tags and copying ----------------------------------------------------
+
+  test "edits a colour's tags in place" do
+    visit color_path(colors(:deep_indigo))
+
+    click_on "Edit tags"
+    fill_in "Tags", with: "Cool, brand"
+    click_on "Save tags"
+
+    assert_current_path color_path(colors(:deep_indigo))
+    assert_text "cool · brand"
+  end
+
+  test "says so rather than showing nothing when a colour has no tags" do
+    colors(:deep_indigo).update!(tags: [])
+
+    visit color_path(colors(:deep_indigo))
+
+    assert_text "Untagged"
+  end
+
+  # A hex is on screen to be taken somewhere else, so it is a button. The
+  # value stays readable inside it, which is what keeps the page usable when
+  # the clipboard is not.
+  test "every hex on screen is a copy button carrying its own value" do
+    visit color_path(colors(:signal_red))
+
+    button = find(".hex--copy", match: :first)
+    assert_equal "#E30613", button.text
+    assert_equal "#E30613", button["data-clipboard-text-value"]
+    assert_equal "Copy #E30613", button["aria-label"]
+  end
+
+  test "hexes are copy buttons on the index and the lookup too" do
+    visit colors_path
+    assert_selector ".color-card .hex--copy", minimum: 6
+
+    visit lookup_path(q: "#E30613")
+    assert_selector ".hex--copy", text: "#E30613"
+  end
+
+  # --- Deleting -----------------------------------------------------------
+
+  test "deletes a colour no palette holds" do
+    visit color_path(colors(:deep_indigo))
+
+    confirming { click_on "Delete colour" }
+
+    assert_current_path colors_path
+    assert_no_text "deep-indigo"
+    assert_not Color.exists?(colors(:deep_indigo).id)
+  end
+
+  # The confirmation is the last place to say what deleting a shared colour
+  # will actually do, so it names the palettes rather than asking twice.
+  test "names the palettes before deleting a colour they hold" do
+    visit color_path(colors(:signal_red))
+
+    assert_equal "signal-red is in Autumn 2026 and Brand Core. Delete it and take it out of those palettes?",
+      find_button("Delete colour")[:"data-turbo-confirm"]
+  end
+
+  test "deletes a shared colour out of every palette holding it" do
+    visit color_path(colors(:signal_red))
+
+    confirming { click_on "Delete colour" }
+
+    assert_current_path colors_path
+    assert_equal [ "ink-black", "paper-white" ], palettes(:brand).colors.reload.order(:name).pluck(:name)
+  end
+
+  test "refuses a deletion that would leave two palettes identical" do
+    pair = Palette.new
+    PaletteComposition.new(pair, attributes: { name: "Pair" },
+      colors: [ { id: colors(:signal_red).id }, { id: colors(:ink_black).id } ]).save
+
+    visit color_path(colors(:paper_white))
+    confirming { click_on "Delete colour" }
+
+    assert_text %(Deleting this would leave "Brand Core" and "Pair" holding exactly the same colours)
+    assert Color.exists?(colors(:paper_white).id)
+  end
+
   # --- Sorting ------------------------------------------------------------
 
   test "lists colours by name until asked otherwise" do
@@ -377,7 +460,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "looks a colour up by hex and lists every palette containing it" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#E30613"
+    fill_in "Hex, RGB or CMYK", with: "#E30613"
     click_on "Look up"
 
     assert_text "signal-red"
@@ -388,7 +471,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "looks a colour up by hex without a leading hash" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "e30613"
+    fill_in "Hex, RGB or CMYK", with: "e30613"
     click_on "Look up"
 
     assert_text "Brand Core"
@@ -397,17 +480,71 @@ class ColorsTest < ApplicationSystemTestCase
   test "looks a colour up by an rgb triple" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "227, 6, 19"
+    fill_in "Hex, RGB or CMYK", with: "227, 6, 19"
     click_on "Look up"
 
     assert_text "signal-red"
     assert_text "Brand Core"
   end
 
+  # Every colour stores both spaces, so a search in one finds a colour
+  # authored in the other. process-cyan was authored in CMYK; signal-red in
+  # RGB. Each is findable from either direction.
+
+  test "finds a cmyk authored colour from its build" do
+    visit lookup_path
+
+    fill_in "Hex, RGB or CMYK", with: "100, 0, 0, 0"
+    click_on "Look up"
+
+    assert_text "process-cyan"
+    assert_text "Press Check"
+    assert_text "Read as a CMYK build"
+  end
+
+  test "finds a cmyk authored colour from its hex" do
+    visit lookup_path
+
+    fill_in "Hex, RGB or CMYK", with: "#00FFFF"
+    click_on "Look up"
+
+    assert_text "process-cyan"
+    assert_no_text "Read as a CMYK build"
+  end
+
+  test "finds an rgb authored colour from a cmyk build" do
+    visit lookup_path
+
+    fill_in "Hex, RGB or CMYK", with: "0, 97.4, 91.6, 11"
+    click_on "Look up"
+
+    assert_text "signal-red"
+    assert_text "Brand Core"
+  end
+
+  test "reads three numbers as rgb and four as a build" do
+    visit lookup_path
+
+    fill_in "Hex, RGB or CMYK", with: "0, 255, 255"
+    click_on "Look up"
+
+    assert_text "process-cyan"
+    assert_no_text "Read as a CMYK build"
+  end
+
+  test "reports a build outside the ink range" do
+    visit lookup_path
+
+    fill_in "Hex, RGB or CMYK", with: "0, 0, 0, 140"
+    click_on "Look up"
+
+    assert_text "Could not read"
+  end
+
   test "shows the swatch even when no stored colour matches" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#ABCDEF"
+    fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
 
     assert_selector ".swatch[style*='#ABCDEF']"
@@ -421,7 +558,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "offers to add a colour the library does not hold" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#ABCDEF"
+    fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
 
     assert_text "Not in the library"
@@ -435,7 +572,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "adding from a lookup lands the colour in the library" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#ABCDEF"
+    fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
     click_on "Add this colour swatch"
 
@@ -453,7 +590,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "does not offer to add a colour the library already holds" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#E30613"
+    fill_in "Hex, RGB or CMYK", with: "#E30613"
     click_on "Look up"
 
     assert_text "signal-red"
@@ -464,7 +601,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "offers the closest stored colour when the library holds no match" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#FFFFFF"
+    fill_in "Hex, RGB or CMYK", with: "#FFFFFF"
     click_on "Look up"
 
     assert_text "Not in the library"
@@ -478,7 +615,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "the closest stored colour links through to it" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#FFFFFF"
+    fill_in "Hex, RGB or CMYK", with: "#FFFFFF"
     click_on "Look up"
 
     within(".lookup-nearest") { click_on "paper-white" }
@@ -489,7 +626,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "offers a closest colour however far off it is" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#800080"
+    fill_in "Hex, RGB or CMYK", with: "#800080"
     click_on "Look up"
 
     assert_selector ".lookup-nearest .swatch"
@@ -498,7 +635,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "does not offer a closest colour when the lookup matched exactly" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#E30613"
+    fill_in "Hex, RGB or CMYK", with: "#E30613"
     click_on "Look up"
 
     assert_text "signal-red"
@@ -510,7 +647,7 @@ class ColorsTest < ApplicationSystemTestCase
     Color.delete_all
 
     visit lookup_path
-    fill_in "Hex or RGB", with: "#ABCDEF"
+    fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
 
     assert_text "Not in the library"
@@ -522,7 +659,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "a found colour keeps its transition name through to its page" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#E30613"
+    fill_in "Hex, RGB or CMYK", with: "#E30613"
     click_on "Look up"
 
     swatch = find(".lookup-result > .swatch")
@@ -532,7 +669,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "an unmatched lookup names its swatch by the colour itself" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "#ABCDEF"
+    fill_in "Hex, RGB or CMYK", with: "#ABCDEF"
     click_on "Look up"
 
     swatch = find(".lookup-result > .swatch")
@@ -542,7 +679,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "reports an unreadable lookup" do
     visit lookup_path
 
-    fill_in "Hex or RGB", with: "wat"
+    fill_in "Hex, RGB or CMYK", with: "wat"
     click_on "Look up"
 
     assert_text "Could not read"

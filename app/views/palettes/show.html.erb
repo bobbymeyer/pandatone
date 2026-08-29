@@ -34,7 +34,7 @@
           <h3 class="swatch-name"><%= color.name %></h3>
         <% end %>
 
-        <p class="hex"><%= color.hex %></p>
+        <%= hex_tag color.hex %>
 
         <dl class="channels">
           <% channel_pairs(color).each do |space, values| %>

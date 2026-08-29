@@ -4,20 +4,24 @@ module Api
       before_action :set_palette, only: %i[ show colors update destroy ]
 
       def index
-        palettes = Palette.order(:name)
+        palettes = Palette.all
         palettes = palettes.tagged(params[:tag]) if params[:tag].present?
         palettes = palettes.containing_hex(params[:color]) if params[:color].present?
 
-        render json: PaletteSerializer.many(palettes)
+        render json: PaletteSerializer.many(palettes.sorted(sort_key))
       end
 
       def show
         render json: PaletteSerializer.one(@palette)
       end
 
-      # The workhorse endpoint for consuming tools.
+      # The workhorse endpoint for consuming tools. Unlike the indexes this
+      # defaults to the palette's own order, because that sequence is the
+      # thing being published — sort only when asked.
       def colors
-        render json: ColorSerializer.many(@palette.colors)
+        colors = params[:sort].present? ? @palette.colors.sorted(sort_key) : @palette.colors
+
+        render json: ColorSerializer.many(colors)
       end
 
       def create

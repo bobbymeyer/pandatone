@@ -61,8 +61,26 @@ module ColorSpace
   # Freeform input from a human: a hex, or an RGB triple in whatever
   # punctuation their tool produced. Six hex digits are read as hex, since
   # that is overwhelmingly what "123456" means in a colour field.
+  # Reads a colour written any of the ways someone might have it to hand: a
+  # hex, an RGB triple, or a CMYK build. All three come back as RGB, which is
+  # what makes a search in one space find a colour authored in the other —
+  # every colour stores both, and RGB is the one they share.
+  #
+  # The count decides the space: four numbers are inks on 0..100, three are
+  # channels on 0..255. A build is lossy in that direction, so this finds the
+  # colour the build renders to rather than the build itself.
   def parse(input)
-    parse_hex(input) || parse_triple(input)
+    parse_hex(input) || parse_triple(input) || build(input)&.then { |inks| cmyk_to_rgb(*inks.values) }
+  end
+
+  # The four inks of a CMYK build, or nil. Public because a screen that reads
+  # one wants to say so: the conversion is lossy, and "we read that as a
+  # build" is the difference between a wrong answer and an explained one.
+  def build(input)
+    inks = input.to_s.scan(/-?\d+(?:\.\d+)?/).map(&:to_f)
+    return nil unless inks.length == 4 && inks.all? { |ink| (0..100).cover?(ink) }
+
+    { c: inks[0], m: inks[1], y: inks[2], k: inks[3] }
   end
 
   # normalize_hex("fc0") # => "#FFCC00"

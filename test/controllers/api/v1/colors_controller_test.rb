@@ -235,6 +235,39 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
       JSON.parse(response.body)
     end
 
+  # --- Sorting ------------------------------------------------------------
+
+  test "sorts by name unless asked otherwise" do
+    get api_v1_colors_url
+
+    assert_equal Color.order(:name).pluck(:name), json.map { |color| color["name"] }
+  end
+
+  test "offers the same orders the interface does" do
+    get api_v1_colors_url(sort: "dark")
+    assert_equal "ink-black", json.first["name"]
+
+    get api_v1_colors_url(sort: "light")
+    assert_equal "paper-white", json.first["name"]
+
+    get api_v1_colors_url(sort: "spectrum")
+    assert_equal "ink-black", json.first["name"]
+    assert_equal "paper-white", json.last["name"]
+  end
+
+  test "an unknown order is name rather than an error" do
+    get api_v1_colors_url(sort: "sideways")
+
+    assert_response :success
+    assert_equal Color.order(:name).pluck(:name), json.map { |color| color["name"] }
+  end
+
+  test "sorting composes with filtering" do
+    get api_v1_colors_url(tag: "brand", sort: "light")
+
+    assert_equal [ "paper-white", "signal-red", "ink-black" ], json.map { |color| color["name"] }
+  end
+
   # --- Duplicates and near duplicates ------------------------------------
 
   test "refuses a colour the library already holds" do
@@ -291,5 +324,39 @@ class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :created
     assert_nil json["similar"]
+  end
+
+  # --- Delete -------------------------------------------------------------
+
+  test "deletes a colour no palette holds" do
+    assert_difference "Color.count", -1 do
+      delete api_v1_color_url(colors(:deep_indigo))
+    end
+
+    assert_response :no_content
+  end
+
+  test "refuses to delete a colour a palette holds" do
+    assert_no_difference "Color.count" do
+      delete api_v1_color_url(colors(:signal_red))
+    end
+
+    assert_response :unprocessable_content
+    assert_match "Autumn 2026 and Brand Core", json["errors"]["base"].first
+  end
+
+  test "deletes a held colour when the client says that is what it means" do
+    assert_difference "Color.count", -1 do
+      delete api_v1_color_url(colors(:signal_red)), as: :json, params: { from_palettes: true }
+    end
+
+    assert_response :no_content
+    assert_equal 2, palettes(:brand).colors.reload.size
+  end
+
+  test "reports a missing colour rather than pretending to delete it" do
+    delete api_v1_color_url(id: 0)
+
+    assert_response :not_found
   end
 end
