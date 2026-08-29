@@ -11,6 +11,19 @@ class BrowserTest < ApplicationSystemTestCase
     skip "needs a real browser; run with SYSTEM_TEST_DRIVER=selenium" unless javascript_driver?
   end
 
+  # The one rule the whole palette rests on is that the swatches are the only
+  # color on the page. An emoji arrives with its own, and which colors depends
+  # on whose emoji font renders it — so it is drained here rather than trusted
+  # to be monochrome. Asserted on the computed style rather than grepped out
+  # of the stylesheet: a rule on the wrong selector reads correctly in the CSS
+  # and does nothing on the page.
+  test "the panda is drained of color like everything else that is not a swatch" do
+    visit root_path
+
+    assert_equal "grayscale(1)",
+      evaluate_script("getComputedStyle(document.querySelector('.masthead__panda')).filter")
+  end
+
   # --- Layout ------------------------------------------------------------
 
   test "the palette results fill the field the filters fill" do

@@ -47,6 +47,32 @@ class NarrowTest < ApplicationSystemTestCase
     end
   end
 
+  # The wordmark is one thing: the panda belongs to the word beside it. At
+  # 320 the masthead was breaking it into three lines — the panda on one, and
+  # "Pandatone" split across two more. Given a masthead too narrow for both,
+  # the nav is what gives way.
+  test "the wordmark holds one line, and the nav drops below it instead" do
+    [ SMALL_PHONE, PHONE ].each do |size|
+      visit root_path
+      resize_viewport(*size)
+
+      assert_equal 1, lines_in(".masthead__mark"),
+        "at #{size.first}px the wordmark broke across lines"
+      assert_operator box(".masthead__nav")["top"], :>=, box(".masthead__mark")["bottom"] - 1,
+        "at #{size.first}px the nav is still beside the wordmark rather than below it"
+    end
+  end
+
+  # Stacking is what a narrow masthead does, not what every masthead does.
+  test "the masthead stays on one line where there is room for it" do
+    visit root_path
+    resize_viewport(1200, 800)
+
+    assert_equal 1, lines_in(".masthead__mark")
+    assert_operator box(".masthead__nav")["top"], :<, box(".masthead__mark")["bottom"],
+      "the nav dropped below the wordmark on a width with room for both"
+  end
+
   # 39 of these were 14px tall on a phone, which is what a row of 12px links
   # measures when nobody looks at it on one.
   test "every tap target clears the 24px minimum" do
@@ -86,6 +112,22 @@ class NarrowTest < ApplicationSystemTestCase
   end
 
   private
+    # How many line boxes a block actually occupies, which is the only honest
+    # way to ask whether its text wrapped.
+    def lines_in(selector)
+      evaluate_script(<<~JS)
+        (() => {
+          const el = document.querySelector('#{selector}');
+          return Math.round(el.getBoundingClientRect().height
+            / parseFloat(getComputedStyle(el).lineHeight));
+        })()
+      JS
+    end
+
+    def box(selector)
+      evaluate_script("document.querySelector('#{selector}').getBoundingClientRect().toJSON()")
+    end
+
     def overflow
       evaluate_script("document.documentElement.scrollWidth - document.documentElement.clientWidth")
     end

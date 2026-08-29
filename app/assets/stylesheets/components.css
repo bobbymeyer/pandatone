@@ -9,20 +9,47 @@
   align-items: baseline;
 }
 
+/* The panda and the word are one mark, so it never breaks: not between them,
+   and not inside the word. body sets overflow-wrap: anywhere for names and
+   tags, which are free text; this is not. */
 .masthead__mark {
   grid-column: 1 / span 2;
   letter-spacing: -0.015em;
+  white-space: nowrap;
 }
 
 /* Off the ladder like every other gap in the app, rather than a space
-   character whose width is the font's business and not ours. */
-.masthead__panda { margin-inline-end: var(--space-1); }
+   character whose width is the font's business and not ours.
+
+   Drained of color for the rule the whole palette rests on: the swatches are
+   the only color on the page. An emoji brings its own, and which colors it
+   brings depends on whose emoji font draws it. */
+.masthead__panda {
+  margin-inline-end: var(--space-1);
+  filter: grayscale(1);
+}
 
 /* Off the left edge rather than pushed to the right: the asymmetry is the
    point, and it lines the nav up with the body column below. */
 .masthead__nav { grid-column: 3 / -1; }
 
 .masthead__nav a:hover { color: var(--ink); }
+
+/* Two fields is not enough for the wordmark at a phone's width, and the
+   wordmark is the one thing here that may not be squeezed. So the masthead
+   stacks instead: the mark takes the width it needs, and the nav drops below
+   it and wraps as it likes. The same phone breakpoint the cards use, rather
+   than a seventh number chosen to fit one word.
+
+   Here rather than beside the other breakpoints in grid.css, because the
+   masthead's placement is stated here and grid.css is loaded first: a rule
+   there loses to this one however narrow the screen gets. */
+@media (max-width: 34rem) {
+  .masthead__mark,
+  .masthead__nav { grid-column: 1 / -1; }
+
+  .masthead__nav { margin-top: var(--space-2); }
+}
 
 /* --- Registers -----------------------------------------------------------
    Three things this interface says over and over: this is secondary, this is
