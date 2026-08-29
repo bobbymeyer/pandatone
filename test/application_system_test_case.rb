@@ -22,7 +22,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   end
 
   # rack_test has no CSS, no box model and no JavaScript, so anything about
-  # layout or behaviour has to say so and stand aside.
+  # layout or behavior has to say so and stand aside.
   def javascript_driver?
     Capybara.current_driver != :rack_test
   end

@@ -12,22 +12,22 @@ class Color < ApplicationRecord
 
   # Below this redmean distance two swatches are near enough that having both
   # is more likely a mistake than a decision: #FAFAF8 against #FFFFFF scores
-  # 17, a red mistyped as #E01020 instead of #E30613 scores 28. Two greys
-  # twenty steps apart score 60 and stay two swatches. The line is a judgement
+  # 17, a red mistyped as #E01020 instead of #E30613 scores 28. Two grays
+  # twenty steps apart score 60 and stay two swatches. The line is a judgment
   # about a library, not a perceptual constant, which is why it warns rather
   # than refuses.
   SIMILARITY_THRESHOLD = 32
 
   # Below this much chroma there is not enough hue to place on the spectrum,
   # so the color belongs on the black-to-white axis instead. It clears the
-  # off-whites and the warm greys without catching a muted olive.
+  # off-whites and the warm grays without catching a muted olive.
   NEUTRAL_CHROMA = 24
 
   # Half of 255: which end of the black-to-white axis a neutral belongs on.
   NEUTRAL_MIDPOINT = 127.5
 
   # A wheel has no beginning, so a linear list has to cut it somewhere, and
-  # wherever the cut falls two neighbouring colors end up at opposite ends.
+  # wherever the cut falls two neighboring colors end up at opposite ends.
   # Cutting at red would do it between #FF0010 and #FF0000 — putting a red
   # that leans a few degrees blue, like #E30613 at 356.5, after the violets.
   # The gap between magenta and red is the emptiest place to break, so the
@@ -170,7 +170,7 @@ class Color < ApplicationRecord
   end
 
   # Floats, not BigDecimal: this is what goes over the wire, and a BigDecimal
-  # would serialise as a quoted string.
+  # would serialize as a quoted string.
   def cmyk
     { c: c.to_f, m: m.to_f, y: y.to_f, k: k.to_f }
   end

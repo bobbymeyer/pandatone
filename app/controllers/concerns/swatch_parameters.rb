@@ -19,7 +19,7 @@ module SwatchParameters
 
   private
     # The swatch already on file that this one is close enough to be a
-    # duplicate of, or nil. A near-duplicate is a judgement call, not a
+    # duplicate of, or nil. A near-duplicate is a judgment call, not a
     # mistake, so it is put as a question rather than refused outright — but
     # it is put before the row is written, because a library nobody trusts to
     # be free of near-identical swatches is a library nobody looks in.
@@ -37,7 +37,7 @@ module SwatchParameters
 
     # Returns nil when the row was left empty, so an untouched entry row does
     # not become a validation error on an otherwise fine palette. Only the
-    # chosen mode's own fields count towards that: the color picker always
+    # chosen mode's own fields count toward that: the color picker always
     # posts a value, so asking whether every field is blank would make an
     # untouched form look filled in.
     def swatch_spec

@@ -384,7 +384,7 @@ class ColorTest < ActiveSupport::TestCase
 
   # --- Sorting ------------------------------------------------------------
 
-  test "sorts by name by default, and for anything it does not recognise" do
+  test "sorts by name by default, and for anything it does not recognize" do
     [ nil, "", "sideways" ].each do |key|
       assert_equal Color.order(:name).pluck(:name), Color.sorted(key).map(&:name),
         "expected #{key.inspect} to fall back to name order"
@@ -425,7 +425,7 @@ class ColorTest < ActiveSupport::TestCase
     assert_operator order.index("process-cyan"), :<, order.index("deep-indigo"), "cyan before blue"
   end
 
-  # #E30613 is a red that leans a few degrees towards magenta, so on a wheel
+  # #E30613 is a red that leans a few degrees toward magenta, so on a wheel
   # cut at red it lands at 356 and sorts after violet. The cut sits in the
   # magenta-to-red gap instead, where a linear list has to break anyway.
   test "a red that leans blue still sorts with the reds" do

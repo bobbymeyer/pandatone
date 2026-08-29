@@ -35,18 +35,18 @@ module Palettes
       end
     end
 
-    # Swaps a swatch with its neighbour. Moving one swatch is a whole
+    # Swaps a swatch with its neighbor. Moving one swatch is a whole
     # interaction on its own, rather than something you compose by typing a
     # column of integers and then remembering to save them.
     def move
       membership = @palette.palette_colors.find_by!(color_id: params[:id])
-      neighbour = neighbour_of(membership)
+      neighbor = neighbor_of(membership)
 
-      if neighbour
+      if neighbor
         PaletteColor.transaction do
           position = membership.position
-          membership.update!(position: neighbour.position)
-          neighbour.update!(position: position)
+          membership.update!(position: neighbor.position)
+          neighbor.update!(position: position)
         end
       end
 
@@ -79,7 +79,7 @@ module Palettes
         @palette = Palette.friendly_find(params[:palette_id])
       end
 
-      def neighbour_of(membership)
+      def neighbor_of(membership)
         scope = @palette.palette_colors.where.not(id: membership.id)
 
         if params[:direction] == "up"

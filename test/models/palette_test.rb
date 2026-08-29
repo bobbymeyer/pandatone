@@ -214,7 +214,7 @@ class PaletteTest < ActiveSupport::TestCase
 
   # --- Sorting ------------------------------------------------------------
 
-  test "sorts by name by default, and for anything it does not recognise" do
+  test "sorts by name by default, and for anything it does not recognize" do
     [ nil, "", "sideways" ].each do |key|
       assert_equal Palette.order(:name).pluck(:name), Palette.sorted(key).map(&:name),
         "expected #{key.inspect} to fall back to name order"

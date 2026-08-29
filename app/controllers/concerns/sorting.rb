@@ -1,4 +1,4 @@
-# Reads the sort a request asked for. An unrecognised one is not worth an
+# Reads the sort a request asked for. An unrecognized one is not worth an
 # error page; it means name, which is what both indexes did before there was
 # anything to choose.
 module Sorting

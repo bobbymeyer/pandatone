@@ -93,7 +93,7 @@ class BrowserTest < ApplicationSystemTestCase
     tops_of(".swatch-detail:first-child .channels dd .channel").each_slice(1) { |t| assert t.first.is_a?(Integer) }
   end
 
-  # --- Behaviour the no-JS suite cannot reach ----------------------------
+  # --- Behavior the no-JS suite cannot reach ----------------------------
 
   test "a row of a form does not stretch across the page" do
     visit lookup_path

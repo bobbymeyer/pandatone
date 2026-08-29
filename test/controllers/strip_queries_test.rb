@@ -3,7 +3,7 @@ require "test_helper"
 # The palette strip renders every swatch of every palette it is given, so both
 # the palette index and the color page sit one missing preload away from a
 # query per palette. These pin the count flat in the number of palettes rather
-# than checking an exact number, which would only measure today's behaviour.
+# than checking an exact number, which would only measure today's behavior.
 class StripQueriesTest < ActionDispatch::IntegrationTest
   test "the palette index does not issue a query per palette" do
     assert_query_count_flat palettes_path do

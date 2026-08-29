@@ -105,7 +105,7 @@ module ColorSpace
   end
 
   # Rec. 601 luma: the standard weighted average of the channels, on 0..255.
-  # It is not a perceptual lightness — it does not linearise the gamma — but it
+  # It is not a perceptual lightness — it does not linearize the gamma — but it
   # puts yellow well above blue where (max + min) / 2 calls them equal, which
   # is the whole of what a dark-to-light sort is for.
   def luma(r, g, b)
@@ -113,7 +113,7 @@ module ColorSpace
   end
 
   # How much color there is in a color: the spread between its channels, on
-  # 0..255. Zero is a grey, and everything near zero reads as one.
+  # 0..255. Zero is a gray, and everything near zero reads as one.
   def chroma(r, g, b)
     [ r, g, b ].max - [ r, g, b ].min
   end

@@ -316,7 +316,7 @@
 .tag:hover { color: var(--ink); }
 
 /* The accent says which one is current, and the weight says it again: this
-   is a color tool, and a reader who cannot separate the red from the grey
+   is a color tool, and a reader who cannot separate the red from the gray
    would otherwise have no current state at all. */
 .tag.active {
   color: var(--accent);
@@ -507,7 +507,7 @@
 .button--danger:focus-visible { color: var(--accent); }
 
 /* Set apart from the actions beside it, not only colored once you arrive:
-   at rest, reordering and destroying were the same grey word in a row, and a
+   at rest, reordering and destroying were the same gray word in a row, and a
    gap is read before a word is. */
 /* :has, because button_to wraps its button in a form: the flex child here is
    the form, and auto margins belong to the child. */

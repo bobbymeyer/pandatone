@@ -59,7 +59,7 @@ class GridTest < ActiveSupport::TestCase
   # --- Type ----------------------------------------------------------------
 
   # A label is a label wherever it stands. The filter block's two new ones
-  # came out a step larger than the choices they label, which is backwards,
+  # came out a step larger than the choices they label, which is backward,
   # and a step larger than every other label in the app.
   test "every register label is set in the one micro register" do
     # The rule that uses the micro size and tracks it, not the :root block

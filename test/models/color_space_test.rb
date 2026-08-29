@@ -27,7 +27,7 @@ class ColorSpaceTest < ActiveSupport::TestCase
     assert_equal({ c: 0.0, m: 0.0, y: 100.0, k: 0.0 }, ColorSpace.rgb_to_cmyk(255, 255, 0))
   end
 
-  test "converts neutral grey to key only" do
+  test "converts neutral gray to key only" do
     assert_equal({ c: 0.0, m: 0.0, y: 0.0, k: 49.8 }, ColorSpace.rgb_to_cmyk(128, 128, 128))
   end
 

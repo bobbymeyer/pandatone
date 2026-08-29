@@ -47,7 +47,7 @@ class ColorRemoval
       false
     end
 
-    # Compares what every palette would hold afterwards, rather than only the
+    # Compares what every palette would hold afterward, rather than only the
     # ones this color touches: two palettes it strips can just as easily
     # collide with each other as with a third it never appears in.
     def colliding_palettes

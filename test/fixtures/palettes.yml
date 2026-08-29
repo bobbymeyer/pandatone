@@ -10,7 +10,7 @@ press:
   name: Press Check
   tags: [ "print" ]
 
-# Deliberately empty. Guards the zero-color rendering and serialisation paths.
+# Deliberately empty. Guards the zero-color rendering and serialization paths.
 empty:
   name: Unfilled
   tags: [ ]

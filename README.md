@@ -34,13 +34,13 @@ collapse onto a single RGB triple — which is exactly why the source space is
 recorded rather than inferred.
 
 There is no `active` boolean anywhere. An active palette is one tagged
-`active`. Tags are normalised to stripped, downcased, deduped strings.
+`active`. Tags are normalized to stripped, downcased, deduped strings.
 
 ### One swatch per color, one palette per set
 
 A library nobody trusts to be free of near-identical swatches is a library
 nobody looks in, so duplication is stopped at the write rather than tidied up
-afterwards:
+afterward:
 
 * **A color is its value.** No two `Color` rows may render the same hex —
   enforced by a validation and a unique index on `(r, g, b)`. A CMYK recipe
@@ -52,7 +52,7 @@ afterwards:
   of the identity, and empty palettes do not duplicate one another. The check
   runs inside the same transaction as every other write, so removing a swatch
   is refused too if it would leave a duplicate behind.
-* **Deleting is the same rule, backwards.** A color is shared, so deleting
+* **Deleting is the same rule, backward.** A color is shared, so deleting
   one held by palettes rewrites every one of them — more than a button
   reading "delete color" suggests. It is refused until the request asks for
   it in those terms, and the refusal names the palettes. It is refused
@@ -71,7 +71,7 @@ afterwards:
   anyway" button. Redmean is a weighted RGB distance: it tracks how different
   two colors look far better than plain Euclidean RGB while staying pure
   arithmetic. No profiles, no Lab, no color science for a question that only
-  needs an approximate answer. Two greys twenty steps apart score 60 and stay
+  needs an approximate answer. Two grays twenty steps apart score 60 and stay
   two swatches.
 
 ### Ordering
@@ -89,7 +89,7 @@ The **color** sort runs black, then ROYGBIV, then white. Colors with almost
 no chroma are not on the spectrum at all, so they go to the two ends by which
 half of the black-to-white axis they sit on, and everything with a hue runs
 between them in hue order. A wheel has no beginning, so a linear list has to
-cut it somewhere and two neighbours always land at opposite ends; the cut goes
+cut it somewhere and two neighbors always land at opposite ends; the cut goes
 in the gap between magenta and red rather than at red, because cutting at red
 puts `#E30613` — a red that leans a few degrees blue, at hue 356.5 — after the
 violets.
@@ -145,7 +145,7 @@ missing records return `404` with `{"error": "Not found"}`.
 | PATCH  | `/colors/:id`               | Edits a color. It is shared, so this changes every palette holding it |
 | DELETE | `/colors/:id`               | Refused while a palette holds it unless `from_palettes` is sent |
 
-A color is serialised as:
+A color is serialized as:
 
 ```json
 {
@@ -182,7 +182,7 @@ the colors alone. The whole write is one transaction.
 
 Both index endpoints take `?sort=` with the same keys the interface uses:
 `name` (the default), `added`, `modified`, `spectrum`, `dark`, `light`. An
-unrecognised one is name rather than an error.
+unrecognized one is name rather than an error.
 
 `GET /palettes/:id/colors` defaults to the palette's own sequence instead,
 because that order is the thing being published; pass `?sort=` to override it.
@@ -194,7 +194,7 @@ a palette holding exactly another palette's colors, comes back `422` with the
 reason under `errors.base`.
 
 A near-duplicate color also comes back `422`, with the swatch it resembles
-serialised under a `similar` key so the client can show it. Send the same
+serialized under a `similar` key so the client can show it. Send the same
 request again with a top-level `"confirm_similar": true` to create it anyway:
 
 ```json
@@ -208,7 +208,7 @@ Rails 8, strictly omakase: Propshaft, importmap, Hotwire, SQLite, Minitest,
 fixtures. No authentication — this is a local, single-user tool.
 
 The CSS is hand-written plain CSS in the spirit of the Swiss International
-Typographic Style, organised by concern (`grid`, `base`, `type`,
+Typographic Style, organized by concern (`grid`, `base`, `type`,
 `components`, `transitions`). There is no framework and no utility-class
 system in this repository. The typeface is Archivo, shipped in
 `app/assets/fonts` as a single variable Latin subset rather than pulled from
@@ -218,7 +218,7 @@ color on the page.
 
 Two signals never rest on color alone. The current filter and the current
 order carry weight as well as the accent, because this is a color tool and a
-reader who cannot separate red from grey would otherwise have no current
+reader who cannot separate red from gray would otherwise have no current
 state at all. And a destructive action is set apart from the ones beside it
 by a gap before it is colored on hover, because a gap is read before a word
 is. Both are pinned by stylesheet tests, and the separation by a rendered one
@@ -229,7 +229,7 @@ Searching, filtering and ordering are three registers of one block: a label
 in a shared column, then the control. Every one of those labels is set in the
 same micro register as every other label in the app, pinned by a test — the
 two newest came out a step larger than the choices they label, which is
-backwards. The column width is a single custom
+backward. The column width is a single custom
 property, so all three line up by construction rather than by coincidence.
 Filtering and ordering are also the same kind of control — pick one of a
 handful — so they are built from one partial. Tags
