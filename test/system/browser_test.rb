@@ -123,18 +123,17 @@ class BrowserTest < ApplicationSystemTestCase
     assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"
   end
 
-  test "a palette's swatches fill the width whatever their number" do
+  # Filling the row and keeping the swatches equal used to be a choice: it
+  # filled, and a palette that wrapped paid for it with one enormous swatch on
+  # the last row. Both, now — they fill while they fit on a line, and past
+  # that they stay the size of the ones above them.
+  test "a palette's swatches are equal, and fill the row while they fit on one" do
     visit palette_path(palettes(:brand))
 
-    row = width_of(".swatch-grid")
-    cards = evaluate_script(
-      "Array.from(document.querySelectorAll('.swatch-grid > li'))" \
-      ".map(el => el.getBoundingClientRect().width).reduce((a, b) => a + b, 0)"
-    )
-    gutters = (all(".swatch-grid > li").size - 1) * 24
-
-    assert_in_delta row, cards + gutters, 2,
-      "three swatches left #{(row - cards - gutters).round}px of the row unused"
+    widths = widths_of(".swatch-grid > li")
+    assert_equal 1, widths.uniq.size, "the swatches came out #{widths.inspect}"
+    assert_in_delta width_of(".swatch-grid"),
+      widths.sum + (widths.size - 1) * 24, 2, "three swatches did not fill the row"
   end
 
   test "the page head stops short of the right edge" do

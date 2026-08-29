@@ -178,6 +178,19 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   def card_names = names_in(".color-card__name")
   def strip_names = names_in(".palette-list .palette-strip__name")
 
+  # For a test that measures something: rack_test has no box model, so it can
+  # pass a page whose layout has collapsed entirely.
+  def needs_a_browser
+    skip "needs a real browser; run with SYSTEM_TEST_DRIVER=selenium" unless javascript_driver?
+  end
+
+  def widths_of(selector)
+    evaluate_script(
+      "Array.from(document.querySelectorAll(#{selector.to_json}))" \
+      ".map(el => Math.round(el.getBoundingClientRect().width))"
+    )
+  end
+
   # rack_test has no JavaScript, so a live-filtering form needs its button —
   # and a real browser has already submitted by the time this is called, and
   # has taken the button away for saying so.

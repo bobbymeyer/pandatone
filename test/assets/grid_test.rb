@@ -7,10 +7,14 @@ require "test_helper"
 class GridTest < ActiveSupport::TestCase
   STYLESHEETS = Rails.root.glob("app/assets/stylesheets/*.css").freeze
 
-  test "no stylesheet invents its own column count" do
-    offenders = STYLESHEETS.select { |sheet| sheet.read.match?(/auto-fill|auto-fit/) }
+  # Once, for the swatch grid, which is the one thing here deliberately not
+  # measured on the field — a palette of four reads as a palette of four. Any
+  # second use is a component sizing itself from the available width instead
+  # of from the page, which is the thing this exists to stop.
+  test "only the swatch grid sizes its tracks from the available width" do
+    uses = STYLESHEETS.sum { |sheet| sheet.read.scan(/repeat\(\s*auto-(?:fill|fit)/).size }
 
-    assert_empty offenders.map { |sheet| sheet.basename.to_s },
+    assert_equal 1, uses,
       "auto-fill/auto-fit sizes tracks from available width, which cannot line up with the field"
   end
 
@@ -27,10 +31,12 @@ class GridTest < ActiveSupport::TestCase
   # Two densities, not two grids: the field, and the same field halved for the
   # small size on the indexes. Both are named counts declared beside each
   # other, which is what keeps a card edge on a field line at either one.
+  # auto-fit is the swatch grid, and the test above it is what holds that to
+  # one.
   test "every grid derives its tracks from a declared field count" do
     repeats = STYLESHEETS.flat_map { |sheet| sheet.read.scan(/grid-template-columns:\s*repeat\(([^,]+),/) }.flatten
 
-    assert_equal %w[ var(--columns) var(--columns-dense) ], repeats.uniq
+    assert_equal %w[ var(--columns) var(--columns-dense) auto-fit ], repeats.uniq
   end
 
   test "nothing is set in capitals" do

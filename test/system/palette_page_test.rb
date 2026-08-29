@@ -145,4 +145,33 @@ class PalettePageTest < ApplicationSystemTestCase
 
     assert_equal [ "/palettes/#{palettes(:brand).id}.ase", "/palettes/#{palettes(:brand).id}.css" ], paths
   end
+
+  # A palette that wraps was a full row of swatches and then one enormous one
+  # underneath, because the last row had room to spare and a single item to
+  # give it to. A swatch is not bigger for being last. Equal, and the row ends
+  # where it ends — flush left, ragged right, like everything else here.
+  #
+  # Seven, because that is what it takes to wrap at the width these run at.
+  test "every swatch on a palette is the same size, however many there are" do
+    needs_a_browser
+
+    palette = Palette.create!(name: "Seven")
+    7.times do |i|
+      palette.palette_colors.create!(position: i,
+        color: Color.create!(name: "seven-#{i}", source_space: Color::RGB, r: 10 * i, g: 60, b: 200))
+    end
+
+    visit palette_path(palette)
+
+    assert_equal 1, widths_of(".swatch-grid > li").uniq.size,
+      "the swatches came out #{widths_of('.swatch-grid > li').inspect}"
+  end
+
+  test "and the same is true of a palette that fills its row exactly" do
+    needs_a_browser
+
+    visit palette_path(palettes(:brand))
+
+    assert_equal 1, widths_of(".swatch-grid > li").uniq.size
+  end
 end
