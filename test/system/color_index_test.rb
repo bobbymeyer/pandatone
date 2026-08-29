@@ -186,4 +186,21 @@ class ColorIndexTest < ApplicationSystemTestCase
     assert_equal [ "process-cyan" ], card_names
     assert_selector "[data-filter=sort] .tag.active", text: "Light", exact_text: true
   end
+
+  # The tag links live outside the results frame, so an order that only swapped
+  # that frame would leave them carrying the old one.
+  test "choosing an order keeps it through a tag filter" do
+    needs_a_browser
+
+    visit colors_path
+
+    within("[data-filter=sort]") { click_on "Dark" }
+    assert_selector ".color-list > li:first-child", text: "ink-black"
+
+    within("[data-filter=tag]") { click_on "brand" }
+
+    assert_selector ".color-list > li", count: 3
+    assert_equal [ "ink-black", "signal-red", "paper-white" ],
+      all(".color-card__name").map(&:text)
+  end
 end

@@ -230,6 +230,43 @@ class PalettePageTest < ApplicationSystemTestCase
     assert_selector ".swatch-detail .swatch-name", text: "signal-red"
   end
 
+
+  test "the page actions sit on one line" do
+    needs_a_browser
+
+    visit palette_path(palettes(:brand))
+
+    # Every action on the page, not a count of them: the row has to hold what
+    # it is given, and pinning a number only dates the test.
+    #
+    # Overlap, not a shared top: the primary action is a filled box and the
+    # rest are links, so they sit on one line at different heights.
+    spans = evaluate_script(
+      "Array.from(document.querySelectorAll('.page-actions > *'))" \
+      ".map(el => { const r = el.getBoundingClientRect(); return [r.top, r.bottom] })"
+    )
+
+    assert_operator spans.size, :>=, 3, "the page actions went missing"
+    first_top, first_bottom = spans.first
+    spans.each do |top, bottom|
+      assert bottom > first_top && top < first_bottom,
+        "the actions wrapped onto more than one line: #{spans.inspect}"
+    end
+  end
+
+  test "tags are edited in place rather than on their own page" do
+    needs_a_browser
+
+    visit palette_path(palettes(:press))
+
+    click_on "Edit tags"
+    fill_in "Tags", with: "print, archive"
+    click_on "Save tags"
+
+    assert_text "archive"
+    assert_current_path palette_path(palettes(:press))
+  end
+
   private
     # A waiting assertion rather than a read of what is there right now: after
     # a move the row is being replaced, and `all` on a half-swapped page

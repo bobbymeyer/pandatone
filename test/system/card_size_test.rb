@@ -56,4 +56,50 @@ class CardSizeTest < ApplicationSystemTestCase
     assert_selector "[data-filter=sort] .tag.active", text: "Added", exact_text: true
     assert_equal "a", find_field("Search").value
   end
+
+  # Half the width, which is the whole of what "small" means here. Measured,
+  # because the arithmetic that produces it lives in the grid and a card that
+  # merely looked smaller would satisfy any assertion about class names.
+  test "a small card is half the width of a large one" do
+    needs_a_browser
+
+    [ [ colors_path, ".color-card" ], [ palettes_path, ".palette-strip" ] ].each do |path, card|
+      visit "#{path}?size=large"
+      large = rect_of(card)["width"]
+
+      visit path
+      small = rect_of(card)["width"]
+
+      assert_in_delta large / 2.0, small, large / 12.0,
+        "#{path}: a small #{card} is #{small}px against #{large}px large, which is not half"
+    end
+  end
+
+  # Enough colors that a row is a row rather than the whole library: six
+  # fixtures already fit on one at either size, which would have agreed that
+  # nothing had changed.
+  test "small fits twice as many on a row" do
+    needs_a_browser
+
+    14.times { |i| Color.create!(name: "filler-#{i}", source_space: Color::RGB, r: i, g: 40 + i, b: 90) }
+
+    visit colors_path(size: "large")
+    large = cards_on_the_first_row(".color-card")
+
+    visit colors_path
+
+    assert_equal large * 2, cards_on_the_first_row(".color-card")
+  end
+
+
+  private
+    def cards_on_the_first_row(selector)
+      evaluate_script(<<~JS)
+        (() => {
+          const cards = Array.from(document.querySelectorAll('#{selector}'));
+          const top = Math.round(cards[0].getBoundingClientRect().top);
+          return cards.filter(c => Math.round(c.getBoundingClientRect().top) === top).length;
+        })()
+      JS
+    end
 end

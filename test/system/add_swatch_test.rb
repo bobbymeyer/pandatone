@@ -318,4 +318,84 @@ class AddSwatchTest < ApplicationSystemTestCase
     assert_no_text "This is similar to"
     assert_text "paper-white"
   end
+
+  test "the preview appears only once there is something to preview" do
+    needs_a_browser
+
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    assert_hidden ".preview"
+
+    fill_in "R", with: "227"
+    fill_in "G", with: "6"
+    fill_in "B", with: "19"
+
+    assert_visible ".preview"
+  end
+
+  test "the swatch preview paints as values are typed" do
+    needs_a_browser
+
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    fill_in "R", with: "227"
+    fill_in "G", with: "6"
+    fill_in "B", with: "19"
+
+    assert_equal "rgb(227, 6, 19)", preview_background
+    assert_text "#E30613"
+  end
+
+  test "the preview follows a change of space" do
+    needs_a_browser
+
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    choose "CMYK"
+    fill_in "C", with: "0"
+    fill_in "M", with: "0"
+    fill_in "Y", with: "100"
+    fill_in "K", with: "0"
+
+    assert_equal "rgb(255, 255, 0)", preview_background
+  end
+
+  test "choosing a space shows only that space's fields" do
+    needs_a_browser
+
+    visit new_palette_color_path(palettes(:press), source: "new")
+
+    assert_visible "[data-mode='rgb']"
+    assert_hidden "[data-mode='cmyk']"
+    assert_hidden "[data-mode='hex']"
+
+    choose "Hex"
+
+    assert_hidden "[data-mode='rgb']"
+    assert_visible "[data-mode='hex']"
+  end
+
+  test "the source switch shows one panel at a time" do
+    needs_a_browser
+
+    visit new_palette_color_path(palettes(:press))
+
+    assert_visible "[data-source='library']"
+    assert_hidden "[data-source='new']"
+
+    choose "New color"
+
+    assert_hidden "[data-source='library']"
+    assert_visible "[data-source='new']"
+  end
+
+
+  private
+    # The painted result, not the value in the field: the point of the preview
+    # is that it shows the color, and only the browser computes that.
+    def preview_background
+      evaluate_script(
+        "getComputedStyle(document.querySelector('[data-swatch-preview-target=\"preview\"]')).backgroundColor"
+      )
+    end
 end

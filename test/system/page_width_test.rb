@@ -1,11 +1,13 @@
 require "application_system_test_case"
 
 # The app was designed, screenshotted and measured at one width for its whole
-# life. These run it at the two the grid has breakpoints for.
-class NarrowTest < ApplicationSystemTestCase
+# life. These run it at every width the grid has a breakpoint for, and at the
+# wide one it was drawn at.
+class PageWidthTest < ApplicationSystemTestCase
   SMALL_PHONE = [ 320, 568 ].freeze
   PHONE = [ 390, 844 ].freeze
   TABLET = [ 768, 1024 ].freeze
+  DESK = ApplicationSystemTestCase::SCREEN_SIZE
 
   setup { skip "needs a real browser" unless javascript_driver? }
 
@@ -15,7 +17,7 @@ class NarrowTest < ApplicationSystemTestCase
 
   # No tolerance. A page that scrolls sideways by one pixel scrolls sideways.
   test "no page scrolls sideways at any width" do
-    [ SMALL_PHONE, PHONE, TABLET ].each do |size|
+    [ SMALL_PHONE, PHONE, TABLET, DESK ].each do |size|
       pages.each do |name, path|
         visit path
         resize_viewport(*size)

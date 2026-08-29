@@ -155,6 +155,18 @@ class PaletteIndexTest < ApplicationSystemTestCase
     assert_text "#E30613"
   end
 
+
+  # At large, which is the size this proportion is: two fields of six. Small
+  # is half of it and has its own test.
+  test "palette cards sit three to a row on a wide window" do
+    needs_a_browser
+
+    visit palettes_path(size: "large")
+
+    tops = tops_of(".palette-strip")
+    assert_equal 3, tops.count(tops.first), "expected three cards on the first row, got #{tops.inspect}"
+  end
+
   private
     def sort_by(label, leading:)
       super(label, leading: leading, list: ".palette-list", name: ".palette-strip__name")

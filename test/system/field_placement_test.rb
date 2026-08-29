@@ -42,6 +42,33 @@ class FieldPlacementTest < ApplicationSystemTestCase
     end
   end
 
+
+  test "the palette results fill the field the filters fill" do
+    needs_a_browser
+
+    visit palettes_path
+
+    assert_in_delta width_of(".filters"), width_of(".palette-list"), 1,
+      "the results are not spanning the field — something between them and the grid is unplaced"
+  end
+
+  test "the color results fill the field the filters fill" do
+    needs_a_browser
+
+    visit colors_path
+
+    assert_in_delta width_of(".filters"), width_of(".color-list"), 1
+  end
+
+  test "the page head stops short of the right edge" do
+    needs_a_browser
+
+    visit palettes_path
+
+    assert width_of(".page-head") < width_of(".filters"),
+      "the head should span four fields against the filter bar's six"
+  end
+
   private
     def pages
       {

@@ -264,6 +264,10 @@
   line-height: var(--space-2);
 }
 
+/* Belt and braces: the row wraps between channels before it would break one,
+   because a flex item does not shrink below its own min-content. Untested for
+   that reason — at every width this app is built for it passes with the rule
+   taken out, and a test that cannot fail is not a guard. */
 .channels .channel { white-space: nowrap; }
 
 .channels--stacked {

@@ -228,4 +228,15 @@ class LookupTest < ApplicationSystemTestCase
 
     assert_text "Could not read"
   end
+
+  test "a row of a form does not stretch across the page" do
+    needs_a_browser
+
+    visit lookup_path
+
+    # An unbounded row put the field across the whole width and stranded the
+    # button against the right edge.
+    assert width_of(".form--inline") <= width_of(".page-head"),
+      "the inline form is wider than the text column it sits under"
+  end
 end

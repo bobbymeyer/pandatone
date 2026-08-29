@@ -65,6 +65,18 @@ class LiveSearchTest < ApplicationSystemTestCase
     assert_no_selector "#color_#{colors(:signal_red).id}"
   end
 
+
+  test "search filters as you type, without pressing Filter" do
+    needs_a_browser
+
+    visit palettes_path
+
+    fill_in "Search", with: "autumn"
+
+    assert_text "1 of 4 palettes"
+    assert_no_text "Brand Core"
+  end
+
   private
     def assert_live_search_wired(selector)
       form = find(selector, visible: :all)
