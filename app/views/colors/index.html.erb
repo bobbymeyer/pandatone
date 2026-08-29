@@ -1,58 +1,8 @@
-<% content_for :title, "Colors" %>
-
-<header class="page-head">
-  <h1 class="page-title">Colors</h1>
-  <p class="page-lede">
-    Every swatch in the library, including those no palette has claimed yet.
-  </p>
-
-  <div class="page-actions">
-    <%= link_to "New color", new_color_path, class: "button button--primary" %>
-  </div>
-</header>
-
-<section class="filters">
-  <%= form_with url: colors_path, method: :get, class: "filter-form",
-        data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "colors" } do %>
-    <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
-    <%# Searching keeps the order you were reading in. Choosing an order is a
-        whole navigation rather than a frame swap, so this is never stale. %>
-    <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
-    <%= hidden_field_tag :size, params[:size] if params[:size].present? %>
-    <div class="field">
-      <%= label_tag :q, "Search" %>
-      <%= text_field_tag :q, params[:q], autocomplete: "off" %>
-    </div>
-    <%# Named for what it does, and taken away by the controller that makes
-        it redundant. See live_search_controller.js. %>
-    <%= submit_tag "Search", name: nil, class: "button",
-          data: { live_search_target: "submit" } %>
-  <% end %>
-
-  <%= render "shared/filter_row", name: "tag", label: "Tagged",
-        items: [ [ "All", colors_path(q: params[:q], sort: params[:sort], size: params[:size]),
-                  params[:tag].blank? ] ] +
-               @tags.map { |tag| [ tag, colors_path(tag: tag, q: params[:q], sort: params[:sort],
-                                                    size: params[:size]),
-                                   params[:tag] == tag ] } %>
-
-  <%= render "shared/sort_filter", sorts: Color::SORTS %>
-
-  <%= render "shared/size_filter" %>
-</section>
-
-<%= turbo_frame_tag "colors", data: { turbo_action: "replace" }, target: "_top" do %>
-  <p class="result-count"><%= result_count(@colors.size, @total, "color") %></p>
-
-  <% if @colors.empty? %>
-    <% if @total.zero? %>
-      <p class="empty">No colors yet. <%= link_to "Add the first one", new_color_path %>.</p>
-    <% else %>
-      <p class="empty">No colors match.</p>
-    <% end %>
-  <% else %>
-    <ul class="color-list <%= "list--small" if size_key == "small" %>">
-      <%= render partial: "colors/card", collection: @colors, as: :color %>
-    </ul>
-  <% end %>
-<% end %>
+<%= render "shared/index",
+      title: "Colors",
+      lede: "Every swatch in the library, including those no palette has claimed yet.",
+      action: "New color", action_path: new_color_path, empty_link: "Add the first one",
+      path: colors_path, frame: "colors",
+      sorts: Color::SORTS, tags: @tags,
+      records: @colors, total: @total, noun: "color",
+      list_class: "color-list", partial: "colors/card", as: :color %>
