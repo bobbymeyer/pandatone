@@ -3,9 +3,20 @@
    files, only these steps. Changing --baseline reproportions the whole app. */
 
 :root {
-  --columns: 12;
+  /* Six fields. The smallest count that covers what this app lays out:
+     thirds for cards carrying a swatch strip, sixths for compact ones, a
+     two-thirds page head, and a two-pane detail with a field left standing
+     empty between the panes. Twelve would only buy quarters, which nothing
+     here asks for. */
+  --columns: 6;
   --gutter: 1.5rem;
   --baseline: 0.5rem;
+
+  /* How many fields a card occupies. Cards that carry a strip need width;
+     compact ones do not. These two numbers are the whole responsive system:
+     the breakpoints below change them and every grid re-proportions. */
+  --card: 1;
+  --card-wide: 2;
 
   /* A tight progression on the baseline unit, so vertical rhythm and
      horizontal rhythm are measured in the same currency. */
@@ -20,10 +31,22 @@
   --measure: 32rem;
 }
 
-.grid {
+/* The one grid. The page field and every list of cards share this single
+   track definition, so a card edge is always a field line — which is the
+   point of a modular grid, and the thing separate per-component grids could
+   only ever manage by coincidence. */
+.grid,
+.palette-list,
+.color-list,
+.swatch-grid,
+.color-detail,
+.lookup-result {
   display: grid;
   grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
   column-gap: var(--gutter);
+}
+
+.grid {
   max-width: var(--page-max);
   margin-inline: auto;
   padding-inline: var(--space-3);
@@ -35,9 +58,19 @@ main.grid {
   align-content: start;
 }
 
-/* The field is asymmetric on purpose: heads and prose sit in the left eight
-   columns and stop there, leaving a standing column of air on the right. */
-.page-head { grid-column: 1 / span 8; }
+.palette-list,
+.color-list,
+.swatch-grid { row-gap: var(--space-4); }
+
+.palette-list > * { grid-column: span var(--card-wide); }
+
+.color-list > *,
+.swatch-grid > * { grid-column: span var(--card); }
+
+/* The field is asymmetric on purpose: heads and prose sit in the left four
+   fields and stop there, leaving two standing empty on the right. */
+.page-head { grid-column: 1 / span 4; }
+
 .filters,
 .palette-list,
 .color-list,
@@ -51,12 +84,16 @@ main.grid {
 .lookup-result,
 .color-detail { grid-column: 1 / -1; }
 
-@media (max-width: 60rem) {
-  :root { --columns: 6; }
+@media (max-width: 76rem) {
+  :root { --card: 2; --card-wide: 3; }
+}
+
+@media (max-width: 48rem) {
+  :root { --card: 3; --card-wide: 6; }
 
   .page-head { grid-column: 1 / -1; }
 }
 
 @media (max-width: 34rem) {
-  :root { --columns: 2; --gutter: 1rem; }
+  :root { --card: 6; --card-wide: 6; --gutter: 1rem; }
 }

@@ -10,7 +10,7 @@
 }
 
 .masthead__mark {
-  grid-column: 1 / span 3;
+  grid-column: 1 / span 2;
   font-weight: 700;
   letter-spacing: -0.015em;
 }
@@ -20,7 +20,7 @@
 /* Off the left edge rather than pushed to the right: the asymmetry is the
    point, and it lines the nav up with the body column below. */
 .masthead__nav {
-  grid-column: 5 / -1;
+  grid-column: 3 / -1;
   display: flex;
   gap: var(--space-3);
 }
@@ -59,13 +59,6 @@
 
 /* --- Palette index ----------------------------------------------------- */
 
-.palette-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
-  column-gap: var(--gutter);
-  row-gap: var(--space-4);
-}
-
 .palette-strip__name { margin-bottom: var(--space-1); }
 
 .palette-strip__name a { text-decoration: none; }
@@ -81,13 +74,6 @@
 }
 
 /* --- Colour index ------------------------------------------------------ */
-
-.color-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  column-gap: var(--gutter);
-  row-gap: var(--space-4);
-}
 
 .color-card .swatch-link {
   display: block;
@@ -144,13 +130,6 @@
   margin-top: var(--space-2);
 }
 
-.swatch-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  column-gap: var(--gutter);
-  row-gap: var(--space-4);
-}
-
 .swatch-detail .swatch-link {
   display: block;
   aspect-ratio: 3 / 2;
@@ -205,9 +184,6 @@
 
 .color-detail,
 .lookup-result {
-  display: grid;
-  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
-  column-gap: var(--gutter);
   row-gap: var(--space-3);
   align-items: start;
 }
@@ -219,7 +195,7 @@
    Column seven is left standing empty. */
 .color-detail__body,
 .lookup-result__body {
-  grid-column: 1 / span 6;
+  grid-column: 1 / span 3;
   grid-row: 1;
 }
 
@@ -228,7 +204,7 @@
    below them, off the bottom of the window before you could read either. */
 .color-detail > .swatch,
 .lookup-result > .swatch {
-  grid-column: 8 / span 5;
+  grid-column: 5 / span 2;
   grid-row: 1;
   justify-self: end;
   width: 100%;
@@ -258,7 +234,7 @@
 
 .link-list a { text-underline-offset: 0.2em; }
 
-@media (max-width: 60rem) {
+@media (max-width: 48rem) {
   .color-detail > .swatch,
   .lookup-result > .swatch,
   .color-detail__body,
