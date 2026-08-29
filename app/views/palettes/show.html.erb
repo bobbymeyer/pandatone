@@ -5,18 +5,18 @@
 
   <%= turbo_frame_tag "palette_tags" do %>
     <div class="inline-edit">
-      <p class="tags"><%= @palette.tags.any? ? @palette.tags.join(" · ") : "Untagged" %></p>
+      <p class="tags"><%= @palette.tags.any? ? tag_links(@palette.tags) { |tag| palettes_path(tag: tag) } : "Untagged" %></p>
       <%= link_to "Edit tags", edit_palette_tags_path(@palette), class: "link-quiet" %>
     </div>
   <% end %>
 
   <div class="page-actions">
-    <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button" %>
+    <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button button--primary" %>
     <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
     <%# Not "duplicate": the one thing it will not make is a copy. %>
     <%= link_to "New from this", new_palette_path(from: @palette.id), class: "button" %>
     <%# The only thing in this app that cannot be undone. %>
-    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--quiet",
+    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--danger",
           data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colours stay in the library." } %>
   </div>
 </header>
@@ -24,7 +24,7 @@
 <%= render "shared/errors", record: @palette %>
 
 <% if @palette.palette_colors.empty? %>
-  <p class="empty">No swatches yet.</p>
+  <p class="empty">No swatches yet. <%= link_to "Add the first one", new_palette_color_path(@palette) %>.</p>
 <% else %>
   <ol class="swatch-grid">
     <% memberships = @palette.palette_colors.to_a %>
@@ -33,7 +33,7 @@
       <li class="swatch-detail" id="<%= dom_id(membership) %>">
         <%= link_to color, class: "swatch-link" do %>
           <%= swatch_tag color.hex, transition_name: "palette-color-#{membership.id}", class: "swatch--card" %>
-          <h3 class="swatch-name"><%= color.name %></h3>
+          <h2 class="swatch-name"><%= color.name %></h2>
         <% end %>
 
         <%= hex_tag color.hex %>
@@ -61,7 +61,7 @@
           <% end %>
 
           <%= button_to "Remove", palette_color_path(@palette, color),
-                method: :delete, class: "button button--quiet" %>
+                method: :delete, class: "button button--danger" %>
         </div>
       </li>
     <% end %>

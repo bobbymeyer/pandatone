@@ -281,15 +281,7 @@
 /* Its own line under the filters it reorders, rather than a seventh thing
    competing for the row. Built from the same links as the tag filter,
    because it is the same kind of control: pick one of a handful. */
-.sort-filter {
-  flex-basis: 100%;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-}
 
-.sort-filter__label { color: var(--ink-quiet); }
 
 .tag-filter {
   display: flex;
@@ -305,10 +297,33 @@
 
 .tag:hover { color: var(--ink); }
 
-/* The single accent in the whole interface. */
-.tag.active { color: var(--accent); }
+/* The accent says which one is current, and the weight says it again: this
+   is a colour tool, and a reader who cannot separate the red from the grey
+   would otherwise have no current state at all. */
+.tag.active {
+  color: var(--accent);
+  font-weight: 700;
+}
 
 .tags { color: var(--ink-quiet); }
+
+/* A label and its row of choices, in the same two positions every time, so
+   filtering and ordering read as the registers they are rather than as two
+   rows of identical words. */
+.filter-row {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* A width off the ladder, so the two rows' choices start in the same column
+   rather than three pixels apart because one word is longer than the other. */
+.filter-row__label {
+  color: var(--ink-quiet);
+  min-width: var(--space-8);
+}
 
 /* --- Forms -------------------------------------------------------------- */
 
@@ -465,6 +480,23 @@
 
 .button--quiet:hover { color: var(--ink); }
 
+/* Destroying and reordering are one shape apart from each other otherwise.
+   The page stays monochrome at rest; the accent arrives at the moment you
+   reach for the one that cannot be undone. */
+.button--danger { color: var(--ink-quiet); }
+
+.button--danger:hover,
+.button--danger:focus-visible { color: var(--accent); }
+
+/* Set apart from the actions beside it, not only coloured once you arrive:
+   at rest, reordering and destroying were the same grey word in a row, and a
+   gap is read before a word is. */
+/* :has, because button_to wraps its button in a form: the flex child here is
+   the form, and auto margins belong to the child. */
+.swatch-detail__controls > :has(.button--danger) { margin-inline-start: auto; }
+
+.page-actions .button--danger { margin-inline-start: var(--space-4); }
+
 form.button_to { display: inline; }
 
 .link-quiet {
@@ -493,7 +525,10 @@ form.button_to { display: inline; }
   letter-spacing: 0;
 }
 
-.hex--copy:hover::after { content: " copy"; }
+/* Focus as well as hover: a keyboard reaches this button, and touch never
+   hovers at all. */
+.hex--copy:hover::after,
+.hex--copy:focus-visible::after { content: " copy"; }
 
 /* Says it worked, in the one place you are already looking. */
 .hex--copy[data-copied]::after,

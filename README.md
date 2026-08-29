@@ -216,6 +216,24 @@ a font CDN, so the app renders correctly with nothing external reachable. All sp
 `grid.css`; the interface is near-monochrome so that the swatches are the only
 colour on the page.
 
+Two signals never rest on colour alone. The current filter and the current
+order carry weight as well as the accent, because this is a colour tool and a
+reader who cannot separate red from grey would otherwise have no current
+state at all. And a destructive action is set apart from the ones beside it
+by a gap before it is coloured on hover, because a gap is read before a word
+is. Both are pinned by stylesheet tests, and the separation by a rendered one
+— the rule for it existed and did nothing for a while, since `button_to`
+wraps its button in a form and an auto margin belongs to the flex child.
+
+Filtering and ordering are the same kind of control — pick one of a handful —
+so they are built from one partial, labelled, and share a label column. Tags
+on a card are the same links as the tags in the filter bar, because they are
+the same thing: the library's whole discovery mechanism.
+
+Headings follow one rule: the page title is `h1`, a section heading is `h2`,
+and an item's name sits one level under whatever heading it belongs to. A
+system test walks every page and fails on a skipped level.
+
 Navigation uses Turbo Drive with the View Transitions API. A swatch on the
 palette index and the same swatch on the palette page share a
 `view-transition-name`, so the browser morphs one into the other. Those names

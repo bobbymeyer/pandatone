@@ -44,7 +44,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "filters the colour index by tag" do
     visit colors_path
 
-    click_on "print"
+    within("[data-filter=tag]") { click_on "print" }
 
     assert_text "process-cyan"
     assert_no_text "signal-red"
@@ -83,7 +83,7 @@ class ColorsTest < ApplicationSystemTestCase
   test "combines the colour tag filter with a search" do
     visit colors_path
 
-    click_on "brand"
+    within("[data-filter=tag]") { click_on "brand" }
     assert_text "3 of 6 colours"
 
     fill_in "Search", with: "ink"
@@ -93,14 +93,27 @@ class ColorsTest < ApplicationSystemTestCase
     assert_no_text "paper-white"
   end
 
-  test "a colour card is one link, not two to the same place" do
+  test "a colour card is one link to the colour, not two to the same place" do
     visit colors_path
 
     within "#color_#{colors(:signal_red).id}" do
-      assert_selector "a", count: 1
       # href comes back absolute in a browser and raw under rack_test.
-      assert_equal "/colors/#{colors(:signal_red).id}", URI.parse(find("a")[:href]).path
+      paths = all("a").map { |link| URI.parse(link[:href]).path }
+      assert_equal 1, paths.count("/colors/#{colors(:signal_red).id}"),
+        "the swatch and the name are one link between them, not two"
     end
+  end
+
+  # Tags on a card look like the tags in the filter bar because they are the
+  # same thing, so they behave like them rather than being inert text wearing
+  # a control's clothes.
+  test "a card's tags filter the library" do
+    visit colors_path
+
+    within("#color_#{colors(:signal_red).id}") { click_on "primary" }
+
+    assert_selector "[data-filter=tag] .tag.active", text: "primary", exact_text: true
+    assert_equal [ "signal-red" ], card_names
   end
 
   test "an empty library reads as empty, not as a failed search" do
@@ -212,7 +225,7 @@ class ColorsTest < ApplicationSystemTestCase
     visit colors_path
 
     assert_equal Color.order(:name).pluck(:name), card_names
-    assert_selector ".sort-filter .tag.active", text: "Name", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
   end
 
   test "sorts by colour, dark first and light first" do
@@ -239,11 +252,11 @@ class ColorsTest < ApplicationSystemTestCase
     visit colors_path
 
     sort_by "Dark first", leading: "ink-black"
-    click_on "brand"
+    within("[data-filter=tag]") { click_on "brand" }
 
     assert_selector ".color-list > li", count: 3
     assert_equal [ "ink-black", "signal-red", "paper-white" ], card_names
-    assert_selector ".sort-filter .tag.active", text: "Dark first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Dark first", exact_text: true
   end
 
   test "a search keeps the sort it was run under" do
@@ -255,7 +268,7 @@ class ColorsTest < ApplicationSystemTestCase
 
     assert_selector ".color-list > li", count: 1
     assert_equal [ "process-cyan" ], card_names
-    assert_selector ".sort-filter .tag.active", text: "Light first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Light first", exact_text: true
   end
 
   test "creates a colour that belongs to no palette yet" do
@@ -810,7 +823,7 @@ class ColorsTest < ApplicationSystemTestCase
     # Choosing a sort is a whole navigation, so this waits for the re-sorted
     # list before handing back: reading the cards does not retry.
     def sort_by(label, leading:)
-      within(".sort-filter") { click_on label }
+      within("[data-filter=sort]") { click_on label }
 
       assert_selector ".color-list > li:first-child .color-card__name",
         text: leading, exact_text: true

@@ -19,6 +19,6 @@
   </p>
 
   <% if color.tags.any? %>
-    <p class="tags"><%= color.tags.join(" · ") %></p>
+    <p class="tags"><%= tag_links(color.tags) { |tag| colors_path(tag: tag) } %></p>
   <% end %>
 </li>

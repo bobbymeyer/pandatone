@@ -1,0 +1,13 @@
+<%# locals: (name:, label:, items:) %>
+<%# One register: a quiet label, then the choices. Filtering and ordering are
+    the same kind of control — pick one of a handful — so they are built the
+    same way and told apart by their label rather than by a second visual
+    language invented for one of them. %>
+<div class="filter-row" data-filter="<%= name %>">
+  <span class="filter-row__label"><%= label %></span>
+  <ul class="tag-filter">
+    <% items.each do |text, url, current| %>
+      <li><%= link_to text, url, class: class_names("tag", active: current) %></li>
+    <% end %>
+  </ul>
+</div>

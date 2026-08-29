@@ -24,7 +24,7 @@
 
     <%= turbo_frame_tag "color_tags" do %>
       <div class="inline-edit">
-        <p class="tags"><%= @color.tags.any? ? @color.tags.join(" · ") : "Untagged" %></p>
+        <p class="tags"><%= @color.tags.any? ? tag_links(@color.tags) { |tag| colors_path(tag: tag) } : "Untagged" %></p>
         <%= link_to "Edit tags", edit_color_tags_path(@color), class: "link-quiet" %>
       </div>
     <% end %>
@@ -37,7 +37,7 @@
           knows what holds it asks for that permission up front. %>
       <%= button_to "Delete colour", @color, method: :delete,
             params: { from_palettes: @palettes.any? || nil }.compact,
-            class: "button button--quiet",
+            class: "button button--danger",
             data: { turbo_confirm: delete_color_warning(@color, @palettes) } %>
     </div>
   </div>
@@ -54,7 +54,7 @@
     <p class="empty">No palettes hold this colour yet.</p>
   <% else %>
     <ul class="palette-list">
-      <%= render partial: "palettes/strip", collection: @palettes, as: :palette %>
+      <%= render partial: "palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>
     </ul>
   <% end %>
 </section>

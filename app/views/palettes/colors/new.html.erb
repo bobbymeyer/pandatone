@@ -39,6 +39,8 @@
   </section>
 
   <section class="library-picker" data-source="library">
+    <h2>Swatches in the library</h2>
+
     <%= form_with url: new_palette_color_path(@palette), method: :get, class: "filter-form",
           data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "library" } do %>
       <%= hidden_field_tag :source, "library" %>

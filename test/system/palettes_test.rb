@@ -93,7 +93,7 @@ class PalettesTest < ApplicationSystemTestCase
     visit palettes_path
 
     assert_equal Palette.order(:name).pluck(:name), strip_names
-    assert_selector ".sort-filter .tag.active", text: "Name", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
   end
 
   test "sorts palettes by colour, dark first and light first" do
@@ -123,11 +123,11 @@ class PalettesTest < ApplicationSystemTestCase
     visit palettes_path
 
     sort_by "Light first", leading: "Press Check"
-    click_on "active"
+    within("[data-filter=tag]") { click_on "active" }
 
     assert_selector ".palette-list > li", count: 2
     assert_equal [ "Brand Core", "Autumn 2026" ], strip_names
-    assert_selector ".sort-filter .tag.active", text: "Light first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Light first", exact_text: true
   end
 
   test "lists palettes as strips of their swatches" do
@@ -185,7 +185,7 @@ class PalettesTest < ApplicationSystemTestCase
   test "filters the index by tag" do
     visit palettes_path
 
-    click_on "seasonal"
+    within("[data-filter=tag]") { click_on "seasonal" }
 
     assert_text "Autumn 2026"
     assert_no_text "Brand Core"
@@ -762,7 +762,7 @@ class PalettesTest < ApplicationSystemTestCase
     # Choosing an order is a whole navigation, so this waits for the reordered
     # list before handing back: reading the strips does not retry.
     def sort_by(label, leading:)
-      within(".sort-filter") { click_on label }
+      within("[data-filter=sort]") { click_on label }
 
       assert_selector ".palette-list > li:first-child .palette-strip__name",
         text: leading, exact_text: true

@@ -34,6 +34,14 @@ module SwatchesHelper
     "#{shown} of #{pluralize(total, noun)}"
   end
 
+  # Tags on a card look exactly like the tags in the filter bar because they
+  # are the same thing: the library's whole discovery mechanism. So they
+  # behave like it too, rather than being inert text wearing a control's
+  # clothes.
+  def tag_links(tags, &url)
+    safe_join(tags.map { |tag| link_to(tag, url.call(tag), class: "tag") }, " · ")
+  end
+
   # A hex on screen exists to be pasted somewhere else, so it is a button
   # that copies itself. The value stays visible text inside it, which is what
   # keeps it usable when the clipboard is unavailable.

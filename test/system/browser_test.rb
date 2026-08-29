@@ -68,9 +68,20 @@ class BrowserTest < ApplicationSystemTestCase
 
     # Every action on the page, not a count of them: the row has to hold what
     # it is given, and pinning a number only dates the test.
-    tops = tops_of(".page-actions > *")
-    assert_operator tops.size, :>=, 3, "the page actions went missing"
-    assert_equal 1, tops.uniq.size, "the actions wrapped onto #{tops.uniq.size} lines: #{tops.inspect}"
+    #
+    # Overlap, not a shared top: the primary action is a filled box and the
+    # rest are links, so they sit on one line at different heights.
+    spans = evaluate_script(
+      "Array.from(document.querySelectorAll('.page-actions > *'))" \
+      ".map(el => { const r = el.getBoundingClientRect(); return [r.top, r.bottom] })"
+    )
+
+    assert_operator spans.size, :>=, 3, "the page actions went missing"
+    first_top, first_bottom = spans.first
+    spans.each do |top, bottom|
+      assert bottom > first_top && top < first_bottom,
+        "the actions wrapped onto more than one line: #{spans.inspect}"
+    end
   end
 
   test "channel values never break mid-value" do
@@ -173,13 +184,47 @@ class BrowserTest < ApplicationSystemTestCase
     end
   end
 
+  # The CSS rule for this existed and did nothing for a while: button_to wraps
+  # its button in a form, so the flex child is the form and an auto margin on
+  # the button inside it goes nowhere. Only a rendered position proves it.
+  test "removing a swatch is set apart from reordering it" do
+    visit palette_path(palettes(:brand))
+
+    lefts = evaluate_script(
+      "Array.from(document.querySelectorAll('.swatch-detail:nth-child(2) .swatch-detail__controls > *'))" \
+      ".map(el => Math.round(el.getBoundingClientRect().left))"
+    )
+
+    assert_equal 3, lefts.size, "expected up, down and remove"
+    reorder_gap = lefts[1] - lefts[0]
+    destroy_gap = lefts[2] - lefts[1]
+
+    assert_operator destroy_gap, :>, reorder_gap * 2,
+      "remove sits as close to down as down does to up: #{lefts.inspect}"
+  end
+
+  # Two registers that read as parallel have to line up as parallel: the
+  # labels differ in width, so without a shared column the choices start a
+  # few pixels apart.
+  test "the filter registers share a label column" do
+    visit colors_path
+
+    starts = evaluate_script(
+      "Array.from(document.querySelectorAll('.filter-row'))" \
+      ".map(row => Math.round(row.querySelector('.tag').getBoundingClientRect().left))"
+    )
+
+    assert_equal 2, starts.size, "expected a tag register and a sort register"
+    assert_equal 1, starts.uniq.size, "the registers' choices start in different columns: #{starts.inspect}"
+  end
+
   test "the sort options sit on one line of their own, below the search" do
     visit colors_path
 
     field = rect_of(".filter-form > .field")
-    sort = rect_of(".sort-filter")
+    sort = rect_of("[data-filter=sort]")
 
-    assert_equal 1, tops_of(".sort-filter li").uniq.size,
+    assert_equal 1, tops_of("[data-filter=sort] li").uniq.size,
       "the sort options wrapped onto more than one line"
     assert_operator sort["top"], :>=, field["top"] + field["height"] - 1,
       "the sort options crowded onto the search line"
@@ -192,10 +237,10 @@ class BrowserTest < ApplicationSystemTestCase
   test "choosing an order keeps it through a tag filter" do
     visit colors_path
 
-    within(".sort-filter") { click_on "Dark first" }
+    within("[data-filter=sort]") { click_on "Dark first" }
     assert_selector ".color-list > li:first-child", text: "ink-black"
 
-    click_on "brand"
+    within("[data-filter=tag]") { click_on "brand" }
 
     assert_selector ".color-list > li", count: 3
     assert_equal [ "ink-black", "signal-red", "paper-white" ],

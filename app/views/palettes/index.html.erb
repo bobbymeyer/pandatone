@@ -23,18 +23,10 @@
     <%= submit_tag "Filter", name: nil, class: "button" %>
   <% end %>
 
-  <ul class="tag-filter">
-    <li>
-      <%= link_to "All", palettes_path(q: params[:q], sort: params[:sort]),
-            class: class_names("tag", active: params[:tag].blank?) %>
-    </li>
-    <% @tags.each do |tag| %>
-      <li>
-        <%= link_to tag, palettes_path(tag: tag, q: params[:q], sort: params[:sort]),
-              class: class_names("tag", active: params[:tag] == tag) %>
-      </li>
-    <% end %>
-  </ul>
+  <%= render "shared/filter_row", name: "tag", label: "Tagged",
+        items: [ [ "All", palettes_path(q: params[:q], sort: params[:sort]), params[:tag].blank? ] ] +
+               @tags.map { |tag| [ tag, palettes_path(tag: tag, q: params[:q], sort: params[:sort]),
+                                   params[:tag] == tag ] } %>
 
   <%= render "shared/sort_filter", sorts: Palette::SORTS %>
 </section>
