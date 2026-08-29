@@ -180,6 +180,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "process-magenta"
     assert_text "#FF00FF"
   end
@@ -215,6 +216,9 @@ class PalettesTest < ApplicationSystemTestCase
     fill_in "Hex value", with: "nope"
     click_on "Add swatch"
 
+    # The refusal first: the radio is already checked before the submission,
+    # so asserting on it alone would pass without the round trip happening.
+    assert_text "is not a colour we can read"
     assert find("#swatch_source_new", visible: :all).checked?
   end
 
@@ -367,6 +371,7 @@ class PalettesTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Add swatch"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "signal-blue"
     assert_text "#1E5AAA"
     assert_equal before + 1, Color.count
@@ -381,6 +386,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "#FFCC00"
   end
 
@@ -405,6 +411,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     click_on "Add swatch"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "picked"
     assert_text "#1E5AAA"
   end
@@ -422,6 +429,7 @@ class PalettesTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Add swatch"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "#D5162B"
     assert_no_text "#010203"
     assert_equal before + 1, Color.count
@@ -576,6 +584,7 @@ class PalettesTest < ApplicationSystemTestCase
 
     click_on "Add anyway"
 
+    assert_current_path palette_path(palettes(:press))
     assert_text "off-white"
     assert_equal before + 1, Color.count
   end

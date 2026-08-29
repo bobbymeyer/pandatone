@@ -187,6 +187,10 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "B", with: "43"
     click_on "Save colour"
 
+    # The path, not the hex: the entry row's live preview paints the hex on
+    # the form itself, so asserting on it would be satisfied without the save
+    # ever having happened.
+    assert_current_path color_path(colors(:deep_indigo))
     assert_text "#D5162B"
     assert_equal [ 213, 22, 43 ], colors(:deep_indigo).reload.rgb.values
   end
@@ -198,6 +202,7 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "Hex value", with: "#C77A1A"
     click_on "Save colour"
 
+    assert_current_path color_path(colors(:deep_indigo))
     assert_text "#C77A1A"
     assert_text "Authored in RGB"
   end
@@ -236,6 +241,8 @@ class ColorsTest < ApplicationSystemTestCase
     fill_in "G", with: "0"
     fill_in "B", with: "0"
     click_on "Save colour"
+
+    assert_current_path color_path(colors(:signal_red))
 
     visit palette_path(palettes(:brand))
     assert_selector "#palette_color_#{palette_colors(:brand_signal_red).id} .swatch[style*='#000000']"
@@ -429,6 +436,7 @@ class ColorsTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Create anyway"
 
+    assert_no_selector ".warning"
     assert_text "off-white"
     assert_text "#FFFFFF"
     assert_equal before + 1, Color.count
@@ -448,7 +456,12 @@ class ColorsTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Create anyway"
 
-    assert_text "This is similar to paper-white"
+    # The old warning is still on screen, so asserting on its wording would
+    # pass without the second submission ever landing. Only the re-rendered
+    # warning names the colour that was just typed.
+    within ".warning" do
+      assert_text "#FDFDFD"
+    end
     assert_equal before, Color.count
   end
 
@@ -479,7 +492,7 @@ class ColorsTest < ApplicationSystemTestCase
 
     click_on "Save anyway"
 
-    assert_text "#FFFFFF"
+    assert_current_path color_path(colors(:deep_indigo))
     assert_equal [ 255, 255, 255 ], colors(:deep_indigo).reload.rgb.values
   end
 
@@ -493,7 +506,10 @@ class ColorsTest < ApplicationSystemTestCase
     before = Color.count
     click_on "Create colour"
 
-    assert_text "grass"
+    # Text only the colour's own page carries: a path built from
+    # Color.find_by would be evaluated before the wait, when the row the
+    # request is creating may not exist yet.
+    assert_text "No palettes hold this colour yet"
     assert_text "#14A028"
     assert_equal before + 1, Color.count
   end
