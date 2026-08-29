@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Api::V1::ColorsControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_client }
+
   # --- Index -------------------------------------------------------------
 
   test "lists every color by name" do

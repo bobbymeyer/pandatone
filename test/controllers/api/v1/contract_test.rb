@@ -9,6 +9,8 @@ require "test_helper"
 # Behavior lives in the controller tests beside this one. What this file pins
 # is the wire format: keys, their order, and their types.
 class Api::V1::ContractTest < ActionDispatch::IntegrationTest
+  setup { sign_in_client }
+
   test "the palette colors endpoint returns exactly this shape" do
     get colors_api_v1_palette_url("Brand Core")
 

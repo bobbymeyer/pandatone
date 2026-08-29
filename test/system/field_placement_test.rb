@@ -4,26 +4,41 @@ require "application_system_test_case"
 # is not gets auto-placed into a single column, which is how the palette index
 # came to be crushed into a sixth of the page: a Turbo Frame is a custom
 # element with no default styling, so it arrived as an unplaced inline box and
-# the grid gave it one field.
+# the grid gave it one field. The account panel and a line of prose under the
+# sign-in form each did the same thing later, which is what moved this from
+# reading the stylesheet to measuring the page.
 #
-# This checks the whole class of mistake rather than that one instance: it
-# reads which selectors grid.css actually places, then walks the real pages.
+# Measuring is the point: it makes no assumption about how the CSS places
+# things, so it keeps biting when the placement is rewritten.
 class FieldPlacementTest < ApplicationSystemTestCase
-  test "every direct child of the page grid is placed on the field" do
-    placed = placed_selectors
-    assert_not_empty placed
+  setup { skip "needs a real browser to have widths" unless javascript_driver? }
 
+  # Half the page. A single auto-placed column is a sixth of it; the page head,
+  # the one block that legitimately stops short, is two thirds. Half separates
+  # those two without pretending to a precision the gutters do not allow.
+  NARROWEST = 0.5
+
+  test "no direct child of the page grid is auto placed into a single column" do
     pages.each do |name, path|
       visit path
 
-      all("main > *", visible: :all).each do |element|
-        classes = element[:class].to_s.split
-        identifiers = classes + [ element.tag_name ]
+      narrow = evaluate_script(<<~JS)
+        (() => {
+          const main = document.querySelector('main.grid');
+          const style = getComputedStyle(main);
+          const room = main.getBoundingClientRect().width
+            - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
 
-        assert_any_placed identifiers, placed,
-          "#{name}: <#{element.tag_name} class=#{element[:class].inspect}> sits directly on the " \
-          "grid with no field placement, so it will take a single column"
-      end
+          return Array.from(main.children)
+            .map(el => [el.tagName.toLowerCase() + '.' + (el.className || ''),
+                        Math.round(el.getBoundingClientRect().width / room * 100)])
+            .filter(([, share]) => share > 0 && share < #{(NARROWEST * 100).round});
+        })()
+      JS
+
+      assert_empty narrow,
+        "#{name}: these sit directly on the grid with no field placement, so each " \
+        "took a single column instead of the page: #{narrow.inspect}"
     end
   end
 
@@ -37,21 +52,10 @@ class FieldPlacementTest < ApplicationSystemTestCase
         "color show" => color_path(colors(:signal_red)),
         "color form" => new_color_path,
         "add a swatch" => new_palette_color_path(palettes(:press)),
-        "lookup" => lookup_path(q: "#E30613")
+        "lookup" => lookup_path(q: "#E30613"),
+        "account" => account_path,
+        "sign in" => new_session_path,
+        "forgotten password" => new_password_path
       }
-    end
-
-    # Selectors grid.css gives an explicit grid-column, reduced to the class or
-    # tag names they hinge on.
-    def placed_selectors
-      css = Rails.root.join("app/assets/stylesheets/grid.css").read
-
-      css.scan(/([^{}]+)\{[^}]*grid-column:[^}]*\}/m).flatten.flat_map do |selectors|
-        selectors.split(",").map { |selector| selector.strip[/[.\w-]+\z/].to_s.delete_prefix(".") }
-      end.reject(&:empty?).uniq
-    end
-
-    def assert_any_placed(identifiers, placed, message)
-      assert identifiers.any? { |identifier| placed.include?(identifier) }, message
     end
 end

@@ -93,7 +93,7 @@ class ColorPageTest < ApplicationSystemTestCase
   test "every hex on screen is a copy button carrying its own value" do
     visit color_path(colors(:signal_red))
 
-    button = find(".hex--copy", match: :first)
+    button = find(".copy", match: :first)
     assert_equal "#E30613", button.text
     assert_equal "#E30613", button["data-clipboard-text-value"]
     assert_equal "Copy #E30613", button["aria-label"]
@@ -101,9 +101,9 @@ class ColorPageTest < ApplicationSystemTestCase
 
   test "hexes are copy buttons on the index and the lookup too" do
     visit colors_path
-    assert_selector ".color-card .hex--copy", minimum: 6
+    assert_selector ".color-card .copy", minimum: 6
 
     visit lookup_path(q: "#E30613")
-    assert_selector ".hex--copy", text: "#E30613"
+    assert_selector ".copy", text: "#E30613"
   end
 end

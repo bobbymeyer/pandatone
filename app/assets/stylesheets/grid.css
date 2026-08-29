@@ -98,9 +98,17 @@ main.grid {
   min-width: 0;
 }
 
+/* Everything on the page field runs the full width of it unless it says
+   otherwise. This replaces a list that had to name every block in the app,
+   where anything left off it silently took one sixth of the page instead — a
+   Turbo Frame, the account panel and a line of prose under the sign-in form
+   each did exactly that in turn. Placement is now the default and the
+   exception is what gets written down. */
+main.grid > * { grid-column: 1 / -1; }
+
 /* The field is asymmetric on purpose: heads and prose sit in the left four
    fields and stop there, leaving two standing empty on the right. */
-.page-head { grid-column: 1 / span 4; }
+main.grid > .page-head { grid-column: 1 / span 4; }
 
 /* A Turbo Frame is a custom element, so it has no default display and no
    placement: on the field it arrives as an unplaced inline box and the grid
@@ -109,19 +117,6 @@ main.grid {
    would have. */
 turbo-frame { display: block; }
 
-.filters,
-turbo-frame,
-.palette-list,
-.color-list,
-.swatch-grid,
-.form,
-.empty,
-.memberships,
-.add-swatch,
-.current-swatches,
-.lookup-result,
-.color-detail { grid-column: 1 / -1; }
-
 @media (max-width: 76rem) {
   :root { --card: 2; --card-wide: 3; }
 }
@@ -129,7 +124,7 @@ turbo-frame,
 @media (max-width: 48rem) {
   :root { --card: 3; --card-wide: 6; }
 
-  .page-head { grid-column: 1 / -1; }
+  main.grid > .page-head { grid-column: 1 / -1; }
 }
 
 @media (max-width: 34rem) {

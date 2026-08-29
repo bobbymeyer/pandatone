@@ -1,0 +1,13 @@
+<% password_digest = BCrypt::Password.create("password") %>
+
+# The tokens are literal so a test can send one without having to look it up,
+# and so a failure prints something recognizable rather than 24 random letters.
+keeper:
+  email_address: keeper@example.com
+  password_digest: <%= password_digest %>
+  api_token: keeper-token-000000000000
+
+second:
+  email_address: second@example.com
+  password_digest: <%= password_digest %>
+  api_token: second-token-00000000000

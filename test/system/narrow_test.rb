@@ -114,7 +114,9 @@ class NarrowTest < ApplicationSystemTestCase
         "add a swatch" => new_palette_color_path(palettes(:press)),
         "fork" => new_palette_path(from: palettes(:brand).id),
         "new color" => new_color_path,
-        "lookup" => lookup_path(q: "#ABCDEF")
+        "lookup" => lookup_path(q: "#ABCDEF"),
+        "account" => account_path,
+        "sign in" => new_session_path
       }
     end
 end

@@ -332,9 +332,9 @@ class BrowserTest < ApplicationSystemTestCase
     grant_clipboard
     visit color_path(colors(:signal_red))
 
-    find(".hex--copy", match: :first).click
+    find(".copy", match: :first).click
 
-    assert_selector ".hex--copy[data-copied]"
+    assert_selector ".copy[data-copied]"
     assert_equal "#E30613", evaluate_async_script(
       "navigator.clipboard.readText().then(arguments[0])"
     )
@@ -344,10 +344,10 @@ class BrowserTest < ApplicationSystemTestCase
     grant_clipboard
     visit color_path(colors(:signal_red))
 
-    find(".hex--copy", match: :first).click
-    assert_selector ".hex--copy[data-copied]"
+    find(".copy", match: :first).click
+    assert_selector ".copy[data-copied]"
 
-    assert_no_selector ".hex--copy[data-copied]", wait: 5
+    assert_no_selector ".copy[data-copied]", wait: 5
   end
 
   test "a refused clipboard leaves the value readable" do
@@ -355,9 +355,9 @@ class BrowserTest < ApplicationSystemTestCase
 
     # No permission granted: the copy fails, and the page must not break or
     # claim to have copied anything.
-    find(".hex--copy", match: :first).click
+    find(".copy", match: :first).click
 
-    assert_no_selector ".hex--copy[data-copied]"
+    assert_no_selector ".copy[data-copied]"
     assert_text "#E30613"
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_041244) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_29_180136) do
   create_table "colors", force: :cascade do |t|
     t.integer "b", null: false
     t.decimal "c", precision: 5, scale: 1, null: false
@@ -48,6 +48,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_041244) do
     t.index "LOWER(name)", name: "index_palettes_on_lower_name", unique: true
   end
 
+  create_table "sessions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "api_token", null: false
+    t.datetime "created_at", null: false
+    t.string "email_address", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["api_token"], name: "index_users_on_api_token", unique: true
+    t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
   add_foreign_key "palette_colors", "colors"
   add_foreign_key "palette_colors", "palettes"
+  add_foreign_key "sessions", "users"
 end

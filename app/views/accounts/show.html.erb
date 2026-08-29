@@ -1,0 +1,25 @@
+<% content_for :title, "Account" %>
+
+<header class="page-head">
+  <h1 class="page-title">Account</h1>
+  <p class="page-lede">Signed in as <%= @user.email_address %>.</p>
+</header>
+
+<section class="account">
+  <h2>API token</h2>
+  <p class="hint">
+    What a script sends to reach the API, as
+    <code>Authorization: Bearer &lt;token&gt;</code>. It is the same library
+    behind it, so a tool holding this can do anything you can.
+  </p>
+
+  <p><%= copy_button @user.api_token, class: "token" %></p>
+
+  <div class="page-actions">
+    <%= button_to "Sign out", session_path, method: :delete, class: "button button--quiet" %>
+
+    <%= button_to "Regenerate token", api_token_path, method: :patch,
+          class: "button button--danger",
+          data: { turbo_confirm: "Every script and tool using the current token stops working until you give it the new one. Regenerate it?" } %>
+  </div>
+</section>

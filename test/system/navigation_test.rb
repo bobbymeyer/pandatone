@@ -57,10 +57,12 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
+  # The three library screens lead, in the order you work in them. The account
+  # is last because it is about you rather than about the library.
   test "leads the nav with colors" do
     visit root_path
 
-    assert_equal [ "Colors", "Palettes", "Lookup" ], all(".masthead__nav a").map(&:text)
+    assert_equal [ "Colors", "Palettes", "Lookup", "Account" ], all(".masthead__nav a").map(&:text)
   end
 
   # The typeface ships with the app. This is a local tool, so it should not

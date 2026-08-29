@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  resource :session
+  resources :passwords, param: :token
+
+  # Who you are signed in as, and the credential your scripts carry. The token
+  # is its own resource because replacing it is the only thing you do to it.
+  resource :account, only: :show
+  resource :api_token, only: :update
   # The API is versioned from the first commit: other tools depend on this
   # contract, and the way to change it is to add v2, not to edit v1.
   namespace :api do

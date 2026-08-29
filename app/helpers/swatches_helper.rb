@@ -46,11 +46,19 @@ module SwatchesHelper
   # that copies itself. The value stays visible text inside it, which is what
   # keeps it usable when the clipboard is unavailable.
   def hex_tag(hex, **options)
-    options[:class] = Array(options[:class]).unshift("hex", "hex--copy")
+    options[:class] = Array(options[:class]).unshift("hex")
 
-    tag.button(hex, type: "button", **options,
-      data: { controller: "clipboard", action: "clipboard#copy", clipboard_text_value: hex },
-      aria: { label: "Copy #{hex}" })
+    copy_button(hex, **options)
+  end
+
+  # The same control for anything on screen that exists to be taken elsewhere.
+  # A hex is the common case; the API token is the other one.
+  def copy_button(value, **options)
+    options[:class] = Array(options[:class]).unshift("copy")
+
+    tag.button(value, type: "button", **options,
+      data: { controller: "clipboard", action: "clipboard#copy", clipboard_text_value: value },
+      aria: { label: "Copy #{value}" })
   end
 
   # Says what deleting will actually do. A color no palette holds is a small

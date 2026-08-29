@@ -376,6 +376,16 @@
 .filter-row__label,
 .filters .filter-form > .field > label { min-width: var(--register-label); }
 
+/* --- Account ------------------------------------------------------------ */
+
+/* Prose and a credential, held to the same measure the forms are: the token
+   is one line at every width the app is read at. */
+.account { max-width: var(--measure); }
+
+.account h2 { margin-bottom: var(--space-1); }
+
+.account .token { margin-top: var(--space-2); }
+
 /* --- Forms -------------------------------------------------------------- */
 
 .form {  align-items: flex-start;
@@ -513,10 +523,13 @@ form.button_to { display: inline; }
 
 .link-quiet:hover { color: var(--ink); }
 
-/* The affordance on the copy button. What makes it look like the text it
+/* The affordance on any button that copies its own text. Named for what it
+   does rather than for the hex it was first used on: the API token wears it
+   too, and nothing here was ever about color values.
+   What makes it look like the text it
    replaced lives in type.css, ahead of the size modifiers it would otherwise
    flatten. */
-.hex--copy {
+.copy {
   border: 0;
   padding: 0;
   background: none;
@@ -525,7 +538,7 @@ form.button_to { display: inline; }
   text-align: left;
 }
 
-.hex--copy::after {
+.copy::after {
   content: "";
   color: var(--ink-quiet);
   font-weight: 400;
@@ -534,12 +547,12 @@ form.button_to { display: inline; }
 
 /* Focus as well as hover: a keyboard reaches this button, and touch never
    hovers at all. */
-.hex--copy:hover::after,
-.hex--copy:focus-visible::after { content: " copy"; }
+.copy:hover::after,
+.copy:focus-visible::after { content: " copy"; }
 
 /* Says it worked, in the one place you are already looking. */
-.hex--copy[data-copied]::after,
-.hex--copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
+.copy[data-copied]::after,
+.copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
 
 /* The swatches a fork carries: a row of choices, each one a swatch you can
    untick, sized like the cards they came from. */

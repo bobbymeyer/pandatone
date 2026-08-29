@@ -126,7 +126,7 @@ h3 {
    copies itself, and a button brings its own font. Resetting that here
    rather than in components.css keeps it ahead of the size modifiers below:
    a `font` shorthand after them would flatten every one. */
-.hex--copy { font: inherit; }
+.copy { font: inherit; }
 
 .hex--large {
   font-size: var(--size-4);

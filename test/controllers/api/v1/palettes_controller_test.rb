@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Api::V1::PalettesControllerTest < ActionDispatch::IntegrationTest
+  setup { sign_in_client }
+
   # --- Index -------------------------------------------------------------
 
   test "lists every palette by name" do

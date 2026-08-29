@@ -93,7 +93,7 @@ class GridTest < ActiveSupport::TestCase
   end
 
   test "the copy affordance answers focus as well as hover" do
-    assert_match(/\.hex--copy:focus-visible::after/, components,
+    assert_match(/\.copy:focus-visible::after/, components,
       "a keyboard reaches the copy button and touch never hovers")
   end
 

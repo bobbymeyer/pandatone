@@ -23,6 +23,22 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     driven_by :rack_test
   end
 
+  # Every screen in this app is behind the sign-in, so every flow through one
+  # starts signed in. Going through the form rather than planting the cookie
+  # keeps this honest under both drivers: it is the same act a person performs,
+  # and it fails loudly if the sign-in itself breaks.
+  setup do
+    visit new_session_path
+    fill_in "Email", with: users(:keeper).email_address
+    fill_in "Password", with: "password"
+    click_on "Sign in"
+
+    # Waits for the sign-in to actually land. A browser submits the form
+    # asynchronously, so without something to wait on the next visit races the
+    # redirect and lands back on the sign-in page with the library still shut.
+    assert_selector ".masthead__nav a", text: "Account"
+  end
+
   # rack_test has no CSS, no box model and no JavaScript, so anything about
   # layout or behavior has to say so and stand aside.
   def javascript_driver?
