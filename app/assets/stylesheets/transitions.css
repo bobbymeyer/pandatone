@@ -10,8 +10,20 @@
 
 @view-transition { navigation: auto; }
 
-::view-transition-old(root),
-::view-transition-new(root) {
+/* The page crossfade is taken of the body rather than of :root, which is the
+   element that carries it by default. A snapshot of :root is sized to the
+   viewport including the scrollbar, while the page is laid out in the width
+   that is left after it — so for the 240ms of every navigation the document
+   was 15px wider than its own viewport and genuinely scrolled sideways. It
+   settled back to zero the moment the transition ended, which is why the page
+   measured clean whenever it was asked while standing still. The body is laid
+   out in the width the page actually has, so its snapshot is that wide too. */
+:root { view-transition-name: none; }
+
+body { view-transition-name: page; }
+
+::view-transition-old(page),
+::view-transition-new(page) {
   animation-duration: 180ms;
   animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
 }

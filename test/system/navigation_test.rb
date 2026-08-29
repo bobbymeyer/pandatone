@@ -84,6 +84,27 @@ class NavigationTest < ApplicationSystemTestCase
     assert_equal names.uniq, names
   end
 
+  # A transition snapshot of :root is sized to the viewport *including* the
+  # scrollbar, while the page is laid out inside it — so for the length of
+  # every navigation the document was 15px wider than its own viewport and
+  # really did scroll sideways. It settled back to zero afterwards, which is
+  # why every static measurement of these pages came back clean.
+  test "a navigation never gives the page somewhere to scroll sideways" do
+    skip "needs a real browser" unless javascript_driver?
+
+    page.driver.browser.manage.window.resize_to(390, 844)
+    visit palettes_path
+    watch_horizontal_scroll
+
+    click_on "Colors"
+    assert_text "signal-red"
+
+    assert_equal 0, widest_scroll_seen,
+      "the page could be scrolled sideways while the transition ran"
+  ensure
+    page.driver.browser.manage.window.resize_to(*ApplicationSystemTestCase::SCREEN_SIZE) if javascript_driver?
+  end
+
   test "moves between every screen" do
     visit root_path
     assert_text "Palettes"
@@ -103,4 +124,24 @@ class NavigationTest < ApplicationSystemTestCase
     click_on "Palettes"
     assert_text "Brand Core"
   end
+
+  private
+    # Samples every frame for the length of a navigation, because the overflow
+    # this catches exists only while the transition runs: asking afterwards
+    # always says zero.
+    def watch_horizontal_scroll
+      execute_script(<<~JS)
+        window.__widest = 0;
+        (function sample() {
+          const page = document.documentElement;
+          const room = page.scrollWidth - page.clientWidth;
+          if (room > window.__widest) window.__widest = room;
+          if ((window.__frames = (window.__frames || 0) + 1) < 240) requestAnimationFrame(sample);
+        })();
+      JS
+    end
+
+    def widest_scroll_seen
+      evaluate_script("window.__widest")
+    end
 end
