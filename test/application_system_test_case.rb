@@ -12,10 +12,10 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     # CHROME_BINARY / CHROMEDRIVER let a machine point at browsers it already
     # has instead of downloading a pair. CI leaves both unset and Selenium
     # Manager sorts it out.
-    Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER"] if ENV["CHROMEDRIVER"]
+    Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER"] if ENV["CHROMEDRIVER"].present?
 
     driven_by :selenium, using: :headless_chrome, screen_size: SCREEN_SIZE do |options|
-      options.binary = ENV["CHROME_BINARY"] if ENV["CHROME_BINARY"]
+      options.binary = ENV["CHROME_BINARY"] if ENV["CHROME_BINARY"].present?
       options.add_argument("--no-sandbox")
       options.add_argument("--disable-dev-shm-usage")
     end
@@ -36,5 +36,33 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     return yield if Capybara.current_driver == :rack_test
 
     accept_confirm(&block)
+  end
+
+  # --- Shared reading helpers ----------------------------------------------
+
+  # Choosing an order is a whole navigation, so this waits for the reordered
+  # list before handing back: reading the names does not retry.
+  def sort_by(label, leading:, list: ".color-list", name: ".color-card__name")
+    within("[data-filter=sort]") { click_on label }
+
+    assert_selector "#{list} > li:first-child #{name}", text: leading, exact_text: true
+  end
+
+  # Reading a collection is two steps — find the nodes, then ask each for its
+  # text — and a view transition can swap them in between. synchronize is
+  # Capybara's own answer: it retries the block on a stale node, and runs it
+  # once under rack_test, where nothing moves.
+  def names_in(selector)
+    page.document.synchronize do
+      all(selector, minimum: 1).map(&:text)
+    end
+  end
+
+  def card_names = names_in(".color-card__name")
+  def strip_names = names_in(".palette-list .palette-strip__name")
+
+  # rack_test has no JavaScript, so a live-filtering form needs its button.
+  def filter_unless_live
+    click_on "Filter" unless javascript_driver?
   end
 end
