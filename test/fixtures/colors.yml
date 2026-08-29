@@ -1,0 +1,77 @@
+# Both color spaces are written out longhand rather than derived, so that a
+# regression in ColorSpace shows up as a failing test instead of quietly
+# rewriting the expectations along with the code.
+
+signal_red:
+  name: signal-red
+  source_space: rgb
+  r: 227
+  g: 6
+  b: 19
+  c: 0.0
+  m: 97.4
+  y: 91.6
+  k: 11.0
+  tags: [ "brand", "primary" ]
+
+ink_black:
+  name: ink-black
+  source_space: rgb
+  r: 17
+  g: 17
+  b: 17
+  c: 0.0
+  m: 0.0
+  y: 0.0
+  k: 93.3
+  tags: [ "brand", "neutral" ]
+
+paper_white:
+  name: paper-white
+  source_space: rgb
+  r: 250
+  g: 250
+  b: 248
+  c: 0.0
+  m: 0.0
+  y: 0.8
+  k: 2.0
+  tags: [ "brand", "neutral" ]
+
+autumn_ochre:
+  name: autumn-ochre
+  source_space: rgb
+  r: 196
+  g: 132
+  b: 44
+  c: 0.0
+  m: 32.7
+  y: 77.6
+  k: 23.1
+  tags: [ "seasonal" ]
+
+# Authored in CMYK: its RGB is the approximation, not the other way round.
+process_cyan:
+  name: process-cyan
+  source_space: cmyk
+  c: 100.0
+  m: 0.0
+  y: 0.0
+  k: 0.0
+  r: 0
+  g: 255
+  b: 255
+  tags: [ "print", "process" ]
+
+# Belongs to no palette. Guards the "standalone color" paths.
+deep_indigo:
+  name: deep-indigo
+  source_space: rgb
+  r: 43
+  g: 74
+  b: 138
+  c: 68.8
+  m: 46.4
+  y: 0.0
+  k: 45.9
+  tags: [ "cool" ]

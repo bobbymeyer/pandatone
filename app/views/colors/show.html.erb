@@ -1,0 +1,60 @@
+<% content_for :title, @color.name %>
+
+<%= render "shared/errors", record: @color %>
+
+<article class="color-detail">
+  <%= swatch_tag @color.hex, transition_name: "color-#{@color.id}", class: "swatch--large" %>
+
+  <div class="color-detail__body">
+    <h1 class="page-title"><%= @color.name %></h1>
+    <%= hex_tag @color.hex, class: "hex--large" %>
+
+    <dl class="channels channels--stacked">
+      <% channel_pairs(@color).each do |space, values| %>
+        <dt><%= space %></dt>
+        <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
+      <% end %>
+    </dl>
+
+    <p class="provenance">
+      Authored in <%= @color.source_space.upcase %>.
+      The <%= @color.rgb_source? ? "CMYK" : "RGB" %> values are an approximate device
+      conversion, not a profiled one.
+    </p>
+
+    <%= turbo_frame_tag "color_tags" do %>
+      <div class="inline-edit">
+        <p class="tags"><%= @color.tags.any? ? tag_links(@color.tags) { |tag| colors_path(tag: tag) } : "Untagged" %></p>
+        <%= link_to "Edit tags", edit_color_tags_path(@color), class: "link-quiet" %>
+      </div>
+    <% end %>
+
+    <div class="page-actions">
+      <%= link_to "Edit color", edit_color_path(@color), class: "button" %>
+
+      <%# The confirmation names the palettes rather than asking twice: the
+          server refuses a bare delete of a held color, so the page that
+          knows what holds it asks for that permission up front. %>
+      <%= button_to "Delete color", @color, method: :delete,
+            params: { from_palettes: @palettes.any? || nil }.compact,
+            class: "button button--danger",
+            data: { turbo_confirm: delete_color_warning(@color, @palettes) } %>
+    </div>
+  </div>
+</article>
+
+<%# Each palette is drawn as its own strip rather than named in a list: the
+    point of the reverse lookup is seeing what company a swatch keeps, which a
+    row of names cannot show. Same partial as the palette index, so a strip
+    looks and morphs the same wherever it appears. %>
+<section class="memberships">
+  <h2>Palettes</h2>
+
+  <% if @palettes.empty? %>
+    <p class="empty">No palettes hold this color yet.</p>
+  <% else %>
+    <ul class="palette-list">
+      <%= render partial: "palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>
+    </ul>
+  <% end %>
+</section>

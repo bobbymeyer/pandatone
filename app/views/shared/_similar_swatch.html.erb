@@ -1,0 +1,23 @@
+<%# locals: (similar:, color:) %>
+<%# The near-duplicate question. Both swatches are shown side by side, because
+    "similar to grid-grey" is not something you can answer from a name — the
+    only way to decide whether these are two colors or one color typed twice
+    is to look at them together. The form's submit button carries the answer. %>
+<div class="warning" role="alert">
+  <p class="warning__title">This is similar to <%= link_to similar.name, similar, class: "link-quiet" %>.</p>
+
+  <ul class="warning__swatches">
+    <li>
+      <%= swatch_tag color.hex, class: "swatch--card" %>
+      <p class="swatch-name"><%= color.name.presence || "Yours" %></p>
+      <%= hex_tag color.hex %>
+    </li>
+    <li>
+      <%= swatch_tag similar.hex, class: "swatch--card" %>
+      <p class="swatch-name"><%= similar.name %></p>
+      <%= hex_tag similar.hex %>
+    </li>
+  </ul>
+
+  <%= hidden_field_tag :confirm_similar, color.hex %>
+</div>

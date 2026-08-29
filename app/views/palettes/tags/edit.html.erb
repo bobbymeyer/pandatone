@@ -1,0 +1,12 @@
+<% content_for :title, "Tags for #{@palette.name}" %>
+
+<%= turbo_frame_tag "palette_tags" do %>
+  <%= form_with model: @palette, url: palette_tags_path(@palette), method: :patch, class: "form form--inline" do |form| %>
+    <div class="field">
+      <%= form.label :tag_list, "Tags" %>
+      <%= form.text_field :tag_list, value: @palette.tag_list, autocomplete: "off" %>
+    </div>
+    <%= form.submit "Save tags", class: "button" %>
+    <%= link_to "Cancel", @palette, class: "link-quiet" %>
+  <% end %>
+<% end %>

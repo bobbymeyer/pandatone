@@ -1,0 +1,29 @@
+<%# locals: (color:, level: 2, pick: false, palette: nil) %>
+<%# One card, two jobs. On an index it browses: the swatch and the name are a
+    single link, so a card costs one tab stop and announces its destination
+    once. In the library picker it picks, so nothing navigates away and the
+    action is the button. Written once because it was written twice, and the
+    copy button reached only one of them. %>
+<li class="color-card" id="<%= dom_id(color) %>">
+  <% head = capture do %>
+    <%= swatch_tag color.hex, transition_name: ("color-#{color.id}" unless pick), class: "swatch--card" %>
+    <%= tag.send("h#{level}", color.name, class: "color-card__name swatch-name") %>
+  <% end %>
+
+  <%= pick ? head : link_to(head, color, class: "swatch-link") %>
+
+  <%= hex_tag color.hex %>
+
+  <% if pick %>
+    <%= button_to "Add", palette_colors_path(palette), params: { color_id: color.id },
+          class: "button", aria: { label: "Add #{color.name}" } %>
+  <% else %>
+    <p class="color-card__palettes">
+      <%= color.palettes.any? ? color.palettes.map(&:name).join(" · ") : "No palettes" %>
+    </p>
+
+    <% if color.tags.any? %>
+      <p class="tags"><%= tag_links(color.tags) { |t| colors_path(tag: t) } %></p>
+    <% end %>
+  <% end %>
+</li>

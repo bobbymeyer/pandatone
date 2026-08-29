@@ -1,0 +1,7 @@
+<%= render "shared/index",
+      title: "Palettes",
+      action: "New palette", action_path: new_palette_path, empty_link: "Make the first one",
+      path: palettes_path, frame: "palettes",
+      sorts: Palette::SORTS, tags: @tags,
+      records: @palettes, total: @total, noun: "palette",
+      list_class: "palette-list", partial: "palettes/strip", as: :palette %>

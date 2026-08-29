@@ -1,0 +1,7 @@
+<% content_for :title, "Edit #{@palette.name}" %>
+
+<header class="page-head">
+  <h1 class="page-title">Edit <%= @palette.name %></h1>
+</header>
+
+<%= render "form", palette: @palette, url: palette_path(@palette), submit: "Save palette", with_swatch: true, source: nil %>

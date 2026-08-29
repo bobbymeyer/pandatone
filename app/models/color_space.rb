@@ -1,0 +1,163 @@
+# Device RGB <-> CMYK conversion.
+#
+# Deliberately naive: the standard textbook formulas, no ICC profiles, no
+# gamut mapping, no black generation or under-color removal. The CMYK a
+# color reports is an approximation good enough to hand a printer as a
+# starting point, and nothing more.
+#
+# The two directions are not symmetrical. RGB round-trips through CMYK
+# losslessly, but many CMYK mixes collapse onto a single RGB triple, which
+# is why Color records which space they were authored in and treats that
+# space as the source of truth.
+module ColorSpace
+  module_function
+
+  # rgb_to_cmyk(227, 6, 19) # => { c: 0.0, m: 97.4, y: 91.6, k: 11.0 }
+  def rgb_to_cmyk(r, g, b)
+    r, g, b = clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255)
+    red, green, blue = r / 255.0, g / 255.0, b / 255.0
+
+    key = 1.0 - [ red, green, blue ].max
+    return { c: 0.0, m: 0.0, y: 0.0, k: 100.0 } if key >= 1.0
+
+    ink = 1.0 - key
+    {
+      c: percent((1.0 - red - key) / ink),
+      m: percent((1.0 - green - key) / ink),
+      y: percent((1.0 - blue - key) / ink),
+      k: percent(key)
+    }
+  end
+
+  # cmyk_to_rgb(0, 97.4, 91.6, 11.0) # => { r: 227, g: 6, b: 19 }
+  def cmyk_to_rgb(c, m, y, k)
+    key = 1.0 - clamp(k, 0, 100).to_f / 100.0
+    {
+      r: channel(c, key),
+      g: channel(m, key),
+      b: channel(y, key)
+    }
+  end
+
+  # to_hex(227, 6, 19) # => "#E30613"
+  def to_hex(r, g, b)
+    format("#%02X%02X%02X", clamp(r, 0, 255), clamp(g, 0, 255), clamp(b, 0, 255))
+  end
+
+  # Accepts "#E30613", "e30613" and the "#FC0" shorthand. Returns nil rather
+  # than raising: callers are usually handling user input or a query string.
+  def parse_hex(hex)
+    digits = hex.to_s.strip.delete_prefix("#")
+    digits = digits.chars.map { |d| d * 2 }.join if digits.length == 3
+    return nil unless digits.match?(/\A\h{6}\z/)
+
+    {
+      r: digits[0, 2].hex,
+      g: digits[2, 2].hex,
+      b: digits[4, 2].hex
+    }
+  end
+
+  # Freeform input from a human: a hex, or an RGB triple in whatever
+  # punctuation their tool produced. Six hex digits are read as hex, since
+  # that is overwhelmingly what "123456" means in a color field.
+  # Reads a color written any of the ways someone might have it to hand: a
+  # hex, an RGB triple, or a CMYK build. All three come back as RGB, which is
+  # what makes a search in one space find a color authored in the other —
+  # every color stores both, and RGB is the one they share.
+  #
+  # The count decides the space: four numbers are inks on 0..100, three are
+  # channels on 0..255. A build is lossy in that direction, so this finds the
+  # color the build renders to rather than the build itself.
+  def parse(input)
+    parse_hex(input) || parse_triple(input) || build(input)&.then { |inks| cmyk_to_rgb(*inks.values) }
+  end
+
+  # The four inks of a CMYK build, or nil. Public because a screen that reads
+  # one wants to say so: the conversion is lossy, and "we read that as a
+  # build" is the difference between a wrong answer and an explained one.
+  def build(input)
+    inks = input.to_s.scan(/-?\d+(?:\.\d+)?/).map(&:to_f)
+    return nil unless inks.length == 4 && inks.all? { |ink| (0..100).cover?(ink) }
+
+    { c: inks[0], m: inks[1], y: inks[2], k: inks[3] }
+  end
+
+  # normalize_hex("fc0") # => "#FFCC00"
+  def normalize_hex(hex)
+    rgb = parse_hex(hex)
+    to_hex(rgb[:r], rgb[:g], rgb[:b]) if rgb
+  end
+
+  # How different two colors look, on a 0..765 scale. This is "redmean": a
+  # weighted RGB distance that tracks perception far better than the plain
+  # Euclidean one — which reads a shift in green as no bigger than the same
+  # shift in blue — while staying pure arithmetic. No profiles, no Lab, no
+  # color-science apparatus for a question that only needs an approximate
+  # answer.
+  def distance(a, b)
+    mean = (a[:r] + b[:r]) / 2.0
+    dr = a[:r] - b[:r]
+    dg = a[:g] - b[:g]
+    db = a[:b] - b[:b]
+
+    Math.sqrt((2 + mean / 256) * dr**2 + 4 * dg**2 + (2 + (255 - mean) / 256) * db**2)
+  end
+
+  # Rec. 601 luma: the standard weighted average of the channels, on 0..255.
+  # It is not a perceptual lightness — it does not linearize the gamma — but it
+  # puts yellow well above blue where (max + min) / 2 calls them equal, which
+  # is the whole of what a dark-to-light sort is for.
+  def luma(r, g, b)
+    0.299 * r + 0.587 * g + 0.114 * b
+  end
+
+  # How much color there is in a color: the spread between its channels, on
+  # 0..255. Zero is a gray, and everything near zero reads as one.
+  def chroma(r, g, b)
+    [ r, g, b ].max - [ r, g, b ].min
+  end
+
+  # Where the color sits on the wheel, in degrees from red, or nil when there
+  # is no hue to speak of.
+  def hue(r, g, b)
+    high = [ r, g, b ].max
+    low = [ r, g, b ].min
+    return nil if high == low
+
+    span = (high - low).to_f
+    sixths =
+      case high
+      when r then (g - b) / span
+      when g then 2 + (b - r) / span
+      else        4 + (r - g) / span
+      end
+
+    (sixths * 60) % 360
+  end
+
+  def parse_triple(input)
+    channels = input.to_s.scan(/-?\d+/).map(&:to_i)
+    return nil unless channels.length == 3 && channels.all? { |channel| (0..255).cover?(channel) }
+
+    { r: channels[0], g: channels[1], b: channels[2] }
+  end
+  private_class_method :parse_triple
+
+  def clamp(value, low, high)
+    return low if value.nil?
+
+    value.clamp(low, high)
+  end
+  private_class_method :clamp
+
+  def percent(fraction)
+    (fraction * 100.0).round(1)
+  end
+  private_class_method :percent
+
+  def channel(ink, key)
+    (255.0 * (1.0 - clamp(ink, 0, 100).to_f / 100.0) * key).round
+  end
+  private_class_method :channel
+end

@@ -1,0 +1,684 @@
+/* Components. Separation is done with thin keylines and whitespace; there are
+   no cards, no rounded boxes and no shadows in this file. */
+
+/* --- Masthead ---------------------------------------------------------- */
+
+.masthead {
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--keyline);
+  align-items: baseline;
+}
+
+/* The panda and the word are one mark, so it never breaks: not between them,
+   and not inside the word. body sets overflow-wrap: anywhere for names and
+   tags, which are free text; this is not. */
+.masthead__mark {
+  grid-column: 1 / span 2;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+
+/* Off the ladder like every other gap in the app, rather than a space
+   character whose width is the font's business and not ours.
+
+   Drained of color for the rule the whole palette rests on: the swatches are
+   the only color on the page. An emoji brings its own, and which colors it
+   brings depends on whose emoji font draws it. */
+.masthead__panda {
+  margin-inline-end: var(--space-1);
+  filter: grayscale(1);
+}
+
+/* Off the left edge rather than pushed to the right: the asymmetry is the
+   point, and it lines the nav up with the body column below. */
+.masthead__nav { grid-column: 3 / -1; }
+
+.masthead__nav a:hover { color: var(--ink); }
+
+/* Two fields is not enough for the wordmark at a phone's width, and the
+   wordmark is the one thing here that may not be squeezed. So the masthead
+   stacks instead: the mark takes the width it needs, and the nav drops below
+   it and wraps as it likes. The same phone breakpoint the cards use, rather
+   than a seventh number chosen to fit one word.
+
+   Here rather than beside the other breakpoints in grid.css, because the
+   masthead's placement is stated here and grid.css is loaded first: a rule
+   there loses to this one however narrow the screen gets. */
+@media (max-width: 34rem) {
+  .masthead__mark,
+  .masthead__nav { grid-column: 1 / -1; }
+
+  .masthead__nav { margin-top: var(--space-2); }
+}
+
+/* --- Registers -----------------------------------------------------------
+   Three things this interface says over and over: this is secondary, this is
+   a name, this is a link not underlined until you reach it. Said once each,
+   so a component below only names itself. */
+
+.masthead__nav a, .palette-strip__meta, .result-count,
+.color-card__palettes, .channels dt, .channels dd, .provenance, .tag,
+.tags, .filter-row__label, .export__label, .field label, .mode-toggle legend,
+.source-toggle legend, .button--quiet, .button--danger, .link-quiet,
+.empty, .errors ul {
+  color: var(--ink-quiet);
+}
+
+.masthead__mark, .palette-strip__name, .color-card__name, .channels dt,
+.channels .channel__key, .tag.active, .swatch-entry legend, .errors__title,
+.warning__title {
+  font-weight: 700;
+}
+
+.masthead__mark a, .masthead__nav a, .palette-strip__name a, .swatch-name,
+.tag, .button--primary {
+  text-decoration: none;
+}
+
+.masthead__mark a:hover, .palette-strip__name a:hover, .swatch-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* --- Rows and columns ---------------------------------------------------
+   Almost every horizontal run in this app is one thing: items on a shared
+   baseline, a space apart, wrapping when they must. It is declared once here
+   the way the grid's tracks are, and a component below says only how it
+   differs. Twenty-two separate flex declarations said the same thing before,
+   and drifted by a pixel wherever one of them was written from memory. */
+
+.masthead__nav,
+.palette-strip__meta,
+.page-actions,
+.inline-edit,
+.swatch-detail__controls,
+.channels dd,
+.link-list,
+.export,
+.filters,
+.filter-form,
+.tag-filter,
+.filter-row,
+.mode-toggle,
+.source-toggle,
+.entry-panel,
+.preview,
+.carried-swatches,
+.carried-swatch,
+.warning__swatches,
+.people-list > li,
+.lookup-missing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* A column is the same idea turned ninety degrees. */
+.form,
+.field,
+.people-list,
+.swatch-entry__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Only the differences. */
+.masthead__nav,
+.page-actions,
+.filters { gap: var(--space-3); }
+
+.page-actions,
+.swatch-detail__controls,
+.preview { align-items: center; }
+
+.filters,
+.filter-form { align-items: flex-end; }
+
+/* A field and the button that submits it are a pair, not a run: they do not
+   wrap away from each other. */
+.filter-form { flex-wrap: nowrap; }
+
+.palette-strip__meta { justify-content: space-between; }
+.channels dd { gap: 0 var(--space-2); }
+.link-list { gap: var(--space-1) var(--space-3); }
+.carried-swatches { gap: var(--space-3) var(--gutter); }
+.warning__swatches { gap: var(--gutter); }
+.carried-swatch,
+.field { gap: var(--space-1); }
+
+/* --- Swatches ---------------------------------------------------------- */
+
+.swatch {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* A hairline so that near-white swatches stay legible against the
+     off-white ground. The only reason any swatch carries an edge. */
+  box-shadow: inset 0 0 0 1px rgb(17 17 17 / 0.09);
+}
+
+.strip {
+  display: flex;
+  height: calc(var(--baseline) * 9);
+}
+
+/* The strip is the one thing in a palette card with a height of its own
+   rather than a proportion, so halving the card does not halve it. Five
+   units is the step on the ladder nearest half of nine. */
+.list--small .strip { height: calc(var(--baseline) * 5); }
+
+.strip .swatch { flex: 1 1 0; }
+
+/* height:auto defeats the base .swatch height:100%, so the square comes from
+   the capped width and the aspect ratio rather than from the grid row. */
+/* Card swatches carry their own proportion, so the link wrapping a swatch
+   and its name does not inherit a 3:2 box. height:auto defeats the base
+   .swatch height:100%. */
+.swatch--card {
+  aspect-ratio: 3 / 2;
+  height: auto;
+  margin-bottom: var(--space-2);
+}
+
+.swatch-link { display: block; }
+
+.swatch--large {
+  aspect-ratio: 1 / 1;
+  height: auto;
+}
+
+/* --- Palette index ----------------------------------------------------- */
+
+/* inline-block for the same reason .tag is: the link is the target, and an
+   inline box ignores the leading around it. */
+.palette-strip__name a { display: inline-block; text-decoration: none; }
+
+.palette-strip__meta { margin-top: var(--space-1); }
+
+/* --- Color index ------------------------------------------------------ */
+
+.color-card form.button_to { margin-top: var(--space-2); }
+
+/* The result count is a sentence, not a label. */
+.result-count { margin-bottom: var(--space-3); }
+
+.library-picker .filter-form { margin-bottom: var(--space-3); }
+
+/* What the palette already holds, as one row above the choosing. Context for
+   the decision, not part of it, so it reuses the index strip rather than the
+   card grid below. */
+.current-swatches h2 { margin-bottom: var(--space-2); }
+
+/* Card titles on the palette index and the color index are the same thing
+   and now read the same. The palette one used to inherit h2 by omission and
+   came out a full step larger. */
+.palette-strip__name,
+.color-card__name {
+  font-size: var(--size-2);
+  line-height: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.color-card__palettes {
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--keyline);
+  font-size: var(--size-1);
+  line-height: var(--space-2);
+}
+
+/* --- Palette show ------------------------------------------------------ */
+
+.page-actions { margin-top: var(--space-3); }
+
+.inline-edit { margin-top: var(--space-2); }
+
+/* The row and what the chosen swatch has to say are one thing on the page,
+   so they sit closer to each other than the field's row gap would put them:
+   the values belong to the swatch above them. */
+.swatch-detail { margin-top: var(--space-3); }
+
+.swatch-detail .swatch-name { margin-bottom: var(--space-1); }
+
+.swatch-detail__controls {
+  margin-top: var(--space-2);
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--keyline);
+}
+
+.channels {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+/* The names carry the weight and the numbers do not, so "R" and "227" are
+   told apart at a glance rather than by counting characters. */
+.channels dt { align-self: center; }
+
+.channels dd {  /* Metadata beside a metadata label, in a card too narrow for body size. */
+  font-size: var(--size-1);
+  line-height: var(--space-2);
+}
+
+/* Belt and braces: the row wraps between channels before it would break one,
+   because a flex item does not shrink below its own min-content. Untested for
+   that reason — at every width this app is built for it passes with the rule
+   taken out, and a test that cannot fail is not a guard. */
+.channels .channel { white-space: nowrap; }
+
+.channels--stacked {
+  grid-template-columns: max-content 1fr;
+  row-gap: var(--space-1);
+  margin-top: var(--space-3);
+}
+
+/* On a color's own page the values are the content, not a caption on it,
+   and there is room to set them properly. */
+.channels--stacked dd {
+  font-size: var(--size-2);
+  line-height: var(--space-3);
+}
+
+/* --- Color detail and lookup ------------------------------------------ */
+
+.color-detail,
+.lookup-result {
+  row-gap: var(--space-3);
+  align-items: start;
+}
+
+/* Two columns: the values read on the left, the swatch sits against the right
+   edge. Both are placed on row one explicitly, because sparse auto-placement
+   drops a definite-column item onto the next row whenever it starts left of
+   the previous item, which would stack these instead of pairing them.
+   Column seven is left standing empty. */
+.color-detail__body,
+.lookup-result__body {
+  grid-column: 1 / span 3;
+  grid-row: 1;
+}
+
+/* Capped rather than filling its span. Five columns square is 533px on a
+   1440px screen, which pushed the values it describes, and the palettes
+   below them, off the bottom of the window before you could read either. */
+.color-detail > .swatch,
+.lookup-result > .swatch {
+  grid-column: 5 / span 2;
+  grid-row: 1;
+  justify-self: end;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.color-detail__body .page-title { margin-bottom: var(--space-1); }
+
+.provenance,
+.lookup-result__body h2 { margin-top: var(--space-3); }
+
+.provenance {
+  max-width: var(--measure);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--keyline);
+}
+
+.memberships h2 { margin-bottom: var(--space-2); }
+
+.color-detail__body .tags { margin-top: var(--space-2); }
+
+.link-list { margin-top: var(--space-1); }
+
+/* Lists of destinations, so each one is a target rather than a word in a
+   sentence — inline-block for the same reason .tag is. */
+.link-list a,
+.lookup-nearest a {
+  display: inline-block;
+  text-underline-offset: 0.2em;
+}
+
+@media (max-width: 48rem) {
+  .color-detail > .swatch,
+  .lookup-result > .swatch,
+  .color-detail__body,
+  .lookup-result__body {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .color-detail > .swatch,
+  .lookup-result > .swatch { justify-self: start; }
+}
+
+/* --- Filters and tags --------------------------------------------------- */
+
+.filters {  padding-block: var(--space-2);
+  border-block: 1px solid var(--keyline);
+}
+
+.filter-form {  /* A definite basis, not the content width: sharing a row with a long tag
+     list would otherwise squeeze the search field down to almost nothing,
+     which is what nine tags were already doing to the color index. */
+  flex: 1 1 var(--measure);
+  max-width: var(--measure);
+}
+
+/* The search is the first of the filter block's three registers, so it is
+   built like the other two rather than as a stacked field sitting above
+   them: the label in the shared column, the control where the choices start.
+   Scoped to the block, since a search with no registers under it has nothing
+   to line up with. */
+.filters .filter-form > .field {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+/* Narrow, there is no room for a label column beside eight tags, so all three
+   registers stack instead of two of them wrapping while the search keeps its
+   inline label. The block changes as a system or not at all. */
+@media (max-width: 48rem) {
+  .filters .filter-form > .field,
+  .filter-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .filter-row__label,
+  .filters .filter-form > .field > label { min-width: 0; }
+
+  .filter-form { flex-wrap: wrap; }
+}
+
+.filters .filter-form > .field > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Its own line under the filters it reorders, rather than a seventh thing
+   competing for the row. Built from the same links as the tag filter,
+   because it is the same kind of control: pick one of a handful. */
+
+.tag-filter { margin-right: auto; }
+
+/* inline-block so the line box is the tap target: an inline box takes its
+   height from the font's metrics and ignores the leading set for it. */
+.tag { display: inline-block; }
+
+.tag:hover { color: var(--ink); }
+
+/* The accent says which one is current, and the weight says it again: this
+   is a color tool, and a reader who cannot separate the red from the gray
+   would otherwise have no current state at all. */
+.tag.active { color: var(--accent); }
+
+/* A label and its row of choices, in the same two positions every time, so
+   filtering and ordering read as the registers they are rather than as two
+   rows of identical words. */
+.filter-row { flex-basis: 100%; }
+
+/* A width off the ladder, so the two rows' choices start in the same column
+   rather than three pixels apart because one word is longer than the other. */
+.filter-row__label,
+.filters .filter-form > .field > label { min-width: var(--register-label); }
+
+/* Each address on its own line, the way the palette strip's meta row puts
+   its name and its count at the two ends of one. */
+.people-list {
+  margin-top: var(--space-4);
+  gap: var(--space-1);
+}
+
+.people-list > li {
+  justify-content: space-between;
+  padding-block: var(--space-1);
+  border-top: 1px solid var(--keyline);
+}
+
+/* --- Account ------------------------------------------------------------ */
+
+/* Prose and a credential, held to the same measure the forms are: the token
+   is one line at every width the app is read at. */
+.account { max-width: var(--measure); }
+
+.account h2 { margin-bottom: var(--space-1); }
+
+.account .token { margin-top: var(--space-2); }
+
+/* --- Forms -------------------------------------------------------------- */
+
+.form {  align-items: flex-start;
+  max-width: var(--measure);
+}
+
+.form--inline {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: var(--space-2);
+  max-width: var(--measure);
+}
+
+.field { width: 100%; }
+
+.field input {
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  /* No padding above: the rule belongs under the text, not a line's height
+     below it, or the label reads as belonging to nothing. */
+  padding-block: 0 var(--space-1);
+  width: 100%;
+}
+
+.swatch-entry {
+  width: 100%;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--keyline);
+}
+
+.swatch-entry legend { padding-inline-end: var(--space-2); }
+
+.swatch-entry__fields {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.mode-toggle legend,
+.source-toggle legend { color: var(--ink-quiet); float: left; }
+
+/* Show only the chosen source. Written as "hide the other" so a browser
+   without :has() falls back to showing both, which is still usable. */
+.add-swatch:has(#swatch_source_new:checked) [data-source="library"],
+.add-swatch:has(#swatch_source_library:checked) [data-source="new"] {
+  display: none;
+}
+
+.add-swatch > section { margin-top: var(--space-3); }
+
+.radio { display: inline-flex; align-items: baseline; gap: var(--space-1); }
+
+/* Show only the panel whose mode is selected. Written as "hide the others"
+   rather than "show the chosen one" so that a browser without :has() falls
+   back to showing every panel, which still works, rather than to showing
+   none, which would leave no way to enter a color at all. */
+.swatch-entry__fields:has(#swatch_input_mode_rgb:checked) .entry-panel:not([data-mode="rgb"]),
+.swatch-entry__fields:has(#swatch_input_mode_cmyk:checked) .entry-panel:not([data-mode="cmyk"]),
+.swatch-entry__fields:has(#swatch_input_mode_hex:checked) .entry-panel:not([data-mode="hex"]),
+.swatch-entry__fields:has(#swatch_input_mode_picker:checked) .entry-panel:not([data-mode="picker"]) {
+  display: none;
+}
+
+.field--channel { width: 5rem; }
+
+.field--picker { width: max-content; }
+
+/* The system picker. Stripped back to a plain block of color so it reads as
+   a swatch rather than as a browser control. */
+.field--picker input {
+  width: calc(var(--baseline) * 9);
+  height: calc(var(--baseline) * 5);
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+
+
+.preview .swatch {
+  width: calc(var(--baseline) * 9);
+  height: calc(var(--baseline) * 9);
+  flex: none;
+}
+
+/* --- Buttons and quiet links -------------------------------------------- */
+
+/* A button is a block; a link is underlined text. It used to be both at
+   once — a button wore the underline that the quiet links in the prose wear,
+   which left the page saying "follow me" and "press me" in the same breath.
+   The underline belongs to the link. The block belongs to the button.
+
+   Every one of them is the same box, so a row of them sits on one line and
+   the difference between them is only what fills it: still no radius and no
+   shadow, and the keyline is the one already drawn everywhere else. */
+.button {
+  display: inline-block;
+  border: 1px solid var(--keyline);
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.button:hover { border-color: var(--ink); }
+
+/* A solid block, the way a Swiss poster sets a call to action. */
+.button--primary {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ground);
+}
+
+.button--primary:hover {
+  border-color: var(--ink-quiet);
+  background: var(--ink-quiet);
+}
+
+/* The ones that sit in a row beside a swatch rather than under a heading.
+   Same box, quieter until you reach for it. */
+.button--quiet,
+.button--danger { color: var(--ink-quiet); }
+
+.button--quiet:hover { color: var(--ink); }
+
+/* Destroying and reordering are one shape apart from each other otherwise.
+   The page stays monochrome at rest; the accent arrives at the moment you
+   reach for the one that cannot be undone. */
+.button--danger:hover,
+.button--danger:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Set apart from the actions beside it, not only colored once you arrive:
+   at rest, reordering and destroying were the same gray word in a row, and a
+   gap is read before a word is. */
+/* :has, because button_to wraps its button in a form: the flex child here is
+   the form, and auto margins belong to the child. */
+.swatch-detail__controls > :has(.button--danger) { margin-inline-start: auto; }
+
+.page-actions .button--danger { margin-inline-start: var(--space-4); }
+
+form.button_to { display: inline; }
+
+.link-quiet { text-underline-offset: 0.25em; }
+
+.link-quiet:hover { color: var(--ink); }
+
+/* The affordance on any button that copies its own text. Named for what it
+   does rather than for the hex it was first used on: the API token wears it
+   too, and nothing here was ever about color values.
+   What makes it look like the text it
+   replaced lives in type.css, ahead of the size modifiers it would otherwise
+   flatten. */
+.copy {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.copy::after {
+  content: "";
+  color: var(--ink-quiet);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Focus as well as hover: a keyboard reaches this button, and touch never
+   hovers at all. */
+.copy:hover::after,
+.copy:focus-visible::after { content: " copy"; }
+
+/* Says it worked, in the one place you are already looking. */
+.copy[data-copied]::after,
+.copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
+
+/* The swatches a fork carries: a row of choices, each one a swatch you can
+   untick, sized like the cards they came from. */
+.carried-swatches {  margin-top: var(--space-2);
+  width: 100%;
+}
+
+.carried-swatch {
+  flex: 1 1 8rem;
+  min-width: 0;
+}
+
+.carried-swatch label {
+  flex: 1 1 auto;
+  min-width: 0;
+  cursor: pointer;
+}
+
+/* --- Empty and error states --------------------------------------------- */
+
+.errors {
+  width: 100%;
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--accent);
+}
+
+.errors ul { margin-top: var(--space-1); }
+
+/* A question, not a refusal, so it keeps the accent keyline of an error but
+   none of its finality: the swatches do the arguing and the submit button
+   below already says "create anyway". */
+.warning {
+  width: 100%;
+  padding-top: var(--space-2);
+  border-top: 2px solid var(--accent);
+}
+
+.warning__swatches { margin-top: var(--space-2); }
+
+.warning__swatches > li { flex: 0 1 12rem; }
+
+/* The answer and what to do about it read as one line, so they sit on one. */
+
+/* Sits inside the lookup result's text column, so it takes a card's width
+   rather than a field's. */
+.lookup-nearest {
+  margin-top: var(--space-2);
+  max-width: 12rem;
+}
+
+.lookup-nearest > p { margin-top: var(--space-1); }

@@ -1,0 +1,11 @@
+<%# locals: (memberships:) %>
+<%# One row of swatches sharing the width. Takes memberships rather than a
+    palette so the caller owns the preload and the transition names stay
+    keyed to the membership. %>
+<div class="strip">
+  <% memberships.each do |membership| %>
+    <%= swatch_tag membership.color.hex,
+          transition_name: "palette-color-#{membership.id}",
+          title: "#{membership.color.name} #{membership.color.hex}" %>
+  <% end %>
+</div>

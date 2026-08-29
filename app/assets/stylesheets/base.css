@@ -1,0 +1,58 @@
+/* Ground, ink, and the one accent. The interface is near-monochrome so that
+   the swatches are the only color on the page.
+   The accent is only ever a rule, a focus ring or a word — never a filled
+   area. A filled block of color is what a swatch is, and the chrome must
+   not be able to be mistaken for the content it holds. */
+
+:root {
+  --ground: #faf9f7;
+  --ink: #111111;
+  --ink-quiet: #6f6f6a;
+  --keyline: #dcdad4;
+  --accent: #e30613;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  /* Names and tags are free text, and a swatch called
+     "Supercalifragilistic" has nowhere to break. anywhere rather than
+     break-word because only anywhere lowers a box's minimum width: a tag
+     chip and a strip's name link are inline-block, so break-word would let
+     the text wrap and leave the box itself sticking off the page. */
+  overflow-wrap: anywhere;
+}
+
+h1, h2, h3, p, ul, ol, dl, dd, figure, fieldset, legend {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol { list-style: none; }
+
+fieldset { border: 0; }
+
+img { max-width: 100%; display: block; }
+
+/* The browser hides [hidden] with display: none, and any author rule that
+   sets display at all outruns it — .button says inline-block, so a hidden
+   button stayed on the page. The attribute means hidden, so it is made to
+   mean it once here rather than remembered at every element that might one
+   day carry it. */
+[hidden] { display: none !important; }
+
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
