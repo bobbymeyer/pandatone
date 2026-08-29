@@ -178,9 +178,11 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   def card_names = names_in(".color-card__name")
   def strip_names = names_in(".palette-list .palette-strip__name")
 
-  # rack_test has no JavaScript, so a live-filtering form needs its button.
+  # rack_test has no JavaScript, so a live-filtering form needs its button —
+  # and a real browser has already submitted by the time this is called, and
+  # has taken the button away for saying so.
   def filter_unless_live
-    click_on "Filter" unless javascript_driver?
+    click_on "Search" unless javascript_driver?
   end
 
   # What the browser was actually looking at. Every CI failure in this suite
@@ -197,7 +199,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   # Runs before super, because Rails resets the Capybara session in its own
   # before_teardown and there is nothing left to ask afterwards.
   def before_teardown
-    report_browser_state if javascript_driver? && !passed?
+    report_browser_state if javascript_driver? && !passed? && !skipped?
 
     super
   end

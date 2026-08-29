@@ -71,7 +71,7 @@ class ColorIndexTest < ApplicationSystemTestCase
     visit colors_path
 
     fill_in "Search", with: "ink"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "1 of 6 colors"
   end
@@ -89,7 +89,7 @@ class ColorIndexTest < ApplicationSystemTestCase
     visit colors_path
 
     fill_in "Search", with: "ink"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "ink-black"
     assert_no_text "signal-red"
@@ -99,7 +99,7 @@ class ColorIndexTest < ApplicationSystemTestCase
     visit colors_path
 
     fill_in "Search", with: "nothing-matches-this"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "No colors"
   end
@@ -111,7 +111,7 @@ class ColorIndexTest < ApplicationSystemTestCase
     assert_text "3 of 6 colors"
 
     fill_in "Search", with: "ink"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "ink-black"
     assert_no_text "paper-white"
@@ -131,7 +131,7 @@ class ColorIndexTest < ApplicationSystemTestCase
     visit colors_path
 
     fill_in "Search", with: "nothing-matches-this"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "No colors match"
     assert_no_text "No colors yet"
@@ -147,8 +147,8 @@ class ColorIndexTest < ApplicationSystemTestCase
   test "sorts by color, dark first and light first" do
     visit colors_path
 
-    sort_by "Dark first", leading: "ink-black"
-    sort_by "Light first", leading: "paper-white"
+    sort_by "Dark", leading: "ink-black"
+    sort_by "Light", leading: "paper-white"
     sort_by "Color", leading: "ink-black"
 
     assert_equal "paper-white", card_names.last, "the lightest neutral closes the spectrum"
@@ -160,30 +160,30 @@ class ColorIndexTest < ApplicationSystemTestCase
 
     visit colors_path
 
-    sort_by "Date added", leading: latest.name
-    sort_by "Date modified", leading: "autumn-ochre"
+    sort_by "Added", leading: latest.name
+    sort_by "Modified", leading: "autumn-ochre"
   end
 
   test "a sort survives a tag filter" do
     visit colors_path
 
-    sort_by "Dark first", leading: "ink-black"
+    sort_by "Dark", leading: "ink-black"
     within("[data-filter=tag]") { click_on "brand" }
 
     assert_selector ".color-list > li", count: 3
     assert_equal [ "ink-black", "signal-red", "paper-white" ], card_names
-    assert_selector "[data-filter=sort] .tag.active", text: "Dark first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Dark", exact_text: true
   end
 
   test "a search keeps the sort it was run under" do
     visit colors_path
 
-    sort_by "Light first", leading: "paper-white"
+    sort_by "Light", leading: "paper-white"
     fill_in "Search", with: "process"
     filter_unless_live
 
     assert_selector ".color-list > li", count: 1
     assert_equal [ "process-cyan" ], card_names
-    assert_selector "[data-filter=sort] .tag.active", text: "Light first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Light", exact_text: true
   end
 end

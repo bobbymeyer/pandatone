@@ -513,7 +513,6 @@
   cursor: pointer;
 }
 
-.preview[hidden] { display: none; }
 
 .preview .swatch {
   width: calc(var(--baseline) * 9);

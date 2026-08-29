@@ -11,13 +11,16 @@
 module Sortable
   extend ActiveSupport::Concern
 
+  # One word each. They sit in a row of six under "Sort by", where the row
+  # itself says these are orders — so "Date added" spent two words saying what
+  # the register above it had already said, and "first" said nothing at all.
   SORTS = {
     "name" => "Name",
-    "added" => "Date added",
-    "modified" => "Date modified",
+    "added" => "Added",
+    "modified" => "Modified",
     "spectrum" => "Color",
-    "dark" => "Dark first",
-    "light" => "Light first"
+    "dark" => "Dark",
+    "light" => "Light"
   }.freeze
 
   class_methods do

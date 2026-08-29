@@ -58,7 +58,7 @@ class AddSwatchTest < ApplicationSystemTestCase
     visit new_palette_color_path(palettes(:press), source: "library")
 
     fill_in "Search", with: "ink"
-    click_on "Filter"
+    filter_unless_live
 
     assert find("#swatch_source_library", visible: :all).checked?
   end
@@ -138,7 +138,7 @@ class AddSwatchTest < ApplicationSystemTestCase
     visit new_palette_color_path(palettes(:press), source: "library")
 
     fill_in "Search", with: "ink"
-    click_on "Filter"
+    filter_unless_live
 
     assert_selector "#color_#{colors(:ink_black).id}"
     assert_no_selector "#color_#{colors(:signal_red).id}"

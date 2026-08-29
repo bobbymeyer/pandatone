@@ -20,7 +20,10 @@
       <%= label_tag :q, "Search" %>
       <%= text_field_tag :q, params[:q], autocomplete: "off" %>
     </div>
-    <%= submit_tag "Filter", name: nil, class: "button" %>
+    <%# Named for what it does, and taken away by the controller that makes
+        it redundant. See live_search_controller.js. %>
+    <%= submit_tag "Search", name: nil, class: "button",
+          data: { live_search_target: "submit" } %>
   <% end %>
 
   <%= render "shared/filter_row", name: "tag", label: "Tagged",

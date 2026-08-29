@@ -178,22 +178,22 @@ class BrowserTest < ApplicationSystemTestCase
   end
 
   # A row of controls added under the search is one declaration away from
-  # pushing the search field or its button out of place.
+  # pushing the search field out of place. This guarded the button beside it
+  # too, until the button stopped being there: the live-search controller
+  # takes it away as redundant, so in a browser there is nothing left to sit
+  # beside. What still collapses is the field.
 
-  test "the search field and its button share a line" do
+  test "the search field holds its line" do
     [ colors_path, palettes_path ].each do |path|
       visit path
-
-      field = rect_of(".filter-form > .field")
-      button = rect_of(".filter-form input[type=submit]")
-      row = rect_of(".filters")
 
       # The field against the whole row, not against its own form: the form
       # collapses along with the field, so comparing the two would agree they
       # are fine.
+      field = rect_of(".filter-form > .field")
+      row = rect_of(".filters")
+
       assert_operator field["width"], :>, row["width"] / 3, "#{path}: the search field collapsed"
-      assert_operator button["left"], :>=, field["left"] + field["width"] - 1,
-        "#{path}: the Filter button wrapped under the search field"
     end
   end
 
@@ -259,7 +259,7 @@ class BrowserTest < ApplicationSystemTestCase
   test "choosing an order keeps it through a tag filter" do
     visit colors_path
 
-    within("[data-filter=sort]") { click_on "Dark first" }
+    within("[data-filter=sort]") { click_on "Dark" }
     assert_selector ".color-list > li:first-child", text: "ink-black"
 
     within("[data-filter=tag]") { click_on "brand" }

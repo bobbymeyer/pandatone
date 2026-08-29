@@ -43,6 +43,13 @@ fieldset { border: 0; }
 
 img { max-width: 100%; display: block; }
 
+/* The browser hides [hidden] with display: none, and any author rule that
+   sets display at all outruns it — .button says inline-block, so a hidden
+   button stayed on the page. The attribute means hidden, so it is made to
+   mean it once here rather than remembered at every element that might one
+   day carry it. */
+[hidden] { display: none !important; }
+
 a { color: inherit; }
 
 :focus-visible {

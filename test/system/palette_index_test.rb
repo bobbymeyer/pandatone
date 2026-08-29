@@ -35,15 +35,15 @@ class PaletteIndexTest < ApplicationSystemTestCase
   test "sorts palettes by color, dark first and light first" do
     visit palettes_path
 
-    sort_by "Dark first", leading: "Autumn 2026"
-    sort_by "Light first", leading: "Press Check"
+    sort_by "Dark", leading: "Autumn 2026"
+    sort_by "Light", leading: "Press Check"
     sort_by "Color", leading: "Brand Core"
   end
 
   test "an empty palette sorts last however the colors run" do
     visit palettes_path
 
-    sort_by "Dark first", leading: "Autumn 2026"
+    sort_by "Dark", leading: "Autumn 2026"
 
     assert_equal "Unfilled", strip_names.last
   end
@@ -52,18 +52,18 @@ class PaletteIndexTest < ApplicationSystemTestCase
     latest = Palette.create!(name: "Just Made")
 
     visit palettes_path
-    sort_by "Date added", leading: latest.name
+    sort_by "Added", leading: latest.name
   end
 
   test "a palette order survives a tag filter" do
     visit palettes_path
 
-    sort_by "Light first", leading: "Press Check"
+    sort_by "Light", leading: "Press Check"
     within("[data-filter=tag]") { click_on "active" }
 
     assert_selector ".palette-list > li", count: 2
     assert_equal [ "Brand Core", "Autumn 2026" ], strip_names
-    assert_selector "[data-filter=sort] .tag.active", text: "Light first", exact_text: true
+    assert_selector "[data-filter=sort] .tag.active", text: "Light", exact_text: true
   end
 
   test "counts the whole library when nothing is filtered" do
@@ -76,7 +76,7 @@ class PaletteIndexTest < ApplicationSystemTestCase
     visit palettes_path
 
     fill_in "Search", with: "autumn"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "1 of 4 palettes"
     assert_no_text "1 palette in the library"
@@ -110,7 +110,7 @@ class PaletteIndexTest < ApplicationSystemTestCase
     visit palettes_path
 
     fill_in "Search", with: "autumn"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "Autumn 2026"
     assert_no_text "Press Check"
@@ -137,7 +137,7 @@ class PaletteIndexTest < ApplicationSystemTestCase
     visit palettes_path
 
     fill_in "Search", with: "nothing-matches-this"
-    click_on "Filter"
+    filter_unless_live
 
     assert_text "No palettes"
   end
