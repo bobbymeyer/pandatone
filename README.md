@@ -72,6 +72,10 @@ The UI is for a human curating the library; the API is for machines.
   and its member palettes, editable from there. Editing a colour changes it
   in every palette that holds it, which the edit form says before you commit.
 - **Lookup** — paste a hex or an RGB triple and find every palette holding it.
+  When the library holds no exact match it offers the closest colour it does
+  hold, with no threshold: "we do not have that, but we have this". The two
+  swatches are shown, so how close *close* is stays a matter for your eye
+  rather than a number nobody can interpret.
 
 ## API
 

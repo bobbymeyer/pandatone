@@ -492,3 +492,12 @@ form.button_to { display: inline; }
 }
 
 .warning__swatches > li { flex: 0 1 12rem; }
+
+/* Sits inside the lookup result's text column, so it takes a card's width
+   rather than a field's. */
+.lookup-nearest {
+  margin-top: var(--space-2);
+  max-width: 12rem;
+}
+
+.lookup-nearest > p { margin-top: var(--space-1); }

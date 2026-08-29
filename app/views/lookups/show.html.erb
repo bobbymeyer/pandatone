@@ -30,6 +30,15 @@
 
         <% if @colors.empty? %>
           <p class="empty">Not in the library.</p>
+
+          <% if @nearest %>
+            <h2>Closest stored colour</h2>
+            <div class="lookup-nearest">
+              <%= swatch_tag @nearest.hex, class: "swatch--card" %>
+              <p><%= link_to @nearest.name, @nearest %></p>
+              <p class="hex"><%= @nearest.hex %></p>
+            </div>
+          <% end %>
         <% else %>
           <h2>Stored as</h2>
           <ul class="link-list">

@@ -354,4 +354,31 @@ class ColorTest < ActiveSupport::TestCase
   test "similar_to says nothing about a colour with no values yet" do
     assert_nil Color.similar_to(Color.new(name: "blank", source_space: "rgb"))
   end
+
+  # --- Nearest ------------------------------------------------------------
+
+  test "nearest_to returns the closest colour in the library" do
+    assert_equal colors(:paper_white), Color.nearest_to({ r: 255, g: 255, b: 255 })
+  end
+
+  test "nearest_to answers however far off the nearest is" do
+    assert_equal colors(:process_cyan), Color.nearest_to({ r: 0, g: 250, b: 250 })
+    assert_not_nil Color.nearest_to({ r: 128, g: 0, b: 128 }),
+      "nearest has to mean nearest — there is no threshold on this one"
+  end
+
+  test "nearest_to returns the exact match when the library holds one" do
+    assert_equal colors(:signal_red), Color.nearest_to({ r: 227, g: 6, b: 19 })
+  end
+
+  test "nearest_to returns nothing for an empty library" do
+    PaletteColor.delete_all
+    Color.delete_all
+
+    assert_nil Color.nearest_to({ r: 1, g: 2, b: 3 })
+  end
+
+  test "nearest_to searches only the scope it is called on" do
+    assert_equal colors(:process_cyan), Color.tagged("print").nearest_to({ r: 255, g: 255, b: 255 })
+  end
 end

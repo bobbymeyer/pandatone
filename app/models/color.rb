@@ -65,10 +65,27 @@ class Color < ApplicationRecord
     scope = near(color)
     scope = scope.where.not(id: color.id) if color.persisted?
 
-    scope.map { |other| [ ColorSpace.distance(color.rgb, other.rgb), other ] }
-         .select { |distance, _| distance <= SIMILARITY_THRESHOLD }
-         .min_by(&:first)&.last
+    nearest, distance = closest_in(scope, color.rgb)
+    nearest if distance && distance <= SIMILARITY_THRESHOLD
   end
+
+  # The closest colour on file to a value, however far off it is. This is what
+  # the lookup answers with when the library holds nothing matching exactly:
+  # "we do not have that, but we have this". No threshold, because nearest has
+  # to mean nearest, and no bounding box for the same reason — one query over
+  # four integer columns reads the whole library.
+  def self.nearest_to(rgb)
+    closest_in(all, rgb).first
+  end
+
+  def self.closest_in(scope, rgb)
+    id, distance = scope.pluck(:id, :r, :g, :b)
+      .map { |row| [ row.first, ColorSpace.distance(rgb, { r: row[1], g: row[2], b: row[3] }) ] }
+      .min_by(&:last)
+
+    id ? [ find(id), distance ] : [ nil, nil ]
+  end
+  private_class_method :closest_in
 
   # A bounding box, so the search is an indexed range scan over a handful of
   # rows rather than a walk of the whole library. Every weight in the distance

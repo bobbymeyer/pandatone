@@ -362,6 +362,65 @@ class ColorsTest < ApplicationSystemTestCase
     assert_text "Not in the library"
   end
 
+  # "We do not have that" on its own sends you away to look somewhere else.
+  # The nearest thing on file is usually the answer you were after.
+
+  test "offers the closest stored colour when the library holds no match" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#FFFFFF"
+    click_on "Look up"
+
+    assert_text "Not in the library"
+    within ".lookup-nearest" do
+      assert_text "paper-white"
+      assert_text "#FAFAF8"
+      assert_selector ".swatch[style*='#FAFAF8']"
+    end
+  end
+
+  test "the closest stored colour links through to it" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#FFFFFF"
+    click_on "Look up"
+
+    within(".lookup-nearest") { click_on "paper-white" }
+
+    assert_current_path color_path(colors(:paper_white))
+  end
+
+  test "offers a closest colour however far off it is" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#800080"
+    click_on "Look up"
+
+    assert_selector ".lookup-nearest .swatch"
+  end
+
+  test "does not offer a closest colour when the lookup matched exactly" do
+    visit lookup_path
+
+    fill_in "Hex or RGB", with: "#E30613"
+    click_on "Look up"
+
+    assert_text "signal-red"
+    assert_no_selector ".lookup-nearest"
+  end
+
+  test "says nothing about a closest colour when the library is empty" do
+    PaletteColor.delete_all
+    Color.delete_all
+
+    visit lookup_path
+    fill_in "Hex or RGB", with: "#ABCDEF"
+    click_on "Look up"
+
+    assert_text "Not in the library"
+    assert_no_selector ".lookup-nearest"
+  end
+
   # The one navigation on this screen is to the colour it found, so the swatch
   # takes that colour's transition name and morphs across rather than fading.
   test "a found colour keeps its transition name through to its page" do
