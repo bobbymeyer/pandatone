@@ -15,6 +15,11 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   private
+    # One rank, and it decides exactly one thing: who else is here.
+    def require_admin
+      redirect_to account_path, alert: "Only an admin can decide who else is here." unless Current.user&.admin?
+    end
+
     def redirect_to_sign_up_while_the_library_is_empty
       # A session means an account exists, so the question is already answered
       # and not worth a query. Signing up is where this would send you anyway.

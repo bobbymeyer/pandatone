@@ -1,32 +1,24 @@
-# Who else may make an account. One rank in this app: an admin decides, and
-# everybody else is here to work on the library rather than on the people.
 class InvitationsController < ApplicationController
-  before_action :require_admin, only: %i[ create destroy ]
-
-  def index
-    @invitations = Invitation.order(:email_address)
-    @invitation = Invitation.new
-  end
+  before_action :require_admin
 
   def create
-    @invitation = Invitation.new(email_address: params[:email_address], invited_by: Current.user)
+    invitation = Invitation.new(invitation_params.merge(invited_by: Current.user))
 
-    if @invitation.save
-      redirect_to invitations_path, notice: "#{@invitation.email_address} can now make an account."
+    if invitation.save
+      redirect_to people_path, notice: "#{invitation.email_address} can now make an account."
     else
-      @invitations = Invitation.order(:email_address)
-      render :index, status: :unprocessable_content
+      redirect_to people_path, alert: invitation.errors.full_messages.to_sentence
     end
   end
 
   def destroy
     Invitation.find(params[:id]).destroy
 
-    redirect_to invitations_path
+    redirect_to people_path
   end
 
   private
-    def require_admin
-      redirect_to invitations_path, alert: "Only an admin can invite people." unless Current.user.admin?
+    def invitation_params
+      params.permit(:email_address, :admin).to_h.symbolize_keys.slice(:email_address, :admin)
     end
 end

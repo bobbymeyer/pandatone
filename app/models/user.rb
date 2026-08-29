@@ -11,6 +11,11 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
+  # Long enough that guessing is not a shortcut, and nothing else. No required
+  # digit, no required symbol: those rules produce Passw0rd! and a sticky note,
+  # and what is behind this door is a list of colors.
+  validates :password, length: { minimum: 8 }, allow_nil: true
+
   # Making an account, which is a different act from creating a User row: it
   # decides whether this address is allowed one at all.
   #
@@ -23,7 +28,8 @@ class User < ApplicationRecord
       first_account = none?
 
       user = new(email_address: email_address, password: password,
-        password_confirmation: password_confirmation, admin: first_account)
+        password_confirmation: password_confirmation,
+        admin: first_account || invitation&.admin?)
 
       unless first_account || invitation
         user.errors.add(:email_address, "has not been invited")

@@ -6,6 +6,10 @@
 </header>
 
 <section class="account">
+  <%# This page is redirected to with something to say — a new token, or a
+      refusal from a page an ordinary account cannot reach — and said nothing. %>
+  <%= render "shared/flash" %>
+
   <h2>API token</h2>
   <p class="hint">
     What a script sends to reach the API, as
@@ -19,7 +23,7 @@
     <%= button_to "Sign out", session_path, method: :delete, class: "button button--quiet" %>
 
     <%# Only an admin can act on that page, so only an admin is sent to it. %>
-    <%= link_to "Invitations", invitations_path, class: "button" if @user.admin? %>
+    <%= link_to "People", people_path, class: "button" if @user.admin? %>
 
     <%= button_to "Regenerate token", api_token_path, method: :patch,
           class: "button button--danger",

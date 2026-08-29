@@ -6,9 +6,12 @@ Rails.application.routes.draw do
   # only to an address someone has invited.
   resource :registration, only: %i[ new create ], path: "sign_up", path_names: { new: "" }
 
-  # The addresses allowed to make one, which is the admin's whole say over who
-  # else is here. Withdrawing is the only edit, so there is no update.
-  resources :invitations, only: %i[ index create destroy ]
+  # Who is here and who has been asked: one screen, two things acted on. An
+  # account is only ever removed and an invitation only ever withdrawn, so
+  # neither has an update.
+  resources :people, only: :index
+  resources :invitations, only: %i[ create destroy ]
+  resources :users, only: :destroy
 
   # Who you are signed in as, and the credential your scripts carry. The token
   # is its own resource because replacing it is the only thing you do to it.
