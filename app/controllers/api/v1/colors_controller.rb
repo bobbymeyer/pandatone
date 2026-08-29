@@ -2,7 +2,7 @@ module Api
   module V1
     class ColorsController < BaseController
       def index
-        colors = Color.all
+        colors = Color.name_matching(params[:q])
         colors = colors.tagged(params[:tag]) if params[:tag].present?
         # color= is the name both collections use; hex= is what v1 published
         # and still answers to.
@@ -79,7 +79,7 @@ module Api
         end
 
         def color_attributes
-          attributes = color_params.permit(:name, :source_space, :r, :g, :b, :c, :m, :y, :k, tags: []).to_h
+          attributes = color_params.permit(:name, :source_space, :hex, :r, :g, :b, :c, :m, :y, :k, tags: []).to_h
           attributes[:tags] = color_params[:tags] if color_params[:tags].is_a?(String)
           attributes
         end

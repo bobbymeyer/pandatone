@@ -4,7 +4,7 @@ module Api
       before_action :set_palette, only: %i[ show colors update destroy ]
 
       def index
-        palettes = Palette.all
+        palettes = Palette.name_matching(params[:q])
         palettes = palettes.tagged(params[:tag]) if params[:tag].present?
         palettes = palettes.containing(params[:color]) if params[:color].present?
 
@@ -73,7 +73,7 @@ module Api
           @permitted ||= palette_params.permit(
             :name,
             tags: [],
-            colors: [ :id, :name, :source_space, :r, :g, :b, :c, :m, :y, :k, { tags: [] } ]
+            colors: [ :id, :name, :source_space, :hex, :r, :g, :b, :c, :m, :y, :k, { tags: [] } ]
           )
         end
 

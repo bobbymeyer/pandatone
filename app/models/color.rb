@@ -60,11 +60,17 @@ class Color < ApplicationRecord
   # hex is derived for reading, but it is also an input path: a hex field and
   # the system color picker both hand back a hex string, and both are RGB
   # sources. Assigning it sets the RGB channels; nothing stores the string.
+  #
+  # A hex is an RGB notation, so writing one authors the color in RGB unless
+  # the caller has already said otherwise. That is what lets a client hand
+  # over the hex it has without also spelling out a space it did not choose.
   def hex=(value)
     @assigned_hex = value
     rgb = ColorSpace.parse_hex(value)
+    return if rgb.nil?
 
-    assign_attributes(rgb) if rgb
+    self.source_space ||= RGB
+    assign_attributes(rgb)
   end
 
   def rgb

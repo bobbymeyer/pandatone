@@ -133,13 +133,13 @@ missing records return `404` with `{"error": "Not found"}`.
 
 | Verb   | Path                        | Notes                                                     |
 | ------ | --------------------------- | --------------------------------------------------------- |
-| GET    | `/palettes`                 | Filters: `?tag=`, `?color=RRGGBB` (with or without `#`), combinable |
+| GET    | `/palettes`                 | Filters: `?q=` (name), `?tag=`, `?color=RRGGBB` (with or without `#`), combinable |
 | GET    | `/palettes/:id`             | Colors inline in position order. `:id` may be an id or a name |
 | GET    | `/palettes/:id/colors`      | Just the colors. The workhorse endpoint                   |
 | POST   | `/palettes`                 | Creates a palette with nested colors in one request       |
 | PATCH  | `/palettes/:id`             | Updates name/tags; adds, removes and reorders colors      |
 | DELETE | `/palettes/:id`             | Colors survive, since they may sit in other palettes      |
-| GET    | `/colors`                   | Filters: `?tag=`, `?hex=RRGGBB`, `?palette=name-or-id`     |
+| GET    | `/colors`                   | Filters: `?q=` (name), `?tag=`, `?color=RRGGBB`, `?palette=name-or-id` |
 | GET    | `/colors/:id`               | Includes a `palettes` array: the reverse lookup            |
 | POST   | `/colors`                   | Creates a standalone color                                |
 | PATCH  | `/colors/:id`               | Edits a color. It is shared, so this changes every palette holding it |
@@ -174,6 +174,10 @@ to a color already in the library, or a full definition to create:
               { "name": "moss", "source_space": "rgb", "r": 85, "g": 96, "b": 58 } ] } }
 ```
 
+A definition may give the color as `"hex"` instead of channels, in either
+collection. A hex is an RGB notation, so it authors an RGB color and
+`source_space` can be left out.
+
 On `PATCH`, the array **replaces** the whole list in the order given, so one
 request shape covers adding, removing and reordering. Omit the key to leave
 the colors alone. The whole write is one transaction.
@@ -185,9 +189,12 @@ the colors alone. The whole write is one transaction.
 | GET | `/lookup?q=` | What the lookup screen answers, in one call: the value read as hex, RGB or a CMYK build, the colors that match, the palettes holding them, and the nearest color on file when nothing matched |
 | GET | `/tags` | Every tag in use, by collection — what a client needs to offer the same filters |
 
-Both collections filter by a color value with `?color=`, written any of the
-three ways. `?hex=` is the name v1 published for that filter on `/colors` and
-still answers to it.
+Both collections take the same three filters the filter bar does — `?q=` for
+a name, `?tag=`, and `?color=` for a value written any of the three ways — and
+they combine, with `?sort=`, exactly as they do on screen.
+
+`?hex=` is the name v1 published for the value filter on `/colors` and still
+answers to it.
 
 ### Ordering over the API
 

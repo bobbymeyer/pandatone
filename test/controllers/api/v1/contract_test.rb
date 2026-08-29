@@ -106,10 +106,46 @@ class Api::V1::ContractTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # The filter bars are q, tag and sort together, so a client that can only
+  # send two of the three cannot reproduce a screen the interface offers.
+  test "both collections search by name, on the same q the interface uses" do
+    get api_v1_colors_url(q: "red")
+    assert_equal [ "signal-red" ], json.map { |c| c["name"] }
+
+    get api_v1_palettes_url(q: "core")
+    assert_equal [ "Brand Core" ], json.map { |p| p["name"] }
+  end
+
+  test "a search combines with a tag and a sort rather than replacing them" do
+    get api_v1_colors_url(q: "e", tag: "brand", sort: "light")
+
+    assert_equal [ "paper-white", "signal-red" ], json.map { |c| c["name"] }
+  end
+
+  test "a blank search is no search, not an empty library" do
+    get api_v1_colors_url(q: "")
+
+    assert_equal Color.count, json.size
+  end
+
   test "hex remains the name v1 published for that filter" do
     get api_v1_colors_url(hex: "E30613")
 
     assert_equal [ "signal-red" ], json.map { |c| c["name"] }
+  end
+
+  # A hex is what a client actually has in hand, and the model already knows
+  # how to read one. Making every caller convert to channels first would be
+  # the interface offering a way in that the API does not.
+  test "a color can be written as a hex, on either collection" do
+    post api_v1_colors_url, params: { color: { name: "sea-green", hex: "#2E8B57" } }
+    assert_response :created
+    assert_equal({ "r" => 46, "g" => 139, "b" => 87 }, json["rgb"])
+
+    post api_v1_palettes_url,
+      params: { palette: { name: "Sea", colors: [ { name: "sea-foam", hex: "9FE2BF" } ] } }
+    assert_response :created
+    assert_equal [ "#9FE2BF" ], json["colors"].map { |c| c["hex"] }
   end
 
   # --- The lookup ----------------------------------------------------------
