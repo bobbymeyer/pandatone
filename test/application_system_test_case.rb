@@ -131,26 +131,30 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     click_on "Filter" unless javascript_driver?
   end
 
-  # Where the browser actually was, added to whatever the failure said. Every
-  # CI failure in this suite so far has been some form of "the click did not
-  # take effect", and the page it was left on separates a navigation that
-  # never happened from one that happened and rendered the wrong thing. Runs
-  # before super, because Rails resets the Capybara session in its own
-  # before_teardown and there is nothing to ask afterwards.
+  # What the browser was actually looking at. Every CI failure in this suite
+  # has been some form of "the interaction did not take effect", and the page
+  # left behind separates a navigation that never happened from one that
+  # happened and rendered something else.
+  #
+  # Printed rather than appended to the failure, because an error arrives
+  # wrapped in a Minitest::UnexpectedError whose message is built on demand:
+  # appending to it writes to a string nobody reads. Which is why the first
+  # version of this reported nothing for exactly the failures it was written
+  # for — the errors.
+  #
+  # Runs before super, because Rails resets the Capybara session in its own
+  # before_teardown and there is nothing left to ask afterwards.
   def before_teardown
-    annotate_failures_with_location if javascript_driver?
+    report_browser_state if javascript_driver? && !passed?
 
     super
   end
 
-  def annotate_failures_with_location
-    return if passed?
-
-    failures.each do |failure|
-      failure.message << "\n  the browser was at: #{page.current_url}"
-    end
+  def report_browser_state
+    puts "\n  [#{self.class}##{name}] the browser was at: #{page.current_url}"
+    puts "  the page read: #{page.find('main').text.squish.truncate(400)}"
   rescue StandardError => e
     # Diagnosis must never become the reason a run fails.
-    Rails.logger.debug { "could not read the browser's location: #{e.message}" }
+    puts "  could not read the browser's state: #{e.class}: #{e.message}"
   end
 end
