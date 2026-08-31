@@ -6,8 +6,6 @@
 </header>
 
 <%= form_with url: password_path(params[:token]), method: :put, class: "form" do |form| %>
-  <%= render "shared/flash" %>
-
   <div class="field">
     <%= form.label :password, "New password" %>
     <%= form.password_field :password, required: true, autofocus: true,

@@ -9,8 +9,6 @@
 </header>
 
 <section class="account">
-  <%= render "shared/flash" %>
-
   <%= form_with url: invitations_path, class: "form form--inline" do |form| %>
     <div class="field">
       <%= form.label :email_address, "Email" %>
