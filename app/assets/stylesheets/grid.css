@@ -1,75 +1,17 @@
-/* The measuring system. Everything else in the app derives its spacing from
-   the values declared here: there are no ad-hoc margins anywhere in the other
-   files, only these steps. Changing --baseline reproportions the whole app. */
+/* How the page is laid out on the field the library measures. The tokens the
+   grid is built from — how many fields, how wide the gutter, how tall a
+   baseline — are declared in theme.css, which is where this app fills the
+   library's slots. What is left here is placement: which blocks span which
+   fields, and the second density the two indexes use. */
 
-:root {
-  /* Six fields. The smallest count that covers what this app lays out:
-     thirds for cards carrying a swatch strip, sixths for compact ones, a
-     two-thirds page head, and a two-pane detail with a field left standing
-     empty between the panes. Twelve would only buy quarters, which nothing
-     here asks for. */
-  --columns: 6;
-  /* Twice the fields, for the small size on the two indexes. Written out
-     rather than doubled in a calc, because repeat() takes an integer and not
-     an expression — so the two have to be kept in step by hand. */
-  --columns-dense: 12;
-  --gutter: 1.5rem;
-  --baseline: 0.5rem;
+/* The field's tracks are the library's .grid, and every list that has to line
+   up with the page wears it. There is one track definition on the page and
+   this file no longer restates it — which is the point of a modular grid, and
+   the thing separate per-component grids could only ever manage by
+   coincidence.
 
-  /* How many fields a card occupies. Cards that carry a strip need width;
-     compact ones do not. These two numbers are the whole responsive system:
-     the breakpoints below change them and every grid re-proportions. */
-  --card: 1;
-  --card-wide: 2;
-
-  /* The column the filter block's labels occupy. One value, so the search,
-     the tags and the sort all start their controls in the same place. */
-  --register-label: var(--space-8);
-
-  /* One ladder for the whole vertical axis, numbered by baseline units, and
-     used for leading as much as for spacing. There were two before — a
-     Fibonacci set for space and a linear one for leading — which agreed at
-     three values and diverged everywhere else, so a heading whose line box
-     was four units could not be separated from the next block by four units.
-     The value simply did not exist. */
-  --space-1: calc(var(--baseline) * 1);    /* 8 */
-  --space-2: calc(var(--baseline) * 2);    /* 16 */
-  --space-3: calc(var(--baseline) * 3);    /* 24 */
-  --space-4: calc(var(--baseline) * 4);    /* 32 */
-  --space-5: calc(var(--baseline) * 5);    /* 40 */
-  --space-6: calc(var(--baseline) * 6);    /* 48 */
-  --space-8: calc(var(--baseline) * 8);    /* 64 */
-  --space-13: calc(var(--baseline) * 13);  /* 104 */
-
-  --page-max: 82rem;
-  /* Three fields wide, derived from the page rather than chosen. At 32rem it
-     ended at 512px, a vertical that existed nowhere else on the page: the
-     field lines are 199, 421, 644. Prose narrower than its container still
-     stops on a line, because the container is field-aligned itself. */
-  --measure: calc(
-    (var(--page-max) - var(--gutter) * (var(--columns) - 1)) / var(--columns) * 3 + var(--gutter) * 2
-  );
-}
-
-/* The one grid. The page field and every list of cards share this single
-   track definition, so a card edge is always a field line — which is the
-   point of a modular grid, and the thing separate per-component grids could
-   only ever manage by coincidence. */
-.grid,
-.palette-list,
-.color-list,
-.color-detail,
-.lookup-result {
-  display: grid;
-  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
-  column-gap: var(--gutter);
-}
-
-.grid {
-  max-width: var(--page-max);
-  margin-inline: auto;
-  padding-inline: var(--space-3);
-}
+   What is left here is the second density, and which blocks take how many
+   fields. */
 
 main.grid {
   row-gap: var(--space-5);
@@ -89,9 +31,13 @@ main.grid {
   row-gap: var(--space-4);
 }
 
-.palette-list > * { grid-column: span var(--card-wide); }
+/* How many fields a card takes. A child of the field that says nothing runs
+   the whole of it, which is what nearly everything on a page does — a Turbo
+   Frame, the account panel and a line of prose under the sign-in form each
+   silently took one sixth of the page before placement was the default. */
+.palette-list > * { --span: var(--card-wide); }
 
-.color-list > * { grid-column: span var(--card); }
+.color-list > * { --span: var(--card); }
 
 /* The one thing in the app that is not measured on the field.
    A palette is one row, divided by the number of swatches in it, because a
@@ -119,35 +65,12 @@ main.grid {
   height: 100%;
 }
 
-/* Everything on the page field runs the full width of it unless it says
-   otherwise. This replaces a list that had to name every block in the app,
-   where anything left off it silently took one sixth of the page instead — a
-   Turbo Frame, the account panel and a line of prose under the sign-in form
-   each did exactly that in turn. Placement is now the default and the
-   exception is what gets written down. */
-main.grid > * { grid-column: 1 / -1; }
-
 /* The field is asymmetric on purpose: heads and prose sit in the left four
    fields and stop there, leaving two standing empty on the right. */
-main.grid > .page-head { grid-column: 1 / span 4; }
+.page-head { --span: 4; }
 
-/* A Turbo Frame is a custom element, so it has no default display and no
-   placement: on the field it arrives as an unplaced inline box and the grid
-   gives it one column, taking whatever it wraps down with it. Frames are
-   transparent wrappers here — they should occupy exactly what their contents
-   would have. */
-turbo-frame { display: block; }
-
-@media (max-width: 76rem) {
-  :root { --card: 2; --card-wide: 3; }
-}
-
+/* At a tablet's width four fields out of six is no longer a head that stops
+   short, it is a head with a sliver beside it. */
 @media (max-width: 48rem) {
-  :root { --card: 3; --card-wide: 6; }
-
-  main.grid > .page-head { grid-column: 1 / -1; }
-}
-
-@media (max-width: 34rem) {
-  :root { --card: 6; --card-wide: 6; --gutter: 1rem; }
+  .page-head { --span: var(--columns); }
 }

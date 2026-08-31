@@ -1,24 +1,16 @@
-/* Components. Separation is done with thin keylines and whitespace; there are
-   no cards, no rounded boxes and no shadows in this file. */
+/* What this app has that its-swiss could not: swatches, strips, palettes,
+   tags and the filter block. Separation is still done with hairlines and
+   whitespace, and there are still no cards, no rounded boxes and no shadows.
+
+   Everything the library ships is inside a cascade layer and nothing here is,
+   so where the two meet this file wins without out-specifying anything. */
 
 /* --- Masthead ---------------------------------------------------------- */
 
-.masthead {
-  padding-block: var(--space-3);
-  border-bottom: 1px solid var(--keyline);
-  align-items: baseline;
-}
+/* The band, the mark and the nav are the library's. The panda is not: it is
+   the one piece of the wordmark that knows this app is about color.
 
-/* The panda and the word are one mark, so it never breaks: not between them,
-   and not inside the word. body sets overflow-wrap: anywhere for names and
-   tags, which are free text; this is not. */
-.masthead__mark {
-  grid-column: 1 / span 2;
-  letter-spacing: -0.015em;
-  white-space: nowrap;
-}
-
-/* Off the ladder like every other gap in the app, rather than a space
+   Off the ladder like every other gap in the app, rather than a space
    character whose width is the font's business and not ours.
 
    Drained of color for the rule the whole palette rests on: the swatches are
@@ -29,53 +21,27 @@
   filter: grayscale(1);
 }
 
-/* Off the left edge rather than pushed to the right: the asymmetry is the
-   point, and it lines the nav up with the body column below. */
-.masthead__nav { grid-column: 3 / -1; }
-
-.masthead__nav a:hover { color: var(--ink); }
-
-/* Two fields is not enough for the wordmark at a phone's width, and the
-   wordmark is the one thing here that may not be squeezed. So the masthead
-   stacks instead: the mark takes the width it needs, and the nav drops below
-   it and wraps as it likes. The same phone breakpoint the cards use, rather
-   than a seventh number chosen to fit one word.
-
-   Here rather than beside the other breakpoints in grid.css, because the
-   masthead's placement is stated here and grid.css is loaded first: a rule
-   there loses to this one however narrow the screen gets. */
-@media (max-width: 34rem) {
-  .masthead__mark,
-  .masthead__nav { grid-column: 1 / -1; }
-
-  .masthead__nav { margin-top: var(--space-2); }
-}
-
 /* --- Registers -----------------------------------------------------------
    Three things this interface says over and over: this is secondary, this is
    a name, this is a link not underlined until you reach it. Said once each,
    so a component below only names itself. */
 
-.masthead__nav a, .palette-strip__meta, .result-count,
-.color-card__palettes, .channels dt, .channels dd, .provenance, .tag,
-.tags, .filter-row__label, .export__label, .field label, .mode-toggle legend,
-.source-toggle legend, .button--quiet, .button--danger, .link-quiet,
-.empty, .errors ul {
+.lede, .palette-strip__meta, .result-count, .color-card__palettes,
+.channels dd, .provenance, .tag, .tags, .filter-row__label, .export__label,
+.field label, .mode-toggle legend, .source-toggle legend {
   color: var(--ink-quiet);
 }
 
-.masthead__mark, .palette-strip__name, .color-card__name, .channels dt,
-.channels .channel__key, .tag.active, .swatch-entry legend, .errors__title,
-.warning__title {
+.palette-strip__name, .color-card__name, .channels .channel__key,
+.tag.active, .swatch-entry legend, .warning__title {
   font-weight: 700;
 }
 
-.masthead__mark a, .masthead__nav a, .palette-strip__name a, .swatch-name,
-.tag, .button--primary {
+.palette-strip__name a, .swatch-name, .tag {
   text-decoration: none;
 }
 
-.masthead__mark a:hover, .palette-strip__name a:hover, .swatch-name:hover {
+.palette-strip__name a:hover, .swatch-name:hover {
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
@@ -85,9 +51,13 @@
    baseline, a space apart, wrapping when they must. It is declared once here
    the way the grid's tracks are, and a component below says only how it
    differs. Twenty-two separate flex declarations said the same thing before,
-   and drifted by a pixel wherever one of them was written from memory. */
+   and drifted by a pixel wherever one of them was written from memory.
 
-.masthead__nav,
+   its-swiss calls the same arrangement .run. These are named rather than
+   wearing it, because a component that knows what a swatch is is this app's
+   to name — the two rows of actions below are the exception, and they wear it
+   for the gap the library puts before a destructive button. */
+
 .palette-strip__meta,
 .page-actions,
 .inline-edit,
@@ -115,8 +85,6 @@
 }
 
 /* A column is the same idea turned ninety degrees. */
-.form,
-.field,
 .people-list,
 .swatch-entry__fields {
   display: flex;
@@ -125,7 +93,6 @@
 }
 
 /* Only the differences. */
-.masthead__nav,
 .page-actions,
 .filters { gap: var(--space-3); }
 
@@ -145,8 +112,7 @@
 .link-list { gap: var(--space-1) var(--space-3); }
 .carried-swatches { gap: var(--space-3) var(--gutter); }
 .warning__swatches { gap: var(--gutter); }
-.carried-swatch,
-.field { gap: var(--space-1); }
+.carried-swatch { gap: var(--space-1); }
 
 /* --- Swatches ---------------------------------------------------------- */
 
@@ -224,7 +190,7 @@
 .color-card__palettes {
   margin-top: var(--space-1);
   padding-top: var(--space-1);
-  border-top: 1px solid var(--keyline);
+  border-top: 1px solid var(--rule);
   font-size: var(--size-1);
   line-height: var(--space-2);
 }
@@ -245,12 +211,13 @@
 .swatch-detail__controls {
   margin-top: var(--space-2);
   padding-top: var(--space-1);
-  border-top: 1px solid var(--keyline);
+  border-top: 1px solid var(--rule);
 }
 
+/* A .pairs, with the two things about it that are a color's rather than a
+   definition list's: it sits under the hex it describes, and its columns are
+   closer together because a card is narrower than a page. */
 .channels {
-  display: grid;
-  grid-template-columns: max-content 1fr;
   column-gap: var(--space-2);
   margin-top: var(--space-1);
 }
@@ -270,11 +237,7 @@
    taken out, and a test that cannot fail is not a guard. */
 .channels .channel { white-space: nowrap; }
 
-.channels--stacked {
-  grid-template-columns: max-content 1fr;
-  row-gap: var(--space-1);
-  margin-top: var(--space-3);
-}
+.channels--stacked { margin-top: var(--space-3); }
 
 /* On a color's own page the values are the content, not a caption on it,
    and there is room to set them properly. */
@@ -322,7 +285,7 @@
 .provenance {
   max-width: var(--measure);
   padding-top: var(--space-2);
-  border-top: 1px solid var(--keyline);
+  border-top: 1px solid var(--rule);
 }
 
 .memberships h2 { margin-bottom: var(--space-2); }
@@ -355,7 +318,7 @@
 /* --- Filters and tags --------------------------------------------------- */
 
 .filters {  padding-block: var(--space-2);
-  border-block: 1px solid var(--keyline);
+  border-block: 1px solid var(--rule);
 }
 
 .filter-form {  /* A definite basis, not the content width: sharing a row with a long tag
@@ -435,7 +398,7 @@
 .people-list > li {
   justify-content: space-between;
   padding-block: var(--space-1);
-  border-top: 1px solid var(--keyline);
+  border-top: 1px solid var(--rule);
 }
 
 /* --- Account ------------------------------------------------------------ */
@@ -448,37 +411,15 @@
 
 .account .token { margin-top: var(--space-2); }
 
-/* --- Forms -------------------------------------------------------------- */
-
-.form {  align-items: flex-start;
-  max-width: var(--measure);
-}
-
-.form--inline {
-  flex-direction: row;
-  align-items: flex-end;
-  gap: var(--space-2);
-  max-width: var(--measure);
-}
-
-.field { width: 100%; }
-
-.field input {
-  border: 0;
-  border-bottom: 1px solid var(--ink);
-  background: transparent;
-  font: inherit;
-  color: inherit;
-  /* No padding above: the rule belongs under the text, not a line's height
-     below it, or the label reads as belonging to nothing. */
-  padding-block: 0 var(--space-1);
-  width: 100%;
-}
+/* --- Entering a color ----------------------------------------------------
+   The form, the field and the rule under a control are the library's. What is
+   here is the one field this app has that is not a line of text: four ways of
+   saying the same color, of which you see one. */
 
 .swatch-entry {
   width: 100%;
   padding-top: var(--space-2);
-  border-top: 1px solid var(--keyline);
+  border-top: 1px solid var(--rule);
 }
 
 .swatch-entry legend { padding-inline-end: var(--space-2); }
@@ -499,8 +440,6 @@
 }
 
 .add-swatch > section { margin-top: var(--space-3); }
-
-.radio { display: inline-flex; align-items: baseline; gap: var(--space-1); }
 
 /* Show only the panel whose mode is selected. Written as "hide the others"
    rather than "show the chosen one" so that a browser without :has() falls
@@ -535,103 +474,6 @@
   flex: none;
 }
 
-/* --- Buttons and quiet links -------------------------------------------- */
-
-/* A button is a block; a link is underlined text. It used to be both at
-   once — a button wore the underline that the quiet links in the prose wear,
-   which left the page saying "follow me" and "press me" in the same breath.
-   The underline belongs to the link. The block belongs to the button.
-
-   Every one of them is the same box, so a row of them sits on one line and
-   the difference between them is only what fills it: still no radius and no
-   shadow, and the keyline is the one already drawn everywhere else. */
-.button {
-  display: inline-block;
-  border: 1px solid var(--keyline);
-  background: transparent;
-  color: var(--ink);
-  font-family: inherit;
-  padding: var(--space-1) var(--space-2);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.button:hover { border-color: var(--ink); }
-
-/* A solid block, the way a Swiss poster sets a call to action. */
-.button--primary {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--ground);
-}
-
-.button--primary:hover {
-  border-color: var(--ink-quiet);
-  background: var(--ink-quiet);
-}
-
-/* The ones that sit in a row beside a swatch rather than under a heading.
-   Same box, quieter until you reach for it. */
-.button--quiet,
-.button--danger { color: var(--ink-quiet); }
-
-.button--quiet:hover { color: var(--ink); }
-
-/* Destroying and reordering are one shape apart from each other otherwise.
-   The page stays monochrome at rest; the accent arrives at the moment you
-   reach for the one that cannot be undone. */
-.button--danger:hover,
-.button--danger:focus-visible {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-/* Set apart from the actions beside it, not only colored once you arrive:
-   at rest, reordering and destroying were the same gray word in a row, and a
-   gap is read before a word is. */
-/* :has, because button_to wraps its button in a form: the flex child here is
-   the form, and auto margins belong to the child. */
-.swatch-detail__controls > :has(.button--danger) { margin-inline-start: auto; }
-
-.page-actions .button--danger { margin-inline-start: var(--space-4); }
-
-form.button_to { display: inline; }
-
-.link-quiet { text-underline-offset: 0.25em; }
-
-.link-quiet:hover { color: var(--ink); }
-
-/* The affordance on any button that copies its own text. Named for what it
-   does rather than for the hex it was first used on: the API token wears it
-   too, and nothing here was ever about color values.
-   What makes it look like the text it
-   replaced lives in type.css, ahead of the size modifiers it would otherwise
-   flatten. */
-.copy {
-  border: 0;
-  padding: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-.copy::after {
-  content: "";
-  color: var(--ink-quiet);
-  font-weight: 400;
-  letter-spacing: 0;
-}
-
-/* Focus as well as hover: a keyboard reaches this button, and touch never
-   hovers at all. */
-.copy:hover::after,
-.copy:focus-visible::after { content: " copy"; }
-
-/* Says it worked, in the one place you are already looking. */
-.copy[data-copied]::after,
-.copy[data-copied]:hover::after { content: " copied"; color: var(--accent); }
-
 /* The swatches a fork carries: a row of choices, each one a swatch you can
    untick, sized like the cards they came from. */
 .carried-swatches {  margin-top: var(--space-2);
@@ -649,17 +491,8 @@ form.button_to { display: inline; }
   cursor: pointer;
 }
 
-/* --- Empty and error states --------------------------------------------- */
-
-.errors {
-  width: 100%;
-  padding-top: var(--space-2);
-  border-top: 2px solid var(--accent);
-}
-
-.errors ul { margin-top: var(--space-1); }
-
-/* A question, not a refusal, so it keeps the accent keyline of an error but
+/* --- A question about a swatch ------------------------------------------
+   A question, not a refusal, so it keeps the accent keyline of an error but
    none of its finality: the swatches do the arguing and the submit button
    below already says "create anyway". */
 .warning {

@@ -60,7 +60,7 @@ class PageWidthTest < ApplicationSystemTestCase
 
       assert_equal 1, lines_in(".masthead__mark"),
         "at #{size.first}px the wordmark broke across lines"
-      assert_operator box(".masthead__nav")["top"], :>=, box(".masthead__mark")["bottom"] - 1,
+      assert_operator box(".nav")["top"], :>=, box(".masthead__mark")["bottom"] - 1,
         "at #{size.first}px the nav is still beside the wordmark rather than below it"
     end
   end
@@ -71,7 +71,7 @@ class PageWidthTest < ApplicationSystemTestCase
     resize_viewport(1200, 800)
 
     assert_equal 1, lines_in(".masthead__mark")
-    assert_operator box(".masthead__nav")["top"], :<, box(".masthead__mark")["bottom"],
+    assert_operator box(".nav")["top"], :<, box(".masthead__mark")["bottom"],
       "the nav dropped below the wordmark on a width with room for both"
   end
 
@@ -85,7 +85,7 @@ class PageWidthTest < ApplicationSystemTestCase
       # it, and padding one out would break the line it sits in.
       small = evaluate_script(<<~JS)
         Array.from(document.querySelectorAll('main a, main button, main input[type=submit]'))
-          .filter(el => !el.closest('.page-lede, .empty, .hint, .provenance'))
+          .filter(el => !el.closest('.lede, .empty, .hint, .provenance'))
           .map(el => [el.className || el.tagName, Math.round(el.getBoundingClientRect().height)])
           .filter(([, h]) => h > 0 && h < 24)
       JS

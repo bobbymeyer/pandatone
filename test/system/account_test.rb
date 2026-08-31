@@ -23,7 +23,7 @@ class AccountTest < ApplicationSystemTestCase
     visit account_path
 
     button = find(".copy")
-    assert_equal users(:keeper).api_token, button["data-clipboard-text-value"]
+    assert_equal users(:keeper).api_token, button["data-its-swiss-clipboard-text-value"]
   end
 
   test "regenerating replaces the token on the page" do

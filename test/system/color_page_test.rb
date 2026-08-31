@@ -95,7 +95,7 @@ class ColorPageTest < ApplicationSystemTestCase
 
     button = find(".copy", match: :first)
     assert_equal "#E30613", button.text
-    assert_equal "#E30613", button["data-clipboard-text-value"]
+    assert_equal "#E30613", button["data-its-swiss-clipboard-text-value"]
     assert_equal "Copy #E30613", button["aria-label"]
   end
 

@@ -11,7 +11,7 @@ class SignInTest < ApplicationSystemTestCase
     fill_in "Password", with: "password"
     click_on "Sign in"
 
-    assert_selector ".masthead__nav a", text: "Account"
+    assert_selector ".nav a", text: "Account"
     assert_text "Palettes"
   end
 
@@ -24,7 +24,7 @@ class SignInTest < ApplicationSystemTestCase
     click_on "Sign in"
 
     assert_text "Try another email address or password"
-    assert_no_selector ".masthead__nav a", text: "Account"
+    assert_no_selector ".nav a", text: "Account"
   end
 
   test "sends a signed out visitor to the sign in page rather than to the library" do

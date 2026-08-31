@@ -175,25 +175,31 @@ class PalettePageTest < ApplicationSystemTestCase
   end
 
   # The CSS rule for this existed and did nothing for a while: button_to wraps
-  # its button in a form, so the flex child is the form and an auto margin on
-  # the button inside it goes nowhere. Only a rendered position proves it.
+  # its button in a form, so the flex child is the form and the margin belongs
+  # to the form rather than the button inside it. Only a rendered position
+  # proves it.
+  #
+  # The gaps are measured edge to edge rather than between left edges, because
+  # the separation is a step on the ladder now rather than an auto margin
+  # taking the rest of the row: from one left edge to the next, the width of a
+  # button counts for more than the gap after it does.
   test "removing a swatch is set apart from reordering it" do
     needs_a_browser
 
     # A swatch in the middle of the row, so all three controls are there.
     visit palette_path(palettes(:brand), swatch: palette_colors(:brand_ink_black).id)
 
-    lefts = evaluate_script(
+    boxes = evaluate_script(
       "Array.from(document.querySelectorAll('.swatch-detail__controls > *'))" \
-      ".map(el => Math.round(el.getBoundingClientRect().left))"
+      ".map(el => el.getBoundingClientRect()).map(box => [Math.round(box.left), Math.round(box.right)])"
     )
 
-    assert_equal 3, lefts.size, "expected up, down and remove"
-    reorder_gap = lefts[1] - lefts[0]
-    destroy_gap = lefts[2] - lefts[1]
+    assert_equal 3, boxes.size, "expected up, down and remove"
+    reorder_gap = boxes[1].first - boxes[0].last
+    destroy_gap = boxes[2].first - boxes[1].last
 
     assert_operator destroy_gap, :>, reorder_gap * 2,
-      "remove sits as close to down as down does to up: #{lefts.inspect}"
+      "remove sits as close to down as down does to up: #{boxes.inspect}"
   end
 
   # --- Choosing one -------------------------------------------------------

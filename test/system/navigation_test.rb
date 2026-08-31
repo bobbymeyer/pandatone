@@ -74,7 +74,24 @@ class NavigationTest < ApplicationSystemTestCase
   test "leads the nav with colors" do
     visit root_path
 
-    assert_equal [ "Colors", "Palettes", "Lookup", "Account" ], all(".masthead__nav a").map(&:text)
+    assert_equal [ "Colors", "Palettes", "Lookup", "Account" ], all(".nav a").map(&:text)
+  end
+
+  # The nav says where you are, and says it in the accessibility tree rather
+  # than only in the accent and the weight. current_page? answers for one
+  # address and a section is more than one, so a palette, a swatch being added
+  # to it and the root are all still Palettes.
+  test "marks the section you are in, not only the address you are at" do
+    { palettes_path => "Palettes", root_path => "Palettes",
+      palette_path(palettes(:brand)) => "Palettes",
+      new_palette_color_path(palettes(:press)) => "Palettes",
+      colors_path => "Colors", color_path(colors(:signal_red)) => "Colors",
+      lookup_path => "Lookup", account_path => "Account" }.each do |path, here|
+      visit path
+
+      assert_equal [ here ], all(".nav [aria-current='page']").map(&:text),
+        "#{path} should be #{here} and nothing else"
+    end
   end
 
   # The typeface ships with the app. This is a local tool, so it should not

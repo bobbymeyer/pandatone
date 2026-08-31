@@ -6,7 +6,7 @@
   <% if @color.palettes.any? %>
     <%# One row per color is what makes the reverse lookup work, and it also
         means an edit here lands everywhere. Say so before, not after. %>
-    <p class="page-lede">
+    <p class="lede">
       This color sits in <%= pluralize(@color.palettes.size, "palette") %>.
       Editing it changes every one of them.
     </p>
@@ -14,7 +14,7 @@
 </header>
 
 <%= form_with url: color_path(@color), method: :patch, class: "form" do %>
-  <%= render "shared/errors", record: @color %>
+  <%= render "its_swiss/shared/errors", record: @color %>
   <%= render "shared/similar_swatch", similar: @similar, color: @color if @similar %>
   <%= render "shared/swatch_fields", color: @color %>
   <%= submit_tag @similar ? "Save anyway" : "Save color", name: nil, class: "button button--primary" %>

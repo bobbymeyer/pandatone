@@ -10,7 +10,7 @@
     </div>
   <% end %>
 
-  <div class="page-actions">
+  <div class="page-actions run">
     <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button button--primary" %>
     <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
     <%# Not "duplicate": the one thing it will not make is a copy. %>
@@ -21,7 +21,7 @@
   </div>
 </header>
 
-<%= render "shared/errors", record: @palette %>
+<%= render "its_swiss/shared/errors", record: @palette %>
 
 <% if @palette.palette_colors.empty? %>
   <p class="empty">No swatches yet. <%= link_to "Add the first one", new_palette_color_path(@palette) %>.</p>
@@ -62,14 +62,14 @@
 
       <%= hex_tag color.hex, class: "hex--large" %>
 
-      <dl class="channels">
+      <dl class="pairs channels">
         <% channel_pairs(color).each do |space, values| %>
           <dt><%= space %></dt>
           <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
         <% end %>
       </dl>
 
-      <div class="swatch-detail__controls">
+      <div class="swatch-detail__controls run">
         <%# No control where there is nowhere to go, rather than one that
             silently does nothing at the ends of the row. %>
         <% index = memberships.index(selected) %>

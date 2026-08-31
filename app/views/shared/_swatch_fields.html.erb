@@ -20,7 +20,7 @@
   <fieldset class="mode-toggle">
     <legend>Enter as</legend>
     <% { "rgb" => "RGB", "cmyk" => "CMYK", "hex" => "Hex", "picker" => "Picker" }.each do |mode, label| %>
-      <span class="radio">
+      <span class="choice">
         <%= radio_button_tag "swatch[input_mode]", mode, swatch_input_mode(color) == mode,
               id: "swatch_input_mode_#{mode}",
               data: { swatch_preview_target: "mode", action: "change->swatch-preview#redraw" } %>

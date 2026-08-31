@@ -1,15 +1,15 @@
 <% content_for :title, @color.name %>
 
-<%= render "shared/errors", record: @color %>
+<%= render "its_swiss/shared/errors", record: @color %>
 
-<article class="color-detail">
+<article class="grid color-detail">
   <%= swatch_tag @color.hex, transition_name: "color-#{@color.id}", class: "swatch--large" %>
 
   <div class="color-detail__body">
     <h1 class="page-title"><%= @color.name %></h1>
     <%= hex_tag @color.hex, class: "hex--large" %>
 
-    <dl class="channels channels--stacked">
+    <dl class="pairs channels channels--stacked">
       <% channel_pairs(@color).each do |space, values| %>
         <dt><%= space %></dt>
         <dd><% values.each do |key, value| %><span class="channel"><span class="channel__key"><%= key %></span> <%= value %></span><% end %></dd>
@@ -29,7 +29,7 @@
       </div>
     <% end %>
 
-    <div class="page-actions">
+    <div class="page-actions run">
       <%= link_to "Edit color", edit_color_path(@color), class: "button" %>
 
       <%# The confirmation names the palettes rather than asking twice: the
@@ -53,7 +53,7 @@
   <% if @palettes.empty? %>
     <p class="empty">No palettes hold this color yet.</p>
   <% else %>
-    <ul class="palette-list">
+    <ul class="grid palette-list">
       <%= render partial: "palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>
     </ul>
   <% end %>

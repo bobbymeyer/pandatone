@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  if Rails.env.development?
+    mount ItsSwiss::Engine => "/its-swiss"
+  end
+
   resource :session
   resources :passwords, param: :token
 

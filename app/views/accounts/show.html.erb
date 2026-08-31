@@ -2,14 +2,10 @@
 
 <header class="page-head">
   <h1 class="page-title">Account</h1>
-  <p class="page-lede">Signed in as <%= @user.email_address %>.</p>
+  <p class="lede">Signed in as <%= @user.email_address %>.</p>
 </header>
 
 <section class="account">
-  <%# This page is redirected to with something to say — a new token, or a
-      refusal from a page an ordinary account cannot reach — and said nothing. %>
-  <%= render "shared/flash" %>
-
   <h2>API token</h2>
   <p class="hint">
     What a script sends to reach the API, as
@@ -19,7 +15,7 @@
 
   <p><%= copy_button @user.api_token, class: "token" %></p>
 
-  <div class="page-actions">
+  <div class="page-actions run">
     <%= button_to "Sign out", session_path, method: :delete, class: "button button--quiet" %>
 
     <%# Only an admin can act on that page, so only an admin is sent to it. %>

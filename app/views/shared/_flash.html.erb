@@ -1,7 +1,0 @@
-<%# The two messages this app has to deliver, in the register it uses for
-    everything else it has to say about a form. %>
-<% if flash[:alert] %>
-  <div class="errors" role="alert"><p class="errors__title"><%= flash[:alert] %></p></div>
-<% elsif flash[:notice] %>
-  <p class="hint" role="status"><%= flash[:notice] %></p>
-<% end %>

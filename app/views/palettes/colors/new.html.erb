@@ -2,10 +2,10 @@
 
 <header class="page-head">
   <h1 class="page-title">Add a swatch</h1>
-  <p class="page-lede">To <%= link_to @palette.name, @palette %>.</p>
+  <p class="lede">To <%= link_to @palette.name, @palette %>.</p>
 </header>
 
-<%= render "shared/errors", record: @palette %>
+<%= render "its_swiss/shared/errors", record: @palette %>
 
 <% if @current.any? %>
   <section class="current-swatches">
@@ -23,7 +23,7 @@
   <fieldset class="source-toggle">
     <legend>Add</legend>
     <% { "library" => "Existing swatch", "new" => "New color" }.each do |source, label| %>
-      <span class="radio">
+      <span class="choice">
         <%= radio_button_tag :source, source, swatch_source == source, id: "swatch_source_#{source}" %>
         <%= label_tag "swatch_source_#{source}", label %>
       </span>
@@ -65,7 +65,7 @@
           <%= params[:q].present? ? "No colors match." : "Every color in the library is already in this palette." %>
         </p>
       <% else %>
-        <ul class="color-list">
+        <ul class="grid color-list">
           <%= render partial: "colors/card", collection: @available, as: :color,
                 locals: { level: 3, pick: true, palette: @palette } %>
         </ul>
