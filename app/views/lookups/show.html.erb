@@ -17,7 +17,7 @@
   <% if @rgb.nil? %>
     <p class="empty">Could not read <q><%= @query %></q> as a hex, an RGB triple or a CMYK build.</p>
   <% else %>
-    <section class="lookup-result">
+    <section class="grid lookup-result">
       <%# When the lookup lands on exactly one stored color, the swatch takes
           that color's transition name, so following the link morphs the
           swatch across instead of crossfading the page under it. %>

@@ -67,7 +67,7 @@
       <p class="empty">No <%= noun.pluralize %> match.</p>
     <% end %>
   <% else %>
-    <ul class="<%= list_class %> <%= "list--small" if size_key == "small" %>">
+    <ul class="grid <%= list_class %> <%= "list--small" if size_key == "small" %>">
       <%= render partial: partial, collection: records, as: as %>
     </ul>
   <% end %>

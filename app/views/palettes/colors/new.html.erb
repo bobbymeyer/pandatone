@@ -65,7 +65,7 @@
           <%= params[:q].present? ? "No colors match." : "Every color in the library is already in this palette." %>
         </p>
       <% else %>
-        <ul class="color-list">
+        <ul class="grid color-list">
           <%= render partial: "colors/card", collection: @available, as: :color,
                 locals: { level: 3, pick: true, palette: @palette } %>
         </ul>

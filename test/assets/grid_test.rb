@@ -30,7 +30,7 @@ class GridTest < ActiveSupport::TestCase
   test "every grid derives its tracks from a declared field count" do
     repeats = STYLESHEETS.flat_map { |sheet| sheet.read.scan(/grid-template-columns:\s*repeat\(([^,]+),/) }.flatten
 
-    assert_equal %w[ var(--columns) var(--columns-dense) ], repeats.uniq
+    assert_equal %w[ var(--columns-dense) ], repeats.uniq
   end
 
   test "nothing is set in capitals" do
@@ -51,8 +51,8 @@ class GridTest < ActiveSupport::TestCase
     grid = Rails.root.join("app/assets/stylesheets/grid.css").read
 
     assert_match(/--columns:\s*6/, theme)
-    assert_match(/grid-column:\s*span var\(--card\)/, grid)
-    assert_match(/grid-column:\s*span var\(--card-wide\)/, grid)
+    assert_match(/--span:\s*var\(--card\)/, grid)
+    assert_match(/--span:\s*var\(--card-wide\)/, grid)
   end
 
   # --- Type ----------------------------------------------------------------

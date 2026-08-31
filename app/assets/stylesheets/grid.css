@@ -4,25 +4,14 @@
    library's slots. What is left here is placement: which blocks span which
    fields, and the second density the two indexes use. */
 
-/* The one grid. The page field and every list of cards share this single
-   track definition, so a card edge is always a field line — which is the
-   point of a modular grid, and the thing separate per-component grids could
-   only ever manage by coincidence. */
-.grid,
-.palette-list,
-.color-list,
-.color-detail,
-.lookup-result {
-  display: grid;
-  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
-  column-gap: var(--gutter);
-}
+/* The field's tracks are the library's .grid, and every list that has to line
+   up with the page wears it. There is one track definition on the page and
+   this file no longer restates it — which is the point of a modular grid, and
+   the thing separate per-component grids could only ever manage by
+   coincidence.
 
-.grid {
-  max-width: var(--page-max);
-  margin-inline: auto;
-  padding-inline: var(--space-3);
-}
+   What is left here is the second density, and which blocks take how many
+   fields. */
 
 main.grid {
   row-gap: var(--space-5);
@@ -42,9 +31,13 @@ main.grid {
   row-gap: var(--space-4);
 }
 
-.palette-list > * { grid-column: span var(--card-wide); }
+/* How many fields a card takes. A child of the field that says nothing runs
+   the whole of it, which is what nearly everything on a page does — a Turbo
+   Frame, the account panel and a line of prose under the sign-in form each
+   silently took one sixth of the page before placement was the default. */
+.palette-list > * { --span: var(--card-wide); }
 
-.color-list > * { grid-column: span var(--card); }
+.color-list > * { --span: var(--card); }
 
 /* The one thing in the app that is not measured on the field.
    A palette is one row, divided by the number of swatches in it, because a
@@ -72,27 +65,12 @@ main.grid {
   height: 100%;
 }
 
-/* Everything on the page field runs the full width of it unless it says
-   otherwise. This replaces a list that had to name every block in the app,
-   where anything left off it silently took one sixth of the page instead — a
-   Turbo Frame, the account panel and a line of prose under the sign-in form
-   each did exactly that in turn. Placement is now the default and the
-   exception is what gets written down. */
-main.grid > * { grid-column: 1 / -1; }
-
 /* The field is asymmetric on purpose: heads and prose sit in the left four
    fields and stop there, leaving two standing empty on the right. */
-main.grid > .page-head { grid-column: 1 / span 4; }
-
-/* A Turbo Frame is a custom element, so it has no default display and no
-   placement: on the field it arrives as an unplaced inline box and the grid
-   gives it one column, taking whatever it wraps down with it. Frames are
-   transparent wrappers here — they should occupy exactly what their contents
-   would have. */
-turbo-frame { display: block; }
+.page-head { --span: 4; }
 
 /* At a tablet's width four fields out of six is no longer a head that stops
    short, it is a head with a sliver beside it. */
 @media (max-width: 48rem) {
-  main.grid > .page-head { grid-column: 1 / -1; }
+  .page-head { --span: var(--columns); }
 }

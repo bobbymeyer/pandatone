@@ -2,7 +2,7 @@
 
 <%= render "its_swiss/shared/errors", record: @color %>
 
-<article class="color-detail">
+<article class="grid color-detail">
   <%= swatch_tag @color.hex, transition_name: "color-#{@color.id}", class: "swatch--large" %>
 
   <div class="color-detail__body">
@@ -53,7 +53,7 @@
   <% if @palettes.empty? %>
     <p class="empty">No palettes hold this color yet.</p>
   <% else %>
-    <ul class="palette-list">
+    <ul class="grid palette-list">
       <%= render partial: "palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>
     </ul>
   <% end %>
