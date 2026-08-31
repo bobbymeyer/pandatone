@@ -1,0 +1,44 @@
+/* What this application fills in.
+ *
+ * Unlayered on purpose. Everything its-swiss ships is inside a cascade layer,
+ * and an unlayered rule beats every layered one whatever its specificity — so
+ * this file wins without having to out-specify the library or reach for
+ * !important, and the grid and the domain components below it win too.
+ */
+
+:root {
+  /* --- The accent --------------------------------------------------------
+     State and emphasis only: the current destination, focus, a link, the one
+     primary action, the moment before something cannot be undone. Never a
+     filled area for its own sake.
+
+     Delete this line and read the app. If it still works, the value scale is
+     doing the work, which is the point. */
+  --accent: oklch(57.7% 0.234 28);
+  --accent-ink: var(--paper);
+
+  /* --- The typeface ------------------------------------------------------
+     The library ships none. Declare an @font-face below and name it here, or
+     leave this out and take the grotesque stack the library falls back to. */
+  /* --font-family: "Your Face", ui-sans-serif, system-ui, sans-serif; */
+
+  /* --- The value scale ---------------------------------------------------
+     Neutral as it ships. These two turn the whole ladder together: a small
+     chroma at a yellow-green hue gives the warm grays of a printed page. */
+  /* --value-chroma: 0.006; */
+  /* --value-hue: 95; */
+
+  /* --- The grid ----------------------------------------------------------
+     How many fields this problem has. Six divides into halves and thirds and
+     is where the library starts; change it here once the pages have said what
+     they need, and every width in the app re-proportions. */
+  --columns: 6;
+  --gutter: 1.5rem;
+  --baseline: 0.5rem;
+}
+
+/* The grid itself lives here, not in the gem: which blocks span which fields
+   is what this application looks like.
+
+   main.grid > .page-head { --span: 4; }
+*/
