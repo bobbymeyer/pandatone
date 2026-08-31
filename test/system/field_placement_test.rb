@@ -13,10 +13,12 @@ require "application_system_test_case"
 class FieldPlacementTest < ApplicationSystemTestCase
   setup { skip "needs a real browser to have widths" unless javascript_driver? }
 
-  # Half the page. A single auto-placed column is a sixth of it; the page head,
-  # the one block that legitimately stops short, is two thirds. Half separates
-  # those two without pretending to a precision the gutters do not allow.
-  NARROWEST = 0.5
+  # A third of the page. A single auto-placed column is a sixth of it; the two
+  # blocks that legitimately stop short are the page head at two thirds and
+  # anything held to the measure, which is three fields of six less the page's
+  # own inset — a shade under half. A third separates a column from both
+  # without pretending to a precision the gutters do not allow.
+  NARROWEST = 1.0 / 3
 
   test "no direct child of the page grid is auto placed into a single column" do
     pages.each do |name, path|

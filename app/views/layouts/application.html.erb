@@ -18,8 +18,11 @@
     <link rel="preload" href="<%= asset_path("archivo-variable-latin.woff2") %>"
           as="font" type="font/woff2" crossorigin>
 
-    <%# Ordered by concern, not bundled: the grid defines the units the rest use. %>
-    <%= stylesheet_link_tag "base", "grid", "type", "components", "transitions", "data-turbo-track": "reload" %>
+    <%# The library first, then this app's own. Order is a courtesy rather than
+        a load-bearing decision: everything its-swiss ships is inside a cascade
+        layer and nothing here is, so these win whatever order they arrive in. %>
+    <%= its_swiss_stylesheet_tags %>
+    <%= stylesheet_link_tag "theme", "grid", "type", "components", "transitions", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 

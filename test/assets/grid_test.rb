@@ -47,17 +47,10 @@ class GridTest < ActiveSupport::TestCase
     assert_match(/line-height: var\(--space-/, type)
   end
 
-  test "the measure is derived from the field" do
-    grid = Rails.root.join("app/assets/stylesheets/grid.css").read
-
-    assert_match(/--measure:\s*calc\(/, grid)
-    assert_no_match(/--measure:\s*[\d.]+rem/, grid, "a hand-picked measure lands between field lines")
-  end
-
   test "cards span whole fields rather than fixed widths" do
     grid = Rails.root.join("app/assets/stylesheets/grid.css").read
 
-    assert_match(/--columns:\s*6/, grid)
+    assert_match(/--columns:\s*6/, theme)
     assert_match(/grid-column:\s*span var\(--card\)/, grid)
     assert_match(/grid-column:\s*span var\(--card-wide\)/, grid)
   end
@@ -110,5 +103,9 @@ class GridTest < ActiveSupport::TestCase
 
     def type
       @type ||= File.read(Rails.root.join("app/assets/stylesheets/type.css"))
+    end
+
+    def theme
+      @theme ||= File.read(Rails.root.join("app/assets/stylesheets/theme.css"))
     end
 end

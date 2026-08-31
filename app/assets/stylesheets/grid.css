@@ -1,55 +1,8 @@
-/* The measuring system. Everything else in the app derives its spacing from
-   the values declared here: there are no ad-hoc margins anywhere in the other
-   files, only these steps. Changing --baseline reproportions the whole app. */
-
-:root {
-  /* Six fields. The smallest count that covers what this app lays out:
-     thirds for cards carrying a swatch strip, sixths for compact ones, a
-     two-thirds page head, and a two-pane detail with a field left standing
-     empty between the panes. Twelve would only buy quarters, which nothing
-     here asks for. */
-  --columns: 6;
-  /* Twice the fields, for the small size on the two indexes. Written out
-     rather than doubled in a calc, because repeat() takes an integer and not
-     an expression — so the two have to be kept in step by hand. */
-  --columns-dense: 12;
-  --gutter: 1.5rem;
-  --baseline: 0.5rem;
-
-  /* How many fields a card occupies. Cards that carry a strip need width;
-     compact ones do not. These two numbers are the whole responsive system:
-     the breakpoints below change them and every grid re-proportions. */
-  --card: 1;
-  --card-wide: 2;
-
-  /* The column the filter block's labels occupy. One value, so the search,
-     the tags and the sort all start their controls in the same place. */
-  --register-label: var(--space-8);
-
-  /* One ladder for the whole vertical axis, numbered by baseline units, and
-     used for leading as much as for spacing. There were two before — a
-     Fibonacci set for space and a linear one for leading — which agreed at
-     three values and diverged everywhere else, so a heading whose line box
-     was four units could not be separated from the next block by four units.
-     The value simply did not exist. */
-  --space-1: calc(var(--baseline) * 1);    /* 8 */
-  --space-2: calc(var(--baseline) * 2);    /* 16 */
-  --space-3: calc(var(--baseline) * 3);    /* 24 */
-  --space-4: calc(var(--baseline) * 4);    /* 32 */
-  --space-5: calc(var(--baseline) * 5);    /* 40 */
-  --space-6: calc(var(--baseline) * 6);    /* 48 */
-  --space-8: calc(var(--baseline) * 8);    /* 64 */
-  --space-13: calc(var(--baseline) * 13);  /* 104 */
-
-  --page-max: 82rem;
-  /* Three fields wide, derived from the page rather than chosen. At 32rem it
-     ended at 512px, a vertical that existed nowhere else on the page: the
-     field lines are 199, 421, 644. Prose narrower than its container still
-     stops on a line, because the container is field-aligned itself. */
-  --measure: calc(
-    (var(--page-max) - var(--gutter) * (var(--columns) - 1)) / var(--columns) * 3 + var(--gutter) * 2
-  );
-}
+/* How the page is laid out on the field the library measures. The tokens the
+   grid is built from — how many fields, how wide the gutter, how tall a
+   baseline — are declared in theme.css, which is where this app fills the
+   library's slots. What is left here is placement: which blocks span which
+   fields, and the second density the two indexes use. */
 
 /* The one grid. The page field and every list of cards share this single
    track definition, so a card edge is always a field line — which is the
@@ -138,16 +91,8 @@ main.grid > .page-head { grid-column: 1 / span 4; }
    would have. */
 turbo-frame { display: block; }
 
-@media (max-width: 76rem) {
-  :root { --card: 2; --card-wide: 3; }
-}
-
+/* At a tablet's width four fields out of six is no longer a head that stops
+   short, it is a head with a sliver beside it. */
 @media (max-width: 48rem) {
-  :root { --card: 3; --card-wide: 6; }
-
   main.grid > .page-head { grid-column: 1 / -1; }
-}
-
-@media (max-width: 34rem) {
-  :root { --card: 6; --card-wide: 6; --gutter: 1rem; }
 }
