@@ -1,3 +1,18 @@
+/* Archivo, shipped with the app rather than fetched from a font CDN: this is
+   a local tool and should render correctly with no third party reachable.
+   One variable file covers the whole weight axis, so the two weights the type
+   scale uses cost a single request. Latin subset only.
+
+   The library ships no typeface, for the same reason it ships no palette: a
+   library that ships a face ships a voice, and a binary with it. */
+@font-face {
+  font-family: "Archivo";
+  src: url("archivo-variable-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* What this application fills in.
  *
  * Unlayered on purpose. Everything its-swiss ships is inside a cascade layer,
@@ -15,6 +30,11 @@
      Delete this line and read the app. If it still works, the value scale is
      doing the work, which is the point of taking the library. */
   --accent: #e30613;
+
+  /* --- The typeface ------------------------------------------------------
+     Named here and declared above. The library falls back to a grotesque
+     stack until an application says otherwise; this one says Archivo. */
+  --font-family: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* --- The value scale ---------------------------------------------------
      The library's ladder is neutral and these two turn the whole of it

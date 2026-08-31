@@ -57,16 +57,21 @@ class GridTest < ActiveSupport::TestCase
 
   # --- Type ----------------------------------------------------------------
 
-  # A label is a label wherever it stands. The filter block's two new ones
-  # came out a step larger than the choices they label, which is backward,
-  # and a step larger than every other label in the app.
+  # A label is a label wherever it stands. The filter block's two came out a
+  # step larger than the choices they label, which is backward, and a step
+  # larger than every other label in the app.
+  #
+  # its-swiss sets bare label and legend in the micro register, so every
+  # control's own label is covered by the library and guarded in its suite.
+  # These two are spans, which no library can know about, so they are named
+  # here and they are what is left to name.
   test "every register label is set in the one micro register" do
     # The rule that uses the micro size and tracks it, not the :root block
     # that declares the size.
     selectors = type[/([^{}]+)\{[^}]*font-size:\s*var\(--size-1\)[^}]*letter-spacing[^}]*\}/m, 1]
 
     assert selectors, "expected one rule setting the micro register"
-    [ ".field label", ".filter-row__label", ".mode-toggle legend", ".source-toggle legend" ].each do |label|
+    [ ".filter-row__label", ".export__label" ].each do |label|
       assert_includes selectors, label,
         "#{label} is not in the micro register, so it is set differently from every other label"
     end

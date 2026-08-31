@@ -1,86 +1,16 @@
-/* One family, five sizes, two weights. Hierarchy comes from size, weight and
-   where a thing sits on the grid — never from a box drawn around it. */
+/* What this app adds to the library's five registers.
+ *
+ * The scale, the body, the headings, the page title, the hint and the micro
+ * register are its-swiss's. What is here is the type this app has that a
+ * library could not: a hex, a tag, a count of swatches. Every line box is
+ * still a whole number of baselines, taken from the same ladder.
+ */
 
-/* Archivo, shipped with the app rather than fetched from a font CDN: this is
-   a local tool and should render correctly with no third party reachable.
-   One variable file covers the whole weight axis, so the two weights the
-   type scale uses cost a single request. Latin subset only. */
-@font-face {
-  font-family: "Archivo";
-  src: url("archivo-variable-latin.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-:root {
-  --font: "Archivo", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
-  /* Five sizes on a 1.33/1.5 alternating ratio, every one a multiple of four
-     and most of eight. The old scale crowded two near-identical small sizes
-     at the bottom and then jumped 2.09x to the display size, which left no
-     rung between a section heading and a page title. */
-  --size-1: 0.75rem;   /* 12 — labels, metadata */
-  --size-2: 1rem;      /* 16 — body */
-  --size-3: 1.5rem;    /* 24 — section */
-  --size-4: 2rem;      /* 32 — subhead, large values */
-  --size-5: 3rem;      /* 48 — page title */
-
-  /* Leading is drawn from the one spacing ladder in grid.css, so a line box
-     and the space beneath it are measured in the same units. Every line box
-     below is a whole number of them. */
-}
-
-body {
-  font-family: var(--font);
-  font-size: var(--size-2);
-  font-weight: 400;
-  line-height: var(--space-3);
-  text-align: left;
-  font-synthesis: none;
-}
-
-/* Flush left, ragged right, everywhere. Nothing in this app is centred. */
-h1, h2, h3, p, dd, dt, li, label, legend { text-align: left; }
-
-.page-title {
-  font-size: var(--size-5);
-  line-height: var(--space-6);
-  font-weight: 700;
-  letter-spacing: -0.028em;
-  text-wrap: balance;
-}
-
-.page-lede,
-.hint {
-  max-width: var(--measure);
-  color: var(--ink-quiet);
-}
-
-.page-lede { margin-top: var(--space-2); }
-
-h2 {
-  font-size: var(--size-3);
-  line-height: var(--space-4);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-
-h3 {
-  font-size: var(--size-2);
-  line-height: var(--space-3);
-  font-weight: 700;
-}
-
-/* The micro register: labels and metadata. Size and color carry it; nothing
-   in this app is set in capitals. Tracking stays only slightly open, since
-   the wide tracking it used to have is a convention of capitals and reads as
-   a gap in lowercase. */
-.field label,
+/* The micro register the library sets on labels and legends, extended to the
+   spans this app uses as labels. A label is a label wherever it stands, and
+   these are the filter block's and the export row's. */
 .filter-row__label,
 .export__label,
-.mode-toggle legend,
-.source-toggle legend,
 .channels dt,
 .count {
   font-size: var(--size-1);
@@ -88,8 +18,7 @@ h3 {
   letter-spacing: 0.01em;
 }
 
-.tags,
-.hint {
+.tags {
   font-size: var(--size-1);
   line-height: var(--space-2);
 }
@@ -104,17 +33,9 @@ h3 {
   line-height: var(--space-3);
 }
 
-.hint { line-height: var(--space-3); }
-
-/* Navigation and actions read at body size. They are how the app is used,
-   not annotations on it. */
-.masthead__nav a,
-.button {
-  font-size: var(--size-2);
-  line-height: var(--space-3);
-}
-
-/* Color values are read as columns of digits, so they get tabular figures. */
+/* Color values are read as columns of digits, so they get tabular figures.
+   The library says the same of its own definition lists; a hex is this app's
+   and says it here. */
 .hex,
 .channels dd {
   font-variant-numeric: tabular-nums;
@@ -123,19 +44,8 @@ h3 {
 
 .hex { font-weight: 700; }
 
-/* A hex is on screen to be taken somewhere else, so it is a button that
-   copies itself, and a button brings its own font. Resetting that here
-   rather than in components.css keeps it ahead of the size modifiers below:
-   a `font` shorthand after them would flatten every one. */
-.copy { font: inherit; }
-
 .hex--large {
   font-size: var(--size-4);
   line-height: var(--space-5);
   letter-spacing: 0.02em;
-}
-
-code {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.9em;
 }

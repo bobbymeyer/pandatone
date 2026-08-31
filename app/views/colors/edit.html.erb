@@ -6,7 +6,7 @@
   <% if @color.palettes.any? %>
     <%# One row per color is what makes the reverse lookup work, and it also
         means an edit here lands everywhere. Say so before, not after. %>
-    <p class="page-lede">
+    <p class="lede">
       This color sits in <%= pluralize(@color.palettes.size, "palette") %>.
       Editing it changes every one of them.
     </p>

@@ -85,7 +85,7 @@ class PageWidthTest < ApplicationSystemTestCase
       # it, and padding one out would break the line it sits in.
       small = evaluate_script(<<~JS)
         Array.from(document.querySelectorAll('main a, main button, main input[type=submit]'))
-          .filter(el => !el.closest('.page-lede, .empty, .hint, .provenance'))
+          .filter(el => !el.closest('.lede, .empty, .hint, .provenance'))
           .map(el => [el.className || el.tagName, Math.round(el.getBoundingClientRect().height)])
           .filter(([, h]) => h > 0 && h < 24)
       JS
