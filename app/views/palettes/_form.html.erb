@@ -1,6 +1,6 @@
 <%# locals: (palette:, url:, submit:, with_swatch:, source: nil) %>
 <%= form_with model: palette, url: url, class: "form" do |form| %>
-  <%= render "shared/errors", record: palette %>
+  <%= render "its_swiss/shared/errors", record: palette %>
 
   <% if source %>
     <%= hidden_field_tag :from, source.id %>

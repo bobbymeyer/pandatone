@@ -16,7 +16,7 @@
 
 <%= form_with url: registration_path, class: "form" do |form| %>
   <%= render "shared/flash" %>
-  <%= render "shared/errors", record: @user %>
+  <%= render "its_swiss/shared/errors", record: @user %>
 
   <div class="field">
     <%= form.label :email_address, "Email" %>

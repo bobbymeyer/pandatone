@@ -74,7 +74,7 @@ class NavigationTest < ApplicationSystemTestCase
   test "leads the nav with colors" do
     visit root_path
 
-    assert_equal [ "Colors", "Palettes", "Lookup", "Account" ], all(".masthead__nav a").map(&:text)
+    assert_equal [ "Colors", "Palettes", "Lookup", "Account" ], all(".nav a").map(&:text)
   end
 
   # The typeface ships with the app. This is a local tool, so it should not

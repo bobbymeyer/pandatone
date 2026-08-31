@@ -8,7 +8,7 @@
 </header>
 
 <%= form_with url: colors_path, class: "form" do %>
-  <%= render "shared/errors", record: @color %>
+  <%= render "its_swiss/shared/errors", record: @color %>
   <%= render "shared/similar_swatch", similar: @similar, color: @color if @similar %>
   <%= render "shared/swatch_fields", color: @color.persisted? ? @color : nil %>
   <%= submit_tag @similar ? "Create anyway" : "Create color", name: nil, class: "button button--primary" %>

@@ -19,7 +19,7 @@
 
   <p><%= copy_button @user.api_token, class: "token" %></p>
 
-  <div class="page-actions">
+  <div class="page-actions run">
     <%= button_to "Sign out", session_path, method: :delete, class: "button button--quiet" %>
 
     <%# Only an admin can act on that page, so only an admin is sent to it. %>

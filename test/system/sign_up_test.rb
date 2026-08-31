@@ -57,7 +57,7 @@ class SignUpTest < ApplicationSystemTestCase
     fill_in "Password", with: "a good password"
     click_on "Open the library"
 
-    assert_selector ".masthead__nav a", text: "Account"
+    assert_selector ".nav a", text: "Account"
     assert User.find_by(email_address: "first@example.com").admin?
 
     sign_out_completely
@@ -76,7 +76,7 @@ class SignUpTest < ApplicationSystemTestCase
     fill_in "Password", with: "a good password"
     click_on "Create account"
 
-    assert_selector ".masthead__nav a", text: "Account"
+    assert_selector ".nav a", text: "Account"
     assert_not User.find_by(email_address: "invited@example.com").admin?
   end
 
@@ -104,7 +104,7 @@ class SignUpTest < ApplicationSystemTestCase
     fill_in "Password", with: "a good password"
     click_on "Create account"
 
-    assert_selector ".masthead__nav a", text: "Account"
+    assert_selector ".nav a", text: "Account"
     assert_not Invitation.invited?("invited@example.com")
   end
 

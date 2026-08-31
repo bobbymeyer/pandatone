@@ -60,7 +60,7 @@ class PageWidthTest < ApplicationSystemTestCase
 
       assert_equal 1, lines_in(".masthead__mark"),
         "at #{size.first}px the wordmark broke across lines"
-      assert_operator box(".masthead__nav")["top"], :>=, box(".masthead__mark")["bottom"] - 1,
+      assert_operator box(".nav")["top"], :>=, box(".masthead__mark")["bottom"] - 1,
         "at #{size.first}px the nav is still beside the wordmark rather than below it"
     end
   end
@@ -71,7 +71,7 @@ class PageWidthTest < ApplicationSystemTestCase
     resize_viewport(1200, 800)
 
     assert_equal 1, lines_in(".masthead__mark")
-    assert_operator box(".masthead__nav")["top"], :<, box(".masthead__mark")["bottom"],
+    assert_operator box(".nav")["top"], :<, box(".masthead__mark")["bottom"],
       "the nav dropped below the wordmark on a width with room for both"
   end
 

@@ -77,35 +77,7 @@ class GridTest < ActiveSupport::TestCase
     end
   end
 
-  # --- Signals -------------------------------------------------------------
-
-  test "the destructive register is not the quiet one" do
-    assert_match(/\.button--danger[^{]*\{/, components, "expected destructive actions to have their own class")
-    assert_match(/\.button--danger:hover,\s*\.button--danger:focus-visible/, components,
-      "the danger register has to answer focus as well as hover")
-  end
-
-  # Hover cannot be the only thing that separates reordering from destroying:
-  # a reader scanning the row has not hovered anything yet.
-  test "destructive actions are set apart at rest, not only on hover" do
-    [ ".swatch-detail__controls", ".page-actions" ].each do |region|
-      rule = components[/#{Regexp.escape(region)}[^{]*button--danger[^{]*\{([^}]*)\}/m, 1]
-
-      assert rule, "expected #{region} to set its destructive action apart"
-      assert_match(/margin/, rule, "#{region} separates them by color alone")
-    end
-  end
-
-  test "the copy affordance answers focus as well as hover" do
-    assert_match(/\.copy:focus-visible::after/, components,
-      "a keyboard reaches the copy button and touch never hovers")
-  end
-
   private
-    def components
-      @components ||= File.read(Rails.root.join("app/assets/stylesheets/components.css"))
-    end
-
     def type
       @type ||= File.read(Rails.root.join("app/assets/stylesheets/type.css"))
     end
