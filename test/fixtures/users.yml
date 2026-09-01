@@ -12,3 +12,11 @@ second:
   email_address: second@example.com
   password_digest: <%= password_digest %>
   api_token: second-token-00000000000
+
+# A consuming tool: reads the library, rewrites none of it. Stripeclub holds
+# one of these on the Studio.
+reader:
+  email_address: reader@example.com
+  password_digest: <%= password_digest %>
+  api_token: reader-token-00000000000
+  api_read_only: true

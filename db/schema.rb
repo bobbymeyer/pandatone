@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_29_223424) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_31_180000) do
   create_table "colors", force: :cascade do |t|
     t.integer "b", null: false
     t.decimal "c", precision: 5, scale: 1, null: false
@@ -69,6 +69,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_29_223424) do
 
   create_table "users", force: :cascade do |t|
     t.boolean "admin", default: false, null: false
+    t.boolean "api_read_only", default: false, null: false
     t.string "api_token", null: false
     t.datetime "created_at", null: false
     t.string "email_address", null: false

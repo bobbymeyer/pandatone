@@ -4,6 +4,7 @@ module Api
       include Sorting
 
       before_action :authenticate_client
+      before_action :enforce_read_only
 
       rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
 
@@ -26,6 +27,23 @@ module Api
           token, _options = ActionController::HttpAuthentication::Token.token_and_options(request)
 
           User.find_by(api_token: token) if token.present?
+        end
+
+        # A read-only token may read the whole library and rewrite none of it.
+        #
+        # Decided on the HTTP verb rather than on a list of actions, because a
+        # list is a thing to forget to add to: every route this API gains is
+        # covered the moment it exists, and the one way to get it wrong would
+        # be to write through a GET, which this API does not do.
+        #
+        # 403 and not 401. The credential is genuine and the client should not
+        # go looking for a better one -- 401 means "authenticate", and it would
+        # send a tool into a retry loop over something retrying cannot fix.
+        def enforce_read_only
+          return unless Current.user&.api_read_only?
+          return if request.get? || request.head?
+
+          render json: { error: "Read only" }, status: :forbidden
         end
 
         def render_unauthorized
