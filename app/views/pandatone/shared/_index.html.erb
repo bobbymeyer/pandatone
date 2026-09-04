@@ -1,0 +1,74 @@
+<%# locals: (title:, lede: nil, action:, action_path:, path:, frame:, sorts:,
+             tags:, records:, total:, noun:, list_class:, partial:, as:,
+             empty_link:) %>
+<%# The two indexes. They were the same file with a noun swapped: the same
+    head, the same four registers, the same frame around the same three
+    states. Only the names of things differ, so only the names are passed. %>
+
+<% content_for :title, title %>
+
+<header class="page-head">
+  <h1 class="page-title"><%= title %></h1>
+  <% if lede %>
+    <p class="lede"><%= lede %></p>
+  <% end %>
+
+  <%# Making one is an action on this page, not one of its filters. %>
+  <div class="page-actions run">
+    <%= link_to action, action_path, class: "button button--primary" %>
+  </div>
+</header>
+
+<section class="filters">
+  <%= form_with url: path, method: :get, class: "filter-form",
+        data: { controller: "live-search", action: "input->live-search#search", turbo_frame: frame } do %>
+    <%= hidden_field_tag :tag, params[:tag] if params[:tag].present? %>
+    <%# Searching keeps the order and the size you were reading in. Choosing
+        either is a whole navigation rather than a frame swap, so these are
+        never stale. %>
+    <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+    <%= hidden_field_tag :size, params[:size] if params[:size].present? %>
+
+    <div class="field">
+      <%= label_tag :q, "Search" %>
+      <%= text_field_tag :q, params[:q], autocomplete: "off" %>
+    </div>
+
+    <%# Named for what it does, and taken away by the controller that makes
+        it redundant. See live_search_controller.js. %>
+    <%= submit_tag "Search", name: nil, class: "button",
+          data: { live_search_target: "submit" } %>
+  <% end %>
+
+  <%= render "pandatone/shared/filter_row", name: "tag", label: "Tagged",
+        items: [ [ "All", url_for(tag: nil, q: params[:q], sort: params[:sort], size: params[:size]),
+                   params[:tag].blank? ] ] +
+               tags.map { |tag| [ tag, url_for(tag: tag, q: params[:q], sort: params[:sort],
+                                               size: params[:size]), params[:tag] == tag ] } %>
+
+  <%= render "pandatone/shared/sort_filter", sorts: sorts %>
+
+  <%= render "pandatone/shared/size_filter" %>
+</section>
+
+<%# Only the results live in the frame; the form stays outside it so typing
+    does not replace the field under the cursor. %>
+<%= turbo_frame_tag frame, data: { turbo_action: "replace" }, target: "_top" do %>
+  <%# The count belongs with the results: outside the frame it would still
+      read "4 palettes" after a search narrowed the list to one. %>
+  <p class="result-count"><%= result_count(records.size, total, noun) %></p>
+
+  <% if records.empty? %>
+    <%# A library with nothing in it is a different state from a search that
+        found nothing, and on a first run the second reading is simply wrong. %>
+    <% if total.zero? %>
+      <p class="empty">No <%= noun.pluralize %> yet. <%= link_to empty_link, action_path %>.</p>
+    <% else %>
+      <p class="empty">No <%= noun.pluralize %> match.</p>
+    <% end %>
+  <% else %>
+    <ul class="grid <%= list_class %> <%= "list--small" if size_key == "small" %>">
+      <%= render partial: partial, collection: records, as: as %>
+    </ul>
+  <% end %>
+<% end %>

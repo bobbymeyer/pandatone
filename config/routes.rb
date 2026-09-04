@@ -1,26 +1,4 @@
-Rails.application.routes.draw do
-  if Rails.env.development?
-    mount ItsSwiss::Engine => "/its-swiss"
-  end
-
-  resource :session
-  resources :passwords, param: :token
-
-  # Making an account. Open only to the first person to arrive, and after that
-  # only to an address someone has invited.
-  resource :registration, only: %i[ new create ], path: "sign_up", path_names: { new: "" }
-
-  # Who is here and who has been asked: one screen, two things acted on. An
-  # account is only ever removed and an invitation only ever withdrawn, so
-  # neither has an update.
-  resources :people, only: :index
-  resources :invitations, only: %i[ create destroy ]
-  resources :users, only: :destroy
-
-  # Who you are signed in as, and the credential your scripts carry. The token
-  # is its own resource because replacing it is the only thing you do to it.
-  resource :account, only: :show
-  resource :api_token, only: :update
+Pandatone::Engine.routes.draw do
   # The API is versioned from the first commit: other tools depend on this
   # contract, and the way to change it is to add v2, not to edit v1.
   #
@@ -29,6 +7,10 @@ Rails.application.routes.draw do
   # which is how a palette can be fetched as a file on the same route.
   namespace :api, defaults: { format: :json } do
     namespace :v1 do
+      # The API describes itself, and the description is not behind the token:
+      # a tool has to be able to read the door before it has a key.
+      get "openapi", to: "openapi#show", as: :openapi
+
       resources :palettes, only: %i[ index show create update destroy ] do
         get :colors, on: :member
       end
@@ -56,8 +38,6 @@ Rails.application.routes.draw do
     resource :tags, only: %i[ edit update ], controller: "colors/tags"
   end
   resource :lookup, only: :show
-
-  get "up" => "rails/health#show", as: :rails_health_check
 
   root "palettes#index"
 end

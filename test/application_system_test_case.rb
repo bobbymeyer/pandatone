@@ -1,6 +1,8 @@
 require "test_helper"
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  include Pandatone::Engine.routes.url_helpers
+
   SCREEN_SIZE = [ 1400, 1400 ].freeze
 
   # These flows are driven through rack_test by default, which means the app
@@ -32,34 +34,24 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     driven_by :rack_test
   end
 
-  # Every screen in this app is behind the sign-in, so every flow through one
-  # starts signed in — by planting the session cookie, not by driving the form.
+  # Every screen in this engine is behind the host's door, so every flow
+  # through one starts already through it — by planting the cookie the dummy
+  # host opens to, not by driving a form. The form is the host's to test.
   #
-  # Driving it was the honest-looking choice and it was the wrong one. Turbo
-  # will not begin a form submission while another is in progress, and a
-  # browser leaves the sign-in POST in flight when Capybara navigates away
-  # from it. The next form the test submits is then silently ignored: a click
-  # on a submit button that does nothing at all, on a page that still looks
-  # right. Every browser failure on CI since the sign-in went in has been some
-  # version of "the interaction did not take effect", and this is the one
-  # thing all of those tests newly had in common.
-  #
-  # The form itself is not left untested — sign_in_test.rb drives it.
+  # Planted rather than driven for a second reason too: Turbo will not begin
+  # a form submission while another is in progress, and a browser leaves a
+  # sign-in POST in flight when Capybara navigates away from it. The next
+  # form the test submits is then silently ignored.
   setup do
-    visit new_session_path
+    visit "/"
     plant_session_cookie
   end
 
-  # A fixture session, so the row is there in every test and the cookie can be
-  # written without asking the app for anything.
   def plant_session_cookie
-    jar = ActionDispatch::TestRequest.create.cookie_jar
-    jar.signed[:session_id] = sessions(:keeper).id
-
     if javascript_driver?
-      page.driver.browser.manage.add_cookie(name: "session_id", value: jar[:session_id], path: "/")
+      page.driver.browser.manage.add_cookie(name: "signed_in", value: "yes", path: "/")
     else
-      page.driver.browser.set_cookie("session_id=#{jar[:session_id]}")
+      page.driver.browser.set_cookie("signed_in=yes")
     end
   end
 

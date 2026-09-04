@@ -1,3 +1,6 @@
+_fixture:
+  model_class: Pandatone::Color
+
 # Both color spaces are written out longhand rather than derived, so that a
 # regression in ColorSpace shows up as a failing test instead of quietly
 # rewriting the expectations along with the code.

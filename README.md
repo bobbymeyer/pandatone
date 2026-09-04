@@ -1,7 +1,8 @@
 # Pandatone
 
-A palette library manager. It stores color swatches and palettes and serves
-them over a small versioned JSON API, so other tools can ask two questions:
+A palette library, as a Rails engine. It stores color swatches and palettes
+and serves them over a small versioned JSON API and a Ruby interface, so
+other tools can ask two questions:
 
 - *Give me the colors of the palette tagged `active`.*
 - *Which palettes contain `#E30613`?*
@@ -10,38 +11,82 @@ That is the whole job. No ICC profiles, no Lab, no spot colors, no gamut
 mapping. CMYK is stored and served, but it is an approximate device
 conversion and says so.
 
-## Running it
+It was a standalone application until 0.1.0. Now it is one tool among
+several, mounted in a host that owns the server, the database, the account
+and the shell — see [design-chassis](https://github.com/bobbymeyer/design-chassis)
+for the one it was made for. The engine keeps everything that knows what a
+swatch is, and nothing that does not.
 
-```sh
-bin/setup           # gems, database, seeds
-bin/rails server
-bin/rails test:all
+## Mounting it
+
+```ruby
+# Gemfile
+gem "pandatone", "~> 0.1"
+
+# config/routes.rb
+mount Pandatone::Engine, at: "/pandatone"
 ```
 
-Seeds are idempotent and make no account. The first person to open the app is
-sent to sign up, and that account is the admin.
+Then `bin/rails db:migrate`: the engine's migrations run with the host's
+rather than being copied into it. Its tables are prefixed `pandatone_`. It is
+written for SQLite (tags are queried with `json_each`), and it needs Propshaft,
+importmap, Turbo and Stimulus in the host, which every `rails new` provides.
 
-## Accounts
+`bin/rails pandatone:seed` plants a small, real library. It is idempotent.
 
-Everything is behind a sign-in: the interface on a session cookie, the API on
-a per-user token. `/up` stays open, because a load balancer has no token.
+### What the host provides
 
-Sign-ups close behind the first account. After that, an admin invites by
-address on **People** (linked from the account page), optionally as another
-admin. Only an invited address may sign up, and signing up spends the
-invitation. An admin can withdraw an invitation or remove an account, but not
-their own.
+Three things, and the dummy application under `test/dummy` is the least of
+each.
 
-Passwords are 8 characters, minimum. There is no character-class rule.
+**The door.** Every screen inherits from the host's `ApplicationController`
+and every API endpoint from the host's `ApiController`; those decide who gets
+in and the engine never learns what a user is. Point them elsewhere before the
+engine loads:
 
-The API token is on the account page. Regenerating it there is the whole of
-revocation — whatever held the old one stops working, nothing else changes.
-It is separate from the password so a tool can be revoked on its own, and so
-the password never goes into a cron line.
+```ruby
+# config/initializers/pandatone.rb
+Pandatone.base_controller_class = "ApplicationController"   # the default
+Pandatone.api_base_controller_class = "ApiController"       # the default
+```
 
-Mail is yours to supply: point `config.action_mailer.smtp_settings` at
-whatever you run. Only "forgot your password" needs it; until then, reset in
-`bin/rails console`.
+A host with no door sets both to `ActionController::Base` and
+`ActionController::API`.
+
+**The shell.** The engine's layout fills the slots its-swiss leaves and then
+renders the host's `layouts/application` around them, so a Pandatone page is
+a page of the host. The host's layout renders `its_swiss/shell` and places
+`yield :sections` where its destinations go — that is where Colors, Palettes
+and Lookup arrive. Inside an engine's request the bare route helpers are the
+engine's, so a host layout calls its own through `main_app`.
+
+**The theme.** The accent, the typeface, the value scale, the field count and
+the baseline are the host's, set in its `theme.css`. The engine sets only what
+a palette library measures: the card widths, the second density on the
+indexes, the swatch row. Pandatone looked its best in Archivo with the accent
+at `#e30613` and the greys warmed to `--value-chroma: 0.006; --value-hue: 95`,
+and a host may set those; the engine will not set them for it.
+
+## Calling it from Ruby
+
+The same questions the API answers, as methods, with plain data back — the
+hashes the API serializes, never a record of the engine's. This is the
+interface another tool in the same host calls; the API is the same interface
+for a tool that is not.
+
+```ruby
+Pandatone.palette("Brand Core")                 # => { id:, name:, tags:, colors: [ ... ] }
+Pandatone.palettes(tag: "active")               # => [ { id:, name:, tags: }, ... ]
+Pandatone.palettes(containing: "#E30613")
+Pandatone.palette_colors("Brand Core")          # the workhorse: the colors, in order
+Pandatone.colors(in_palette: 12, sort: "light")
+Pandatone.lookup("227, 6, 19")                  # => { query:, hex:, rgb:, build:, colors:, palettes:, nearest: }
+Pandatone.tags                                  # => { colors: [...], palettes: [...] }
+```
+
+Anything else — `Pandatone::Palette.where(...)` — is reaching into the
+engine, and is the thing this interface exists to make unnecessary. The read
+endpoints of the API call these same methods, so the two cannot drift.
 
 ## The domain
 
@@ -111,9 +156,6 @@ palette sorts last under all three.
   it. With no exact match it offers the nearest color on file, both swatches
   shown, so how close *close* is stays a matter for your eye. "Add this color
   swatch" opens the entry form with the value already in it.
-- **Account** — who you are, your API token, and the buttons that end either.
-- **People** — admin only: who has an account, who has been invited, and the
-  field that invites another.
 
 Both indexes offer **Small** and **Large** cards. Small is the default and
 half the width, so the library reads as a library rather than as six cards.
@@ -124,8 +166,8 @@ A palette leaves as `.ase` or `.css` — between them, a design tool and a
 stylesheet. Same URL as the palette, asked for by extension.
 
 ```sh
-curl -H "Authorization: Bearer $PANDATONE_TOKEN" \
-     -O https://pandatone.example.com/api/v1/palettes/Brand%20Core.ase
+curl -H "Authorization: Bearer $TOKEN" \
+     -O https://studio.example.com/pandatone/api/v1/palettes/Brand%20Core.ase
 ```
 
 **`.ase`** is Adobe Swatch Exchange. The palette becomes a named group, and
@@ -142,19 +184,22 @@ and an order, which is what both formats are for.
 
 ## API
 
-Everything is under `/api/v1`. Collections are bare arrays, no envelope.
+Everything is under `/api/v1` of the mount path — `/pandatone/api/v1` where
+the engine is mounted at `/pandatone`. Collections are bare arrays, no envelope.
 `422` with `{"errors": {...}}`, `404` with `{"error": "Not found"}`, `401`
 with `{"error": "Unauthorized"}`.
 
 ```sh
-curl -H "Authorization: Bearer $PANDATONE_TOKEN" \
-     https://pandatone.example.com/api/v1/palettes?tag=active
+curl -H "Authorization: Bearer $TOKEN" \
+     https://studio.example.com/pandatone/api/v1/palettes?tag=active
 ```
 
-`Token` works as well as `Bearer`. The session cookie is deliberately not
-accepted, or any page on the internet could drive this API from a signed-in
-browser. The API does the color work; accounts and invitations are the
-interface's business.
+`Token` works as well as `Bearer`. The token is the host's: the engine's API
+controllers inherit from the host's, and whatever that one refuses, the
+engine refuses. The API describes itself at `GET /api/v1/openapi`, which is
+the one endpoint not behind the token — a tool has to read the door before
+it has a key. `test/controllers/api/v1/openapi_test.rb` holds the
+description and the routes to each other.
 
 | Verb   | Path                   | Notes |
 | ------ | ---------------------- | ----- |
@@ -224,15 +269,18 @@ Duplicate rules apply as they do on screen: `422` with the reason under
 ## Conventions
 
 Rails 8, strictly omakase: Propshaft, importmap, Hotwire, SQLite, Minitest,
-fixtures. Authentication is Rails' own generator plus a token column.
+fixtures. A mountable engine with an isolated namespace: every constant is
+under `Pandatone`, every table under `pandatone_`, every route under the mount.
 
 The CSS is hand-written, in the spirit of the Swiss International
-Typographic Style, in five files by concern: `base`, `grid`, `type`,
-`components`, `transitions`. No framework, no utility classes. The typeface
-is Archivo, shipped in `app/assets/fonts` as one variable Latin subset rather
-than pulled from a CDN, so the app renders with nothing external reachable.
-All spacing derives from custom properties in `grid.css`, and the interface is
-near-monochrome so the swatches are the only color on the page.
+Typographic Style. The tokens, the reset, the type and the components are
+[its-swiss](https://github.com/bobbymeyer/its-swiss)'s, which the engine
+declares in its own gemspec rather than taking from the host on faith. What is
+the engine's is in `app/assets/stylesheets/pandatone`, in four files by
+concern — `tokens`, `grid`, `type`, `components` — and it is what knows what a
+swatch is: the swatch, the strip, the card, the tag, the filter block. No
+framework, no utility classes, and near-monochrome, so the swatches are the
+only color on the page.
 
 The stylesheet says a thing once. Three type registers and two flex rules —
 one row, one column — carry every repetition; a component names only how it
@@ -262,10 +310,16 @@ transitions off.
 ## Tests
 
 Tests come first, and a guard is only kept if removing what it guards makes
-it fail.
+it fail. They run against the dummy host under `test/dummy`, which opens its
+screens to a cookie and its API to one token — the least a host can be.
+
+```sh
+bin/rails test               # models, controllers, the API contract, the spec
+bin/rails test test/system   # every screen, through rack_test
+```
 
 System tests run through `rack_test` by default, so the suite needs no
-browser. That also keeps the app working with JavaScript off: Turbo Frames
+browser. That also keeps the engine working with JavaScript off: Turbo Frames
 fall back to full navigations, and the Stimulus preview is enhancement over a
 form that already submits.
 
@@ -275,16 +329,20 @@ where the tests marked `needs_a_browser` — measured widths, the live preview,
 the `:has()` panels, the clipboard — stop skipping:
 
 ```sh
-SYSTEM_TEST_DRIVER=selenium bin/rails test:system
+SYSTEM_TEST_DRIVER=selenium bin/rails test test/system
 ```
 
-Each file covers one screen. Selenium Manager fetches a driver to match the
-browser it finds; on a machine with both, point at them:
-
-```sh
-SYSTEM_TEST_DRIVER=selenium \
-  CHROME_BINARY=/path/to/chrome CHROMEDRIVER=/path/to/chromedriver \
-  bin/rails test:system
-```
+Selenium Manager fetches a driver to match the browser it finds; on a machine
+with both, point at them with `CHROME_BINARY` and `CHROMEDRIVER`.
 
 CI runs both: `system-test` through `rack_test`, `browser-test` in Chrome.
+
+## Moving a library across
+
+The standalone application kept its tables as `colors`, `palettes` and
+`palette_colors`; the engine keeps them as `pandatone_colors`,
+`pandatone_palettes` and `pandatone_palette_colors`, with the same columns.
+Accounts, sessions and invitations do not come across: the host has its own.
+The API is the migration path — `GET /api/v1/palettes/:id` on the old side is
+the body `POST /api/v1/palettes` takes on the new — or, for a SQLite file,
+three `ALTER TABLE ... RENAME TO` statements.

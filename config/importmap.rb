@@ -1,7 +1,6 @@
-# Pin npm packages by running ./bin/importmap
-
-pin "application"
-pin "@hotwired/turbo-rails", to: "turbo.min.js"
-pin "@hotwired/stimulus", to: "stimulus.min.js"
-pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
-pin_all_from "app/javascript/controllers", under: "controllers"
+# The engine's JavaScript: two Stimulus controllers and the module that
+# registers them with the host's Stimulus application. The layout imports
+# that module, so a host has nothing to add to its own importmap or index.
+pin "pandatone", to: "pandatone.js"
+pin "pandatone/controllers/live_search_controller", to: "pandatone/controllers/live_search_controller.js"
+pin "pandatone/controllers/swatch_preview_controller", to: "pandatone/controllers/swatch_preview_controller.js"

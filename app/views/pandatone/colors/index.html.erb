@@ -1,0 +1,8 @@
+<%= render "pandatone/shared/index",
+      title: "Colors",
+      lede: "Every swatch in the library, including those no palette has claimed yet.",
+      action: "New color", action_path: new_color_path, empty_link: "Add the first one",
+      path: colors_path, frame: "colors",
+      sorts: Pandatone::Color::SORTS, tags: @tags,
+      records: @colors, total: @total, noun: "color",
+      list_class: "color-list", partial: "pandatone/colors/card", as: :color %>

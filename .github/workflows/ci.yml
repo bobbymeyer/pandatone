@@ -18,26 +18,8 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
-      
       - name: Scan for known security vulnerabilities in gems used
-        run: bin/bundler-audit
-      
-  scan_js:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+        run: bundle exec bundler-audit check --update
 
   lint:
     runs-on: ubuntu-latest
@@ -52,32 +34,13 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Prepare RuboCop cache
-        uses: actions/cache@v6
-        env:
-          DEPENDENCIES_HASH: ${{ hashFiles('.ruby-version', '**/.rubocop.yml', '**/.rubocop_todo.yml', 'Gemfile.lock') }}
-        with:
-          path: ${{ env.RUBOCOP_CACHE_ROOT }}
-          key: rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-${{ github.ref_name == github.event.repository.default_branch && github.run_id || 'default' }}
-          restore-keys: |
-            rubocop-${{ runner.os }}-${{ env.DEPENDENCIES_HASH }}-
-
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
   test:
     runs-on: ubuntu-latest
 
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
-
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -89,23 +52,12 @@ jobs:
       - name: Run tests
         env:
           RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test
+        run: bin/rails test
 
   system-test:
     runs-on: ubuntu-latest
 
-    # services:
-    #  redis:
-    #    image: valkey/valkey:8
-    #    ports:
-    #      - 6379:6379
-    #    options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
-
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -114,12 +66,10 @@ jobs:
         with:
           bundler-cache: true
 
-      - name: Run System Tests
+      - name: Run system tests
         env:
           RAILS_ENV: test
-          # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-          # REDIS_URL: redis://localhost:6379/0
-        run: bin/rails db:test:prepare test:system
+        run: bin/rails test test/system
 
       - name: Keep screenshots from failed system tests
         uses: actions/upload-artifact@v7
@@ -133,9 +83,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install packages
-        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y libvips
-
       - name: Checkout code
         uses: actions/checkout@v7
 
@@ -145,15 +92,14 @@ jobs:
           bundler-cache: true
 
       # The suite above runs through rack_test, which has no CSS, no box model
-      # and no JavaScript: a list collapsed into one column of six passes every
-      # assertion in it. This one drives the runner's Chrome, so the Stimulus
+      # and no JavaScript. This one drives the runner's Chrome, so the Stimulus
       # preview, the :has() panels, Turbo's frames and the measured layout are
       # all actually exercised.
       - name: Run system tests in a real browser
         env:
           RAILS_ENV: test
           SYSTEM_TEST_DRIVER: selenium
-        run: bin/rails db:test:prepare test:system
+        run: bin/rails test test/system
 
       - name: Keep screenshots from failed browser tests
         uses: actions/upload-artifact@v7
