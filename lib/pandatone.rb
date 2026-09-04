@@ -1,5 +1,7 @@
 require "pandatone/version"
 require "pandatone/engine"
+# lib is not autoloaded, so what lives here is required by name.
+require "pandatone/seeds"
 
 # The public interface: what another tool may call, and the only thing it
 # may call. Every method here takes plain arguments and returns plain data —
