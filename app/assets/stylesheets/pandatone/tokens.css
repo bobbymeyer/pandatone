@@ -1,0 +1,56 @@
+/* What this engine adds to the tokens the host has already set.
+ *
+ * The accent, the typeface, the value scale, the field count and the
+ * baseline are the host's: they are what the whole site is set in, and an
+ * engine that changed them would change the page around itself. What is
+ * here is only what a palette library measures that a host could not know.
+ *
+ * Unlayered on purpose, like a host's own stylesheets: everything its-swiss
+ * ships is inside a cascade layer, and an unlayered rule beats every layered
+ * one whatever its specificity. */
+
+:root {
+  /* The ladder the swatch row and the card are measured on. */
+  --baseline: 0.5rem;
+
+  /* Twice the fields, for the small size on the two indexes. Written out
+     rather than doubled in a calc, because repeat() takes an integer and not
+     an expression — so the two have to be kept in step by hand with the
+     host's --columns. */
+  --columns: 6;
+  --columns-dense: 12;
+
+  /* How many fields a card occupies. Cards that carry a strip need width;
+     compact ones do not. These two numbers are the whole responsive system:
+     the breakpoints below change them and every grid re-proportions. */
+  --card: 1;
+  --card-wide: 2;
+
+  /* The column the filter block's labels occupy. One value, so the search,
+     the tags and the sort all start their controls in the same place. */
+  --register-label: var(--space-8);
+}
+
+body {
+  /* Names and tags are free text, and a swatch called
+     "Supercalifragilistic" has nowhere to break. anywhere rather than
+     break-word because only anywhere lowers a box's minimum width: a tag
+     chip and a strip's name link are inline-block, so break-word would let
+     the text wrap and leave the box itself sticking off the page. */
+  overflow-wrap: anywhere;
+}
+
+/* The two card widths are the responsive system, so the breakpoints that
+   change them are declarations rather than layout, and belong here beside the
+   numbers they move. */
+@media (max-width: 76rem) {
+  :root { --card: 2; --card-wide: 3; }
+}
+
+@media (max-width: 48rem) {
+  :root { --card: 3; --card-wide: 6; }
+}
+
+@media (max-width: 34rem) {
+  :root { --card: 6; --card-wide: 6; --gutter: 1rem; }
+}

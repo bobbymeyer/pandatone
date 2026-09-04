@@ -1,6 +1,0 @@
-# A session that exists in every test, so signing in is a cookie rather than a
-# form submission. See ApplicationSystemTestCase for why that matters.
-keeper:
-  user: keeper
-  ip_address: 127.0.0.1
-  user_agent: system tests

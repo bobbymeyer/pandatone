@@ -1,34 +1,47 @@
-ENV["RAILS_ENV"] ||= "test"
-require_relative "../config/environment"
+# Configure Rails Environment
+ENV["RAILS_ENV"] = "test"
+
+require_relative "../test/dummy/config/environment"
+ActiveRecord::Migrator.migrations_paths = [ File.expand_path("../test/dummy/db/migrate", __dir__) ]
+ActiveRecord::Migrator.migrations_paths << File.expand_path("../db/migrate", __dir__)
 require "rails/test_help"
-require_relative "test_helpers/session_test_helper"
+
+# Load fixtures from the engine
+if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
+  ActiveSupport::TestCase.fixture_paths = [ File.expand_path("fixtures", __dir__) ]
+  ActionDispatch::IntegrationTest.fixture_paths = ActiveSupport::TestCase.fixture_paths
+  ActiveSupport::TestCase.file_fixture_path = File.expand_path("fixtures", __dir__) + "/files"
+  ActiveSupport::TestCase.fixtures :all
+end
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers
     parallelize(workers: :number_of_processors)
-
-    # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
-    fixtures :all
-
-    # Add more helper methods to be used by all tests here...
   end
 end
 
 class ActionDispatch::IntegrationTest
-  # Every API test reads the body this way; it was a private method copied
-  # into each file, which is also why one of them declared tests after a
-  # `private` keyword.
-  def json
-    JSON.parse(response.body)
+  # The engine's routes, by their own names. The dummy application mounts the
+  # engine at /pandatone, and these helpers already know that.
+  include Pandatone::Engine.routes.url_helpers
+
+  # The door is the host's. The dummy host under test/ opens its screens to a
+  # cookie and its API to one token; these are the two ways through it.
+  def sign_in_as(_user = nil)
+    cookies[:signed_in] = "yes"
   end
 
-  # Every API request needs a token, and saying so at all 118 call sites would
-  # bury what each of those tests is actually about. A test that cares how the
-  # door works says so itself — see api/v1/authentication_test.rb, which never
-  # calls this.
-  def sign_in_client(user = users(:keeper))
-    @api_token = user.api_token
+  def sign_out
+    cookies.delete(:signed_in)
+  end
+
+  def sign_in_client(_user = nil)
+    @api_token = Dummy::API_TOKEN
+  end
+
+  # Every API test reads the body this way.
+  def json
+    JSON.parse(response.body)
   end
 
   # The verbs rather than #process, because an integration test forwards each

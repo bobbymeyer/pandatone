@@ -1,37 +1,39 @@
 require "test_helper"
 
-class PaletteColorTest < ActiveSupport::TestCase
-  test "requires a palette and a color" do
-    membership = PaletteColor.new
+module Pandatone
+  class PaletteColorTest < ActiveSupport::TestCase
+    test "requires a palette and a color" do
+      membership = PaletteColor.new
 
-    assert_not membership.valid?
-    assert_includes membership.errors[:palette], "must exist"
-    assert_includes membership.errors[:color], "must exist"
-  end
+      assert_not membership.valid?
+      assert_includes membership.errors[:palette], "must exist"
+      assert_includes membership.errors[:color], "must exist"
+    end
 
-  test "requires a non negative integer position" do
-    membership = PaletteColor.new(palette: palettes(:empty), color: colors(:deep_indigo), position: -1)
+    test "requires a non negative integer position" do
+      membership = PaletteColor.new(palette: palettes(:empty), color: colors(:deep_indigo), position: -1)
 
-    assert_not membership.valid?
-    assert_includes membership.errors[:position], "must be greater than or equal to 0"
-  end
+      assert_not membership.valid?
+      assert_includes membership.errors[:position], "must be greater than or equal to 0"
+    end
 
-  test "holds a color in a palette at a position" do
-    membership = palette_colors(:brand_signal_red)
+    test "holds a color in a palette at a position" do
+      membership = palette_colors(:brand_signal_red)
 
-    assert_equal palettes(:brand), membership.palette
-    assert_equal colors(:signal_red), membership.color
-    assert_equal 0, membership.position
-  end
+      assert_equal palettes(:brand), membership.palette
+      assert_equal colors(:signal_red), membership.color
+      assert_equal 0, membership.position
+    end
 
-  test "rejects the same color twice in one palette" do
-    duplicate = PaletteColor.new(palette: palettes(:brand), color: colors(:signal_red), position: 9)
+    test "rejects the same color twice in one palette" do
+      duplicate = PaletteColor.new(palette: palettes(:brand), color: colors(:signal_red), position: 9)
 
-    assert_not duplicate.valid?
-    assert_includes duplicate.errors[:color_id], "has already been taken"
-  end
+      assert_not duplicate.valid?
+      assert_includes duplicate.errors[:color_id], "has already been taken"
+    end
 
-  test "allows the same color in different palettes" do
-    assert_predicate PaletteColor.new(palette: palettes(:press), color: colors(:signal_red)), :valid?
+    test "allows the same color in different palettes" do
+      assert_predicate PaletteColor.new(palette: palettes(:press), color: colors(:signal_red)), :valid?
+    end
   end
 end

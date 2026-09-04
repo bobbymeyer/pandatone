@@ -1,0 +1,631 @@
+# The API, described. Served at api/v1/openapi and kept beside the routes it
+# describes; test/controllers/api/v1/openapi_test.rb fails when the two
+# disagree. The wire format is pinned longhand in contract_test.rb; this is
+# the same contract in the format every client generator reads.
+openapi: 3.1.0
+info:
+  title: Pandatone
+  version: "1"
+  summary: A palette library.
+  description: |
+    Named, tagged colors and the palettes that hold them. Two questions this
+    API exists to answer: *give me the colors of the palette tagged active*
+    (`GET /palettes?tag=active`, then `GET /palettes/{id}/colors`) and *which
+    palettes contain #E30613* (`GET /palettes?color=%23E30613`).
+
+    Every request but this description carries a Bearer token issued by the
+    host application. A color value, wherever one is accepted, may be written
+    as a hex (`#E30613`, `E30613`, `#FC0`), an RGB triple (`227, 6, 19`) or a
+    CMYK build (`0, 97.4, 91.6, 11`).
+servers:
+  - url: /pandatone/api/v1
+    description: Relative to the host the engine is mounted in, at its mount path.
+security:
+  - bearer: []
+tags:
+  - name: palettes
+  - name: colors
+  - name: lookup
+  - name: tags
+
+paths:
+  /openapi:
+    get:
+      operationId: openapi
+      summary: This document.
+      security: []
+      responses:
+        "200":
+          description: The OpenAPI description of this API.
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /palettes:
+    get:
+      operationId: listPalettes
+      tags: [palettes]
+      summary: Palette summaries, filtered and ordered.
+      parameters:
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/tag"
+        - name: color
+          in: query
+          description: Only palettes holding this color value.
+          schema:
+            $ref: "#/components/schemas/ColorValue"
+        - $ref: "#/components/parameters/sort"
+      responses:
+        "200":
+          description: Summaries, without their colors. An unreadable color filter matches nothing.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaletteSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createPalette
+      tags: [palettes]
+      summary: Create a palette, optionally with its whole ordered color list.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [palette]
+              properties:
+                palette:
+                  $ref: "#/components/schemas/PaletteInput"
+      responses:
+        "201":
+          description: The palette, with its colors in order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Palette"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/Invalid"
+
+  /palettes/{key}:
+    parameters:
+      - $ref: "#/components/parameters/paletteKey"
+    get:
+      operationId: showPalette
+      tags: [palettes]
+      summary: One palette with its colors in order.
+      responses:
+        "200":
+          description: The palette.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Palette"
+            application/x-adobe-ase:
+              schema:
+                type: string
+                format: binary
+              description: The palette as an Adobe Swatch Exchange file. Ask with a `.ase` extension.
+            text/css:
+              schema:
+                type: string
+              description: The palette as custom properties on `:root`. Ask with a `.css` extension.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updatePalette
+      tags: [palettes]
+      summary: Change a palette's name or tags, and optionally replace its whole color list.
+      description: |
+        A `colors` list, when present, replaces the palette's colors in the
+        order given: this one shape covers adding, removing and reordering.
+        Colors removed from the palette stay in the library. Leave `colors` out
+        to leave the colors alone.
+      requestBody:
+        $ref: "#/components/requestBodies/PaletteUpdate"
+      responses:
+        "200":
+          description: The palette as it now is.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Palette"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Invalid"
+    put:
+      operationId: replacePalette
+      tags: [palettes]
+      summary: The same as PATCH.
+      requestBody:
+        $ref: "#/components/requestBodies/PaletteUpdate"
+      responses:
+        "200":
+          description: The palette as it now is.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Palette"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Invalid"
+    delete:
+      operationId: deletePalette
+      tags: [palettes]
+      summary: Delete a palette. Its colors stay in the library.
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /palettes/{key}/colors:
+    parameters:
+      - $ref: "#/components/parameters/paletteKey"
+    get:
+      operationId: paletteColors
+      tags: [palettes]
+      summary: The colors of one palette, in the palette's own order.
+      description: The workhorse endpoint for consuming tools. The palette's own sequence is the thing being published, so it is only reordered when a sort is asked for.
+      parameters:
+        - $ref: "#/components/parameters/sort"
+      responses:
+        "200":
+          description: The colors.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Color"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /colors:
+    get:
+      operationId: listColors
+      tags: [colors]
+      summary: Colors, filtered and ordered.
+      parameters:
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/tag"
+        - name: color
+          in: query
+          description: Only the color rendering this value.
+          schema:
+            $ref: "#/components/schemas/ColorValue"
+        - name: hex
+          in: query
+          description: The name v1 first published for `color`. Still honored.
+          schema:
+            $ref: "#/components/schemas/ColorValue"
+        - name: palette
+          in: query
+          description: Only colors held by this palette, by id or by name.
+          schema:
+            type: string
+        - $ref: "#/components/parameters/sort"
+      responses:
+        "200":
+          description: The colors. An unknown palette or an unreadable value matches nothing.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Color"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createColor
+      tags: [colors]
+      summary: Add a color to the library.
+      parameters:
+        - $ref: "#/components/parameters/confirmSimilar"
+      requestBody:
+        $ref: "#/components/requestBodies/Color"
+      responses:
+        "201":
+          description: The color, with the palettes holding it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorWithPalettes"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/InvalidOrSimilar"
+
+  /colors/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      operationId: showColor
+      tags: [colors]
+      summary: One color, with the palettes that hold it.
+      responses:
+        "200":
+          description: The color.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorWithPalettes"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateColor
+      tags: [colors]
+      summary: Change a color. It is shared, so this changes it in every palette holding it.
+      parameters:
+        - $ref: "#/components/parameters/confirmSimilar"
+      requestBody:
+        $ref: "#/components/requestBodies/Color"
+      responses:
+        "200":
+          description: The color as it now is.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorWithPalettes"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/InvalidOrSimilar"
+    put:
+      operationId: replaceColor
+      tags: [colors]
+      summary: The same as PATCH.
+      parameters:
+        - $ref: "#/components/parameters/confirmSimilar"
+      requestBody:
+        $ref: "#/components/requestBodies/Color"
+      responses:
+        "200":
+          description: The color as it now is.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorWithPalettes"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/InvalidOrSimilar"
+    delete:
+      operationId: deleteColor
+      tags: [colors]
+      summary: Delete a color from the library.
+      description: A color held by palettes is refused until the request says it means to take it out of them, with `from_palettes`. It is refused outright if removing it would leave two palettes holding exactly the same colors.
+      parameters:
+        - name: from_palettes
+          in: query
+          description: Take the color out of every palette holding it, too.
+          schema:
+            type: boolean
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Invalid"
+
+  /lookup:
+    get:
+      operationId: lookup
+      tags: [lookup]
+      summary: What a value is, whether the library holds it, and which palettes do.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/ColorValue"
+      responses:
+        "200":
+          description: The answer.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lookup"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/Invalid"
+
+  /tags:
+    get:
+      operationId: listTags
+      tags: [tags]
+      summary: Every tag in use, on colors and on palettes.
+      description: Tags are the whole discovery mechanism, so a client that cannot enumerate them cannot navigate.
+      responses:
+        "200":
+          description: The tags.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [colors, palettes]
+                properties:
+                  colors:
+                    type: array
+                    items:
+                      type: string
+                  palettes:
+                    type: array
+                    items:
+                      type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: A token issued by the host application. `Token <token>` is honored as well as `Bearer <token>`.
+
+  parameters:
+    q:
+      name: q
+      in: query
+      description: A substring of the name. Blank is no search.
+      schema:
+        type: string
+    tag:
+      name: tag
+      in: query
+      description: Only records carrying this tag. Case-insensitive.
+      schema:
+        type: string
+    sort:
+      name: sort
+      in: query
+      description: The order. Unknown values mean `name`.
+      schema:
+        type: string
+        enum: [name, added, modified, spectrum, dark, light]
+        default: name
+    paletteKey:
+      name: key
+      in: path
+      required: true
+      description: A palette's id or its name, case-insensitively.
+      schema:
+        type: string
+    confirmSimilar:
+      name: confirm_similar
+      in: query
+      description: Accept a color the library holds a near-duplicate of. Without it the request is refused with the swatch it resembles.
+      schema:
+        type: boolean
+
+  requestBodies:
+    Color:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [color]
+            properties:
+              color:
+                $ref: "#/components/schemas/ColorInput"
+    PaletteUpdate:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [palette]
+            properties:
+              palette:
+                $ref: "#/components/schemas/PaletteInput"
+
+  responses:
+    Unauthorized:
+      description: No token, or one that belongs to nobody.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: No such record.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Invalid:
+      description: Refused, with the reasons keyed by attribute.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    InvalidOrSimilar:
+      description: Refused. Either invalid, with the reasons keyed by attribute, or too similar to a color already on file, with that color attached under `similar`.
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Errors"
+              - type: object
+                properties:
+                  similar:
+                    $ref: "#/components/schemas/Color"
+
+  schemas:
+    ColorValue:
+      type: string
+      description: A hex, an RGB triple or a CMYK build.
+      examples: ["#E30613", "227, 6, 19", "0, 97.4, 91.6, 11"]
+    Rgb:
+      type: object
+      required: [r, g, b]
+      properties:
+        r: { type: integer, minimum: 0, maximum: 255 }
+        g: { type: integer, minimum: 0, maximum: 255 }
+        b: { type: integer, minimum: 0, maximum: 255 }
+    Cmyk:
+      type: object
+      required: [c, m, y, k]
+      properties:
+        c: { type: number, minimum: 0, maximum: 100 }
+        m: { type: number, minimum: 0, maximum: 100 }
+        y: { type: number, minimum: 0, maximum: 100 }
+        k: { type: number, minimum: 0, maximum: 100 }
+    Color:
+      type: object
+      description: Both spaces are always present. `source_space` says which was authored; the other is derived from it on every write.
+      required: [id, name, hex, rgb, cmyk, source_space, tags]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        hex: { type: string, examples: ["#E30613"] }
+        rgb: { $ref: "#/components/schemas/Rgb" }
+        cmyk: { $ref: "#/components/schemas/Cmyk" }
+        source_space: { type: string, enum: [rgb, cmyk] }
+        tags:
+          type: array
+          items: { type: string }
+    ColorWithPalettes:
+      allOf:
+        - $ref: "#/components/schemas/Color"
+        - type: object
+          required: [palettes]
+          properties:
+            palettes:
+              type: array
+              items:
+                $ref: "#/components/schemas/PaletteSummary"
+    ColorInput:
+      type: object
+      description: A color to create or change. Give the channels of one space and name it in `source_space`, or give a `hex`, which is an RGB source.
+      properties:
+        name: { type: string }
+        source_space: { type: string, enum: [rgb, cmyk] }
+        hex: { type: string }
+        r: { type: integer }
+        g: { type: integer }
+        b: { type: integer }
+        c: { type: number }
+        m: { type: number }
+        y: { type: number }
+        k: { type: number }
+        tags:
+          description: A list, or one comma-separated string.
+          oneOf:
+            - type: array
+              items: { type: string }
+            - type: string
+    ColorReference:
+      type: object
+      description: A color already in the library, by id. How one brand blue ends up in ten palettes as a single row.
+      required: [id]
+      properties:
+        id: { type: integer }
+    PaletteSummary:
+      type: object
+      required: [id, name, tags]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+    Palette:
+      allOf:
+        - $ref: "#/components/schemas/PaletteSummary"
+        - type: object
+          required: [colors]
+          properties:
+            colors:
+              type: array
+              items:
+                $ref: "#/components/schemas/Color"
+    PaletteInput:
+      type: object
+      properties:
+        name: { type: string }
+        tags:
+          description: A list, or one comma-separated string.
+          oneOf:
+            - type: array
+              items: { type: string }
+            - type: string
+        colors:
+          description: The whole ordered color list. Each entry is a reference to a color in the library or a color to create. An empty list empties the palette; leaving the key out leaves the colors alone.
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ColorReference"
+              - $ref: "#/components/schemas/ColorInput"
+    Lookup:
+      type: object
+      required: [query, hex, rgb, build, colors, palettes, nearest]
+      properties:
+        query: { type: string }
+        hex: { type: string }
+        rgb: { $ref: "#/components/schemas/Rgb" }
+        build:
+          description: Present only when the value was read as a CMYK build. That conversion is lossy, and the match is on the color it renders to.
+          oneOf:
+            - $ref: "#/components/schemas/Cmyk"
+            - type: "null"
+        colors:
+          description: The colors on file rendering exactly this value.
+          type: array
+          items: { $ref: "#/components/schemas/Color" }
+        palettes:
+          description: The palettes holding one of those colors.
+          type: array
+          items: { $ref: "#/components/schemas/PaletteSummary" }
+        nearest:
+          description: The closest color on file, only when nothing matched exactly.
+          oneOf:
+            - $ref: "#/components/schemas/Color"
+            - type: "null"
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    Errors:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: object
+          description: Messages keyed by attribute; `base` for the record as a whole.
+          additionalProperties:
+            type: array
+            items: { type: string }

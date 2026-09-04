@@ -1,0 +1,30 @@
+<%# The engine's layout is the host's layout with the engine's own things
+    added: its stylesheets, its JavaScript, its destinations, and the grid
+    its pages are laid out on. Everything else — the shell, the mark, the
+    door — is the host's, which is what makes this a tool inside an
+    application rather than an application of its own.
+
+    The host's layout is expected to render its-swiss's shell and to place
+    :sections in its masthead nav; the dummy application under test/ shows
+    the least a host has to do. %>
+
+<% content_for :head do %>
+  <%# Unlayered, like a host's own stylesheets, so they win over the library
+      wherever the two meet. Turbo-tracked so a new gem version reloads them. %>
+  <%= stylesheet_link_tag "pandatone/tokens", "pandatone/grid", "pandatone/type", "pandatone/components",
+        "data-turbo-track": "reload" %>
+  <%= javascript_import_module_tag "pandatone" %>
+<% end %>
+
+<%# current_page? answers for a destination, not for a section: it is false
+    on /palettes/12, which is still where Palettes goes. Only this engine
+    knows that, which is why it says so rather than leaving it to the host. %>
+<% content_for :sections do %>
+  <%= nav_link_to "Colors", colors_path, current: in_section?("colors") %>
+  <%= nav_link_to "Palettes", palettes_path, current: in_section?("palettes") %>
+  <%= nav_link_to "Lookup", lookup_path %>
+<% end %>
+
+<% content_for :main_class, "grid" %>
+
+<%= render template: "layouts/application" %>

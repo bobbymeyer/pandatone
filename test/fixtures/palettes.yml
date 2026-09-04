@@ -1,3 +1,6 @@
+_fixture:
+  model_class: Pandatone::Palette
+
 brand:
   name: Brand Core
   tags: [ "brand", "active" ]

@@ -1,0 +1,57 @@
+<%# locals: (palette:, url:, submit:, with_swatch:, source: nil) %>
+<%= form_with model: palette, url: url, class: "form" do |form| %>
+  <%= render "its_swiss/shared/errors", record: palette %>
+
+  <% if source %>
+    <%= hidden_field_tag :from, source.id %>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name, "Name" %>
+    <%= form.text_field :name, autocomplete: "off" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :tag_list, "Tags" %>
+    <%= form.text_field :tag_list, value: palette.tag_list, autocomplete: "off" %>
+    <p class="hint">Comma separated. Tags are how palettes are found: an "active" palette is one tagged <code>active</code>.</p>
+  </div>
+
+  <% if source %>
+    <fieldset class="swatch-entry">
+      <legend>Swatches from <%= source.name %></legend>
+      <p class="hint">
+        All of them come across. Untick what you do not want, or add a swatch below:
+        a palette holding exactly these colors already exists, so something has to differ.
+      </p>
+
+      <%# Submitted whatever happens, so unticking every box reads as an empty
+          list rather than as no list at all. %>
+      <%= hidden_field_tag "carried[]", "", id: nil %>
+
+      <ul class="carried-swatches">
+        <% source.palette_colors.each do |membership| %>
+          <li class="carried-swatch">
+            <%= check_box_tag "carried[]", membership.color_id,
+                  carried_color_ids.include?(membership.color_id),
+                  id: "carried_#{membership.color_id}" %>
+            <%= label_tag "carried_#{membership.color_id}" do %>
+              <%= swatch_tag membership.color.hex, class: "swatch--card" %>
+              <span class="swatch-name"><%= membership.color.name %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    </fieldset>
+  <% end %>
+
+  <% if with_swatch %>
+    <fieldset class="swatch-entry">
+      <legend>Add a swatch</legend>
+      <p class="hint">Optional. Leave empty to save the palette on its own.</p>
+      <%= render "pandatone/shared/swatch_fields" %>
+    </fieldset>
+  <% end %>
+
+  <%= form.submit submit, class: "button button--primary" %>
+<% end %>
