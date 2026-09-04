@@ -47,3 +47,7 @@
 !/test/dummy/storage/.keep
 /test/dummy/db/*.sqlite3
 /test/dummy/db/*.sqlite3-*
+
+# A gem resolves its dependencies in the host; the lock is the host's.
+/Gemfile.lock
+/*.gem

@@ -1,0 +1,64 @@
+name: Release
+
+# Cut a version by pushing its tag:
+#
+#   git tag v0.1.0 && git push origin v0.1.0
+#
+# No API key exists anywhere in this repository or in its secrets. RubyGems
+# trusted publishing hands this workflow a short-lived credential over OIDC,
+# scoped to this repository and this workflow file, which is why `id-token`
+# below is the whole of the authentication. See RELEASING.md for the one-time
+# setup on rubygems.org.
+on:
+  push:
+    tags: [ "v*" ]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # to create the GitHub release
+      id-token: write   # to mint the RubyGems credential
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      # The tag is what says which version is being cut, so it has to agree
+      # with the version the gem would build. A mismatch here is a release
+      # that goes out under a number nobody chose.
+      - name: The tag and the gemspec agree
+        run: |
+          tagged="${GITHUB_REF_NAME#v}"
+          built="$(ruby -Ilib -e 'require "pandatone/version"; print Pandatone::VERSION')"
+          test "$tagged" = "$built" || {
+            echo "tag $GITHUB_REF_NAME does not match Pandatone::VERSION $built"
+            exit 1
+          }
+
+      - run: bin/rubocop
+
+      - run: bin/rails test
+
+      # A tag can be pushed for a version that is already out. Publishing is
+      # not idempotent and RubyGems rejects a repeat, so the run would fail
+      # for having nothing to do. Ask first.
+      - name: Is this version already on RubyGems?
+        id: published
+        run: |
+          version="$(ruby -Ilib -e 'require "pandatone/version"; print Pandatone::VERSION')"
+          if curl -sf "https://rubygems.org/api/v1/versions/pandatone.json" \
+               | jq -e --arg v "$version" 'any(.[]; .number == $v)' > /dev/null; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "pandatone $version is already published; nothing to push."
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: rubygems/release-gem@v1
+        if: steps.published.outputs.already == 'false'

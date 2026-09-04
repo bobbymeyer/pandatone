@@ -21,7 +21,7 @@ swatch is, and nothing that does not.
 
 ```ruby
 # Gemfile
-gem "pandatone"
+gem "pandatone", "~> 0.1"
 
 # config/routes.rb
 mount Pandatone::Engine, at: "/pandatone"
