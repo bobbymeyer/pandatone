@@ -4,11 +4,12 @@ name: Release
 #
 #   git tag v0.1.0 && git push origin v0.1.0
 #
-# No API key exists anywhere in this repository or in its secrets. RubyGems
-# trusted publishing hands this workflow a short-lived credential over OIDC,
-# scoped to this repository and this workflow file, which is why `id-token`
-# below is the whole of the authentication. See RELEASING.md for the one-time
-# setup on rubygems.org.
+# Pandatone is not published to RubyGems. A host takes it from the tag:
+#
+#   gem "pandatone", github: "bobbymeyer/pandatone", tag: "v0.1.0"
+#
+# So a release is the tag, checked, with a GitHub release opened on it that
+# carries the built gem for anything that wants a file.
 on:
   push:
     tags: [ "v*" ]
@@ -19,7 +20,6 @@ jobs:
 
     permissions:
       contents: write   # to create the GitHub release
-      id-token: write   # to mint the RubyGems credential
 
     steps:
       - uses: actions/checkout@v4
@@ -45,20 +45,12 @@ jobs:
 
       - run: bin/rails test
 
-      # A tag can be pushed for a version that is already out. Publishing is
-      # not idempotent and RubyGems rejects a repeat, so the run would fail
-      # for having nothing to do. Ask first.
-      - name: Is this version already on RubyGems?
-        id: published
-        run: |
-          version="$(ruby -Ilib -e 'require "pandatone/version"; print Pandatone::VERSION')"
-          if curl -sf "https://rubygems.org/api/v1/versions/pandatone.json" \
-               | jq -e --arg v "$version" 'any(.[]; .number == $v)' > /dev/null; then
-            echo "already=true" >> "$GITHUB_OUTPUT"
-            echo "pandatone $version is already published; nothing to push."
-          else
-            echo "already=false" >> "$GITHUB_OUTPUT"
-          fi
+      - run: gem build pandatone.gemspec
 
-      - uses: rubygems/release-gem@v1
-        if: steps.published.outputs.already == 'false'
+      - name: Open the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" pandatone-*.gem \
+            --title "$GITHUB_REF_NAME" \
+            --notes "See CHANGELOG.md. Take it with: gem \"pandatone\", github: \"bobbymeyer/pandatone\", tag: \"$GITHUB_REF_NAME\""
