@@ -38,7 +38,9 @@ module Pandatone
           Array.from(document.querySelectorAll('.button')).filter(el => {
             const style = getComputedStyle(el);
             const filled = style.backgroundColor !== 'rgba(0, 0, 0, 0)';
-            const outlined = parseFloat(style.borderTopWidth) > 0;
+            // its-swiss draws a keyline as an inset shadow, so the box is the
+            // label's line and two paddings and nothing else.
+            const outlined = parseFloat(style.borderTopWidth) > 0 || style.boxShadow !== 'none';
             return !filled && !outlined;
           }).map(el => el.textContent.trim() || el.value)
         JS

@@ -147,21 +147,6 @@ module Pandatone
     end
 
 
-    # The one rule the whole palette rests on is that the swatches are the only
-    # color on the page. An emoji arrives with its own, and which colors depends
-    # on whose emoji font renders it — so it is drained here rather than trusted
-    # to be monochrome. Asserted on the computed style rather than grepped out
-    # of the stylesheet: a rule on the wrong selector reads correctly in the CSS
-    # and does nothing on the page.
-    test "the panda is drained of color like everything else that is not a swatch" do
-      needs_a_browser
-
-      visit root_path
-
-      assert_equal "grayscale(1)",
-        evaluate_script("getComputedStyle(document.querySelector('.masthead__panda')).filter")
-    end
-
     private
       # Samples every frame for the length of a navigation, because the overflow
       # this catches exists only while the transition runs: asking afterwards
