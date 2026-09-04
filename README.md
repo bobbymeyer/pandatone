@@ -20,8 +20,8 @@ swatch is, and nothing that does not.
 ## Mounting it
 
 ```ruby
-# Gemfile
-gem "pandatone", "~> 0.1"
+# Gemfile — not on RubyGems; taken from the tag
+gem "pandatone", github: "bobbymeyer/pandatone", tag: "v0.1.0"
 
 # config/routes.rb
 mount Pandatone::Engine, at: "/pandatone"
