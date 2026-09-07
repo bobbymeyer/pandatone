@@ -55,7 +55,11 @@
   background-image: repeating-linear-gradient(45deg, var(--ink-quiet) 0 1px, transparent 1px 4px);
 }
 
-/* --- The picker ---------------------------------------------------------- */
+/* --- The picker ----------------------------------------------------------
+   Each section of it is a section: a line above its heading, and a line
+   after it before whatever follows. */
+.palettes { margin-block-end: var(--line); }
+
 .palettes h2 {
   font-size: var(--size-2);
   line-height: var(--line);
