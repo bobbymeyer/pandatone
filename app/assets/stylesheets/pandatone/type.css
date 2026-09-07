@@ -44,7 +44,8 @@
 .hex { font-weight: 700; }
 
 .hex--large {
+  font-family: var(--face-150), var(--font-family);
   font-size: var(--size-4);
-  line-height: var(--space-5);
+  line-height: var(--line-2);
   letter-spacing: 0.02em;
 }

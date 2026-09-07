@@ -3,6 +3,19 @@
 Semver. The API is versioned separately, under its own path, and is not
 what this file numbers.
 
+## 0.4.0 — 2026-09-08
+
+On its-swiss 1.0.
+
+### Changed
+
+- **Set on its-swiss 1.0.** The library registers its own controllers from
+  a module its shell imports, so the dummy no longer registers them by hand.
+  The large hex was leaded on `--space-5`, a step of the horizontal ladder,
+  and the page's row gap and padding on two tokens the library has dropped;
+  all three are whole lines now, which is what they were pretending to be.
+  Every form written through the helper is at the measure as before.
+
 ## 0.3.0 — 2026-09-07
 
 A day of use. On its-swiss 0.9.
