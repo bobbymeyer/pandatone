@@ -129,9 +129,28 @@ module Pandatone
       assert Color.exists?(colors(:process_cyan).id)
     end
 
+    # The page's two surfaces, named under the title; the one shown in the
+    # weight, and shown alone.
+    test "the palette page is two surfaces, reached from the head" do
+      visit palette_path(palettes(:brand))
+
+      within("header.page-head nav.sections") do
+        assert_equal %w[ Swatches Export ], all("a").map(&:text)
+        assert_selector "a[aria-current=page]", text: "Swatches"
+      end
+      assert_selector ".swatch-row"
+      assert_no_selector ".export"
+
+      within("nav.sections") { click_on "Export" }
+
+      assert_selector "nav.sections a[aria-current=page]", text: "Export"
+      assert_selector ".export"
+      assert_no_selector ".swatch-row"
+    end
+
     # The two places these colors actually go: a design tool, and a stylesheet.
     test "offers the palette as a file, in both formats" do
-      visit palette_path(palettes(:brand))
+      visit palette_path(palettes(:brand), section: "export")
 
       within(".export") do
         assert_equal [ "ASE", "CSS variables" ], all("a").map(&:text)
@@ -139,7 +158,7 @@ module Pandatone
     end
 
     test "each export link asks for the palette in that format" do
-      visit palette_path(palettes(:brand))
+      visit palette_path(palettes(:brand), section: "export")
 
       paths = within(".export") { all("a").map { |link| URI.parse(link[:href]).path } }
 

@@ -5,6 +5,6 @@
   <%= button_to "Check for drift", drift_url, method: :patch, class: "button button--quiet" %>
   <%= button_to "Take off", remove_url, method: :delete, class: "button button--quiet" %>
   <% if colorway.snapshot %>
-    <span class="hint">Taken <%= colorway.snapshot.taken_at.to_fs(:long) %></span>
+    <span class="micro quiet">Taken <%= colorway.snapshot.taken_at.to_fs(:long) %></span>
   <% end %>
 </div>
