@@ -1,4 +1,5 @@
 import { application } from "controllers/application"
 
-// its-swiss pins its two controllers from its engine; a host registers them
-// once. The engine's own controllers register themselves from pandatone.js.
+// its-swiss registers its own controllers from the module its shell imports;
+// a host registers nothing for it. The engine's own controllers register
+// themselves from pandatone.js.
