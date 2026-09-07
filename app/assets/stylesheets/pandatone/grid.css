@@ -58,12 +58,3 @@ main.grid {
   height: 100%;
 }
 
-/* The field is asymmetric on purpose: heads and prose sit in the left four
-   fields and stop there, leaving two standing empty on the right. */
-.page-head { --span: 4; }
-
-/* At a tablet's width four fields out of six is no longer a head that stops
-   short, it is a head with a sliver beside it. */
-@media (max-width: 48rem) {
-  .page-head { --span: var(--columns); }
-}
