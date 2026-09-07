@@ -1,25 +1,19 @@
-<% content_for :title, @palette.name %>
+<%= page_head @palette.name do %>
+  <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button button--primary" %>
+  <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
+  <%# Not "duplicate": the one thing it will not make is a copy. %>
+  <%= link_to "New from this", new_palette_path(from: @palette.id), class: "button" %>
+  <%# The only thing in this app that cannot be undone. %>
+  <%= button_to "Delete palette", @palette, method: :delete, class: "button button--danger",
+        data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colors stay in the library." } %>
+<% end %>
 
-<header class="page-head">
-  <h1 class="page-title"><%= @palette.name %></h1>
-
-  <%= turbo_frame_tag "palette_tags" do %>
-    <div class="inline-edit">
-      <p class="tags"><%= @palette.tags.any? ? tag_links(@palette.tags) { |tag| palettes_path(tag: tag) } : "Untagged" %></p>
-      <%= link_to "Edit tags", edit_palette_tags_path(@palette), class: "link-quiet" %>
-    </div>
-  <% end %>
-
-  <div class="page-actions run">
-    <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button button--primary" %>
-    <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
-    <%# Not "duplicate": the one thing it will not make is a copy. %>
-    <%= link_to "New from this", new_palette_path(from: @palette.id), class: "button" %>
-    <%# The only thing in this app that cannot be undone. %>
-    <%= button_to "Delete palette", @palette, method: :delete, class: "button button--danger",
-          data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colors stay in the library." } %>
+<%= turbo_frame_tag "palette_tags" do %>
+  <div class="inline-edit">
+    <p class="tags"><%= @palette.tags.any? ? tag_links(@palette.tags) { |tag| palettes_path(tag: tag) } : "Untagged" %></p>
+    <%= link_to "Edit tags", edit_palette_tags_path(@palette), class: "link-quiet" %>
   </div>
-</header>
+<% end %>
 
 <%= render "its_swiss/shared/errors", record: @palette %>
 

@@ -8,8 +8,7 @@
 
 /* The micro register the library sets on labels and legends, extended to the
    spans this app uses as labels. A label is a label wherever it stands, and
-   these are the filter block's and the export row's. */
-.filter-row__label,
+   this is the export row's. */
 .export__label,
 .channels dt,
 .count {

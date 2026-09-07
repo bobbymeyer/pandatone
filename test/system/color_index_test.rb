@@ -53,7 +53,7 @@ module Pandatone
 
       within("#color_#{colors(:signal_red).id}") { click_on "primary" }
 
-      assert_selector "[data-filter=tag] .tag.active", text: "primary", exact_text: true
+      assert_selector "[data-filter=tag] a[aria-current]", text: "primary", exact_text: true
       assert_equal [ "signal-red" ], card_names
     end
 
@@ -142,7 +142,7 @@ module Pandatone
       visit colors_path
 
       assert_equal Color.order(:name).pluck(:name), card_names
-      assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Name", exact_text: true
     end
 
     test "sorts by color, dark first and light first" do
@@ -173,7 +173,7 @@ module Pandatone
 
       assert_selector ".color-list > li", count: 3
       assert_equal [ "ink-black", "signal-red", "paper-white" ], card_names
-      assert_selector "[data-filter=sort] .tag.active", text: "Dark", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Dark", exact_text: true
     end
 
     test "a search keeps the sort it was run under" do
@@ -185,7 +185,7 @@ module Pandatone
 
       assert_selector ".color-list > li", count: 1
       assert_equal [ "process-cyan" ], card_names
-      assert_selector "[data-filter=sort] .tag.active", text: "Light", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Light", exact_text: true
     end
 
     # The tag links live outside the results frame, so an order that only swapped

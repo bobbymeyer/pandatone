@@ -41,11 +41,14 @@ module Pandatone
         "the field itself is .grid's, and a second density belongs in grid.css rather than per component")
     end
 
+    # The library's .cards reads --card and spans each card that many fields;
+    # what this app declares is the two numbers, and which list takes the
+    # wider one. Neither list writes a span of its own.
     test "cards span whole fields rather than fixed widths" do
       assert_match(/--card:\s*\d/, theme)
       assert_match(/--card-wide:\s*\d/, theme)
-      assert_match(/--span:\s*var\(--card\)/, grid)
-      assert_match(/--span:\s*var\(--card-wide\)/, grid)
+      assert_match(/\.palette-list\s*\{\s*--card:\s*var\(--card-wide\)/, grid)
+      assert_no_match(/list[^{]*\{[^}]*--span/, grid, "a list's span is the library's to write")
     end
 
     test "nothing is set in capitals" do
@@ -55,18 +58,19 @@ module Pandatone
         "capitals are not used in this interface; size and value carry the micro register"
     end
 
-    # A label is a label wherever it stands. The filter block's two came out a
+    # A label is a label wherever it stands. The filter block's came out a
     # step larger than the choices they label, which is backward, and a step
     # larger than every other label in the app.
     #
-    # its-swiss sets bare label and legend in the micro register, so every
-    # control's own label is the library's and guarded there. These two are
-    # spans, which no library can know about, so they are what is left to name.
+    # its-swiss sets bare label and legend in the micro register, and since
+    # 0.8 the filter block's label too, so those are the library's and
+    # guarded there. The export row's is a span of this app's, which no
+    # library can know about, so it is what is left to name.
     test "every register label is set in the one micro register" do
       selectors = type[/([^{}]+)\{[^}]*font-size:\s*var\(--size-1\)[^}]*letter-spacing[^}]*\}/m, 1]
 
       assert selectors, "expected one rule setting the micro register"
-      [ ".filter-row__label", ".export__label" ].each do |label|
+      [ ".export__label" ].each do |label|
         assert_includes selectors, label,
           "#{label} is not in the micro register, so it is set differently from every other label"
       end

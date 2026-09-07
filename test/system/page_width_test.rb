@@ -103,8 +103,8 @@ module Pandatone
         resize_viewport(*size)
 
         lefts = evaluate_script(<<~JS)
-          [document.querySelector('.filters .filter-form > .field'),
-           ...document.querySelectorAll('.filter-row')]
+          [document.querySelector('.filters form .field'),
+           ...document.querySelectorAll('.filter')]
             .map(row => Array.from(row.children).map(el => Math.round(el.getBoundingClientRect().left)))
         JS
 

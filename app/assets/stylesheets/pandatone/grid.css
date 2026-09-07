@@ -19,9 +19,6 @@ main.grid {
   align-content: start;
 }
 
-.palette-list,
-.color-list { row-gap: var(--space-5); }
-
 /* Small is half of whatever large is at that width: the same card spanning
    the same number of fields, over twice as many of them. Every field line the
    page has is still a line here, with one more between each pair — which is
@@ -31,13 +28,9 @@ main.grid {
   row-gap: var(--space-4);
 }
 
-/* How many fields a card takes. A child of the field that says nothing runs
-   the whole of it, which is what nearly everything on a page does — a Turbo
-   Frame, the account panel and a line of prose under the sign-in form each
-   silently took one sixth of the page before placement was the default. */
-.palette-list > * { --span: var(--card-wide); }
-
-.color-list > * { --span: var(--card); }
+/* How many fields a card takes. The library's .cards reads --card; a
+   palette's card carries a strip and needs the wider of this app's two. */
+.palette-list { --card: var(--card-wide); }
 
 /* The one thing in the app that is not measured on the field.
    A palette is one row, divided by the number of swatches in it, because a
@@ -47,7 +40,7 @@ main.grid {
    one thing about a swatch that carries no meaning. */
 .swatch-row {
   display: flex;
-  height: calc(var(--baseline) * 16);
+  height: calc(var(--swatch-step) * 16);
 }
 
 .swatch-row > li {
@@ -55,7 +48,7 @@ main.grid {
   min-width: 0;
   /* Reserved on every one of them, so choosing a swatch moves the mark
      rather than the row. */
-  border-bottom: var(--baseline) solid transparent;
+  border-bottom: var(--swatch-step) solid transparent;
 }
 
 .swatch-row > li.selected { border-bottom-color: var(--ink); }

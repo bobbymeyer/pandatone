@@ -1,11 +1,8 @@
 <% content_for :title, "Tags for #{@color.name}" %>
 
 <%= turbo_frame_tag "color_tags" do %>
-  <%= form_with model: @color, url: color_tags_path(@color), method: :patch, class: "form form--inline" do |form| %>
-    <div class="field">
-      <%= form.label :tag_list, "Tags" %>
-      <%= form.text_field :tag_list, value: @color.tag_list, autocomplete: "off" %>
-    </div>
+  <%= its_swiss_form_with model: @color, url: color_tags_path(@color), method: :patch, class: "form form--inline" do |form| %>
+    <%= form.text_field :tag_list, label: "Tags", value: @color.tag_list, autocomplete: "off" %>
     <%= form.submit "Save tags", class: "button" %>
     <%= link_to "Cancel", @color, class: "link-quiet" %>
   <% end %>

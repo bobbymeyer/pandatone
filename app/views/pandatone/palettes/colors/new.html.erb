@@ -1,9 +1,4 @@
-<% content_for :title, "Add a swatch to #{@palette.name}" %>
-
-<header class="page-head">
-  <h1 class="page-title">Add a swatch</h1>
-  <p class="lede">To <%= link_to @palette.name, @palette %>.</p>
-</header>
+<%= page_head "Add a swatch", lede: safe_join([ "To ", link_to(@palette.name, @palette), "." ]) %>
 
 <%= render "its_swiss/shared/errors", record: @palette %>
 
@@ -31,28 +26,19 @@
   </fieldset>
 
   <section class="new-color" data-source="new">
-    <%= form_with url: palette_colors_path(@palette), class: "form" do %>
+    <%= its_swiss_form_with url: palette_colors_path(@palette) do |form| %>
       <%= render "pandatone/shared/similar_swatch", similar: @similar, color: @candidate if @similar %>
       <%= render "pandatone/shared/swatch_fields" %>
-      <%= submit_tag @similar ? "Add anyway" : "Add swatch", name: nil, class: "button button--primary" %>
+      <%= form.submit @similar ? "Add anyway" : "Add swatch" %>
     <% end %>
   </section>
 
   <section class="library-picker" data-source="library">
     <h2>Swatches in the library</h2>
 
-    <%= form_with url: new_palette_color_path(@palette), method: :get, class: "filter-form",
-          data: { controller: "live-search", action: "input->live-search#search", turbo_frame: "library" } do %>
-      <%= hidden_field_tag :source, "library" %>
-      <div class="field">
-        <%= label_tag :q, "Search" %>
-        <%= text_field_tag :q, params[:q], autocomplete: "off" %>
-      </div>
-      <%# Named for what it does, and taken away by the controller that makes
-        it redundant. See live_search_controller.js. %>
-    <%= submit_tag "Search", name: nil, class: "button",
-          data: { live_search_target: "submit" } %>
-    <% end %>
+    <div class="filters">
+      <%= search_form new_palette_color_path(@palette), frame: "library", keep: { source: "library" } %>
+    </div>
 
     <%# target: "_top" because this frame holds results, not an editable region:
     a link or an Add button inside it is going somewhere else entirely, and
@@ -65,7 +51,7 @@
           <%= params[:q].present? ? "No colors match." : "Every color in the library is already in this palette." %>
         </p>
       <% else %>
-        <ul class="grid color-list">
+        <ul class="grid cards color-list">
           <%= render partial: "pandatone/colors/card", collection: @available, as: :color,
                 locals: { level: 3, pick: true, palette: @palette } %>
         </ul>

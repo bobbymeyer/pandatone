@@ -4,6 +4,10 @@ source "https://rubygems.org"
 # dummy application under test/ needs to run it.
 gemspec
 
+# its-swiss 0.8 is not on RubyGems yet; until it is, the engine develops
+# against the branch that carries it. Delete this line when it is.
+gem "its-swiss", github: "bobbymeyer/its-swiss", branch: "page-head-and-indexes"
+
 gem "puma"
 # Tags are queried with SQLite's json_each; the engine is written for SQLite
 # and the dummy runs on it.
