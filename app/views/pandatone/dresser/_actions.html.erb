@@ -1,0 +1,10 @@
+<%# locals: (colorway:, drift_url:, remove_url:) %>
+<%# What can be done to a colorway once it is on: ask Pandatone whether the
+    palette has moved, or take it off. Both leave the thing it dresses alone. %>
+<div class="run">
+  <%= button_to "Check for drift", drift_url, method: :patch, class: "button button--quiet" %>
+  <%= button_to "Take off", remove_url, method: :delete, class: "button button--quiet" %>
+  <% if colorway.snapshot %>
+    <span class="hint">Taken <%= colorway.snapshot.taken_at.to_fs(:long) %></span>
+  <% end %>
+</div>

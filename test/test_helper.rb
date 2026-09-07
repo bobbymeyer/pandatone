@@ -6,6 +6,11 @@ ActiveRecord::Migrator.migrations_paths = [ File.expand_path("../test/dummy/db/m
 ActiveRecord::Migrator.migrations_paths << File.expand_path("../db/migrate", __dir__)
 require "rails/test_help"
 
+# Nothing in the suite is allowed out to the network. The dresser's client is
+# tested at the wire, with the wire stubbed.
+require "webmock/minitest"
+WebMock.disable_net_connect!(allow_localhost: true)
+
 # Load fixtures from the engine
 if ActiveSupport::TestCase.respond_to?(:fixture_paths=)
   ActiveSupport::TestCase.fixture_paths = [ File.expand_path("fixtures", __dir__) ]
@@ -17,6 +22,41 @@ end
 module ActiveSupport
   class TestCase
     parallelize(workers: :number_of_processors)
+
+    # A palette shaped the way Pandatone sends them, built from hexes because
+    # the hex is the only part of a colour most tests are ever about.
+    def dresser_palette(*hexes, id: 7, name: "Sample")
+      colors = hexes.each_with_index.map do |hex, index|
+        Pandatone::Dresser::Color.new(
+          id: (id * 100) + index, name: "#{name.parameterize}-#{index}", hex: hex,
+          red: hex[1..2].to_i(16), green: hex[3..4].to_i(16), blue: hex[5..6].to_i(16)
+        )
+      end
+
+      Pandatone::Dresser::Palette.new(id: id, name: name, colors: colors)
+    end
+
+    # The dresser answering from a source of these palettes, for the block.
+    # `palettes` maps [id, name] to hexes, the way the API would send them.
+    def with_palette_source(palettes)
+      was = Pandatone::Dresser.source
+      Pandatone::Dresser.source = -> { palettes.map { |(id, name), hexes| wire_palette(id, name, hexes) } }
+      Pandatone::Dresser::Catalog.forget!
+
+      yield
+    ensure
+      Pandatone::Dresser.source = was
+      Pandatone::Dresser::Catalog.forget!
+    end
+
+    def wire_palette(id, name, hexes)
+      colors = hexes.each_with_index.map do |hex, index|
+        { "id" => (id * 100) + index, "name" => "#{name.parameterize}-#{index}", "hex" => hex,
+          "rgb" => { "r" => hex[1..2].to_i(16), "g" => hex[3..4].to_i(16), "b" => hex[5..6].to_i(16) }, "tags" => [] }
+      end
+
+      { "id" => id, "name" => name, "tags" => [], "colors" => colors }
+    end
   end
 end
 

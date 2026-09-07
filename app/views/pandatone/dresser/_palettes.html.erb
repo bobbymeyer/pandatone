@@ -1,0 +1,36 @@
+<%# locals: (palettes:, heading:, note:, slot_count:, dress_url:) %>
+<section class="palettes">
+  <h2><%= heading %></h2>
+  <p class="hint"><%= note %></p>
+
+  <% if palettes.any? %>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Palette</th>
+          <th scope="col" class="numeric">Colours</th>
+          <th scope="col">Ranked, lightest first</th>
+          <th scope="col"><span class="visually-hidden">Choose</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% palettes.each do |palette| %>
+          <tr>
+            <td><%= palette.name %></td>
+            <td class="numeric"><%= palette.size %></td>
+            <td><%= palette_strip palette %></td>
+            <td>
+              <% if palette.serves?(slot_count) %>
+                <%= button_to "Dress", dress_url.call(palette), class: "button" %>
+              <% else %>
+                <span class="hint"><%= slot_count - palette.size %> short</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="empty">None.</p>
+  <% end %>
+</section>

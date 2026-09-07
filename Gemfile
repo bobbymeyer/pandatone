@@ -18,4 +18,6 @@ end
 group :test do
   gem "capybara"
   gem "selenium-webdriver"
+  # The dresser's client is tested at the wire.
+  gem "webmock"
 end
