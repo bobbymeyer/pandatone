@@ -4,9 +4,11 @@ source "https://rubygems.org"
 # dummy application under test/ needs to run it.
 gemspec
 
-# its-swiss 0.9 until it is on RubyGems; then this line goes and the gemspec is
-# the whole pin again.
-gem "its-swiss", github: "bobbymeyer/its-swiss", branch: "say-it-once"
+# json 3.0.0 (7 September 2026) changed the signature of JSON.parse, and Active
+# Support 8.1.3.1 still calls it the old way: a signed cookie, a JSON column, a
+# schema load all raise. The lock is not committed here, so CI resolves the
+# newest json. Below 3 until a Rails that takes it; the gem does not depend on it.
+gem "json", "< 3"
 
 gem "puma"
 # Tags are queried with SQLite's json_each; the engine is written for SQLite
