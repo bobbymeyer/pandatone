@@ -4,10 +4,6 @@ source "https://rubygems.org"
 # dummy application under test/ needs to run it.
 gemspec
 
-# its-swiss 0.9 until it is on RubyGems; then this line goes and the gemspec is
-# the whole pin again.
-gem "its-swiss", github: "bobbymeyer/its-swiss", branch: "say-it-once"
-
 gem "puma"
 # Tags are queried with SQLite's json_each; the engine is written for SQLite
 # and the dummy runs on it.
