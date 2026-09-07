@@ -10,8 +10,9 @@
  * one whatever its specificity. */
 
 :root {
-  /* The ladder the swatch row and the card are measured on. */
-  --baseline: 0.5rem;
+  /* The step the swatch row and the picker are measured on: half a space
+     unit, a third of a line. Not a baseline — the library's is --line. */
+  --swatch-step: 0.5rem;
 
   /* Twice the fields, for the small size on the two indexes. Written out
      rather than doubled in a calc, because repeat() takes an integer and not
@@ -25,10 +26,6 @@
      the breakpoints below change them and every grid re-proportions. */
   --card: 1;
   --card-wide: 2;
-
-  /* The column the filter block's labels occupy. One value, so the search,
-     the tags and the sort all start their controls in the same place. */
-  --register-label: var(--space-8);
 }
 
 body {

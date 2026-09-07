@@ -53,7 +53,7 @@
   <% if @palettes.empty? %>
     <p class="empty">No palettes hold this color yet.</p>
   <% else %>
-    <ul class="grid palette-list">
+    <ul class="grid cards palette-list">
       <%= render partial: "pandatone/palettes/strip", collection: @palettes, as: :palette, locals: { level: 3 } %>
     </ul>
   <% end %>

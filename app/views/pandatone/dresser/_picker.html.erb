@@ -1,0 +1,34 @@
+<%# locals: (slot_count:, serving:, demoted: [], dress_url:, refresh_url:, unreachable: nil, noun: "it") %>
+<%# The palette picker: every palette Pandatone has, ordered so the ones that
+    can dress the thing come first — demoted and not excluded, because a slot
+    taken away brings the rest back into range. dress_url takes a palette and
+    answers the URL that dresses with it; the consumer's page head goes above
+    this, and its own explanation of the thing below. %>
+<% if unreachable %>
+  <p class="empty">
+    Pandatone did not answer: <%= unreachable.message %>.
+    <br>
+    Composing needs nothing from it — only dressing does. Set
+    <code>PANDATONE_URL</code> and <code>PANDATONE_TOKEN</code> for a Pandatone somewhere else,
+    or leave both unset for the one in this application, and try again.
+  </p>
+<% else %>
+  <p class="hint measure">
+    Every palette Pandatone has, shown as the greys of its own lightness. The preview is
+    where colour belongs; what a palette is for here is how its values are spread, and six
+    hues shouting at each other is the one thing that hides it.
+  </p>
+
+  <%= render "pandatone/dresser/palettes", palettes: serving, slot_count: slot_count, dress_url: dress_url,
+        heading: "Can dress #{noun}", note: "#{pluralize(slot_count, "slot")}, so at least that many colours." %>
+
+  <% if demoted.any? %>
+    <%= render "pandatone/dresser/palettes", palettes: demoted, slot_count: slot_count, dress_url: dress_url,
+          heading: "Too few colours",
+          note: "Kept rather than hidden: take a slot away and these come back into range." %>
+  <% end %>
+
+  <div class="run">
+    <%= link_to "Refresh from Pandatone", refresh_url, class: "button button--quiet" %>
+  </div>
+<% end %>

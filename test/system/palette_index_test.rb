@@ -30,7 +30,7 @@ module Pandatone
       visit palettes_path
 
       assert_equal Palette.order(:name).pluck(:name), strip_names
-      assert_selector "[data-filter=sort] .tag.active", text: "Name", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Name", exact_text: true
     end
 
     test "sorts palettes by color, dark first and light first" do
@@ -64,7 +64,7 @@ module Pandatone
 
       assert_selector ".palette-list > li", count: 2
       assert_equal [ "Brand Core", "Autumn 2026" ], strip_names
-      assert_selector "[data-filter=sort] .tag.active", text: "Light", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Light", exact_text: true
     end
 
     test "counts the whole library when nothing is filtered" do

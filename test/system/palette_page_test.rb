@@ -249,7 +249,7 @@ module Pandatone
       # Overlap, not a shared top: the primary action is a filled box and the
       # rest are links, so they sit on one line at different heights.
       spans = evaluate_script(
-        "Array.from(document.querySelectorAll('.page-actions > *'))" \
+        "Array.from(document.querySelectorAll('.page-head__actions > *'))" \
         ".map(el => { const r = el.getBoundingClientRect(); return [r.top, r.bottom] })"
       )
 

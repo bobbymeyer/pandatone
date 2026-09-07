@@ -56,5 +56,13 @@ module Pandatone
       app.config.importmap.paths << root.join("config/importmap.rb")
       app.config.importmap.cache_sweepers << root.join("app/assets/javascripts")
     end
+
+    # The dresser's helpers reach every view of the host, because the views
+    # that use them are a consumer's. The engine's own helpers stay isolated.
+    config.to_prepare do
+      ActiveSupport.on_load(:action_view) do
+        include Pandatone::DresserHelper
+      end
+    end
   end
 end

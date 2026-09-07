@@ -12,7 +12,7 @@ module Pandatone
 
         within("[data-filter=size]") do
           assert_equal [ "Small", "Large" ], all("a").map(&:text)
-          assert_selector ".tag.active", text: "Small", exact_text: true
+          assert_selector "a[aria-current]", text: "Small", exact_text: true
         end
       end
     end
@@ -23,13 +23,13 @@ module Pandatone
       within("[data-filter=size]") { click_on "Large" }
 
       assert_current_path colors_path(size: "large")
-      assert_selector "[data-filter=size] .tag.active", text: "Large", exact_text: true
+      assert_selector "[data-filter=size] a[aria-current]", text: "Large", exact_text: true
     end
 
     test "a size nobody offers is small, not an error" do
       visit colors_path(size: "enormous")
 
-      assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
+      assert_selector "[data-filter=size] a[aria-current]", text: "Small", exact_text: true
     end
 
     # The three registers are one set of choices, so each has to survive the
@@ -38,14 +38,14 @@ module Pandatone
       visit colors_path(size: "small")
 
       within("[data-filter=tag]") { click_on "brand" }
-      assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
+      assert_selector "[data-filter=size] a[aria-current]", text: "Small", exact_text: true
 
       within("[data-filter=sort]") { click_on "Added" }
-      assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
+      assert_selector "[data-filter=size] a[aria-current]", text: "Small", exact_text: true
 
       fill_in "Search", with: "signal"
       filter_unless_live
-      assert_selector "[data-filter=size] .tag.active", text: "Small", exact_text: true
+      assert_selector "[data-filter=size] a[aria-current]", text: "Small", exact_text: true
     end
 
     test "and the other choices survive the size" do
@@ -53,8 +53,8 @@ module Pandatone
 
       within("[data-filter=size]") { click_on "Small" }
 
-      assert_selector "[data-filter=tag] .tag.active", text: "brand", exact_text: true
-      assert_selector "[data-filter=sort] .tag.active", text: "Added", exact_text: true
+      assert_selector "[data-filter=tag] a[aria-current]", text: "brand", exact_text: true
+      assert_selector "[data-filter=sort] a[aria-current]", text: "Added", exact_text: true
       assert_equal "a", find_field("Search").value
     end
 

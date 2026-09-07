@@ -7,6 +7,6 @@
 
     url_for without a controller keeps the index it is rendered on, so one
     partial serves both. %>
-<%= render "pandatone/shared/filter_row", name: "sort", label: "Sort by", items: sorts.map { |key, label|
+<%= filter_register "Sort by", sorts.map { |key, label|
       [ label, url_for(sort: key, q: params[:q], tag: params[:tag], size: params[:size]), sort_key == key ]
-    } %>
+    }, name: "sort" %>

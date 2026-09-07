@@ -14,7 +14,7 @@ module Pandatone
         # The field against the whole row, not against its own form: the form
         # collapses along with the field, so comparing the two would agree they
         # are fine.
-        field = rect_of(".filter-form > .field")
+        field = rect_of(".filters form .field")
         row = rect_of(".filters")
 
         assert_operator field["width"], :>, row["width"] / 3, "#{path}: the search field collapsed"
@@ -33,9 +33,9 @@ module Pandatone
 
         lefts = evaluate_script(<<~JS)
           [
-            ['.filters .filter-form > .field > label', '.filters .filter-form > .field > input'],
-            ...Array.from(document.querySelectorAll('.filter-row')).map(row =>
-              [row.querySelector('.filter-row__label'), row.querySelector('.tag')])
+            ['.filters form .field > label', '.filters form .field > input'],
+            ...Array.from(document.querySelectorAll('.filter')).map(row =>
+              [row.querySelector('.filter__label'), row.querySelector('.filter__choices a')])
           ].map(pair => pair.map(el =>
             Math.round((typeof el === 'string' ? document.querySelector(el) : el)
               .getBoundingClientRect().left)))
@@ -52,10 +52,10 @@ module Pandatone
 
       visit colors_path
 
-      field = rect_of(".filter-form > .field")
+      field = rect_of(".filters form .field")
       sort = rect_of("[data-filter=sort]")
 
-      assert_equal 1, tops_of("[data-filter=sort] li").uniq.size,
+      assert_equal 1, tops_of("[data-filter=sort] a").uniq.size,
         "the sort options wrapped onto more than one line"
       assert_operator sort["top"], :>=, field["top"] + field["height"] - 1,
         "the sort options crowded onto the search line"
@@ -74,8 +74,8 @@ module Pandatone
 
       %w[ tag sort ].each do |register|
         weights = evaluate_script(<<~JS)
-          Array.from(document.querySelectorAll('[data-filter=#{register}] .tag'))
-            .map(el => [el.classList.contains('active'), getComputedStyle(el).fontWeight])
+          Array.from(document.querySelectorAll('[data-filter=#{register}] .filter__choices a'))
+            .map(el => [el.hasAttribute('aria-current'), getComputedStyle(el).fontWeight])
         JS
 
         active = weights.select(&:first).map(&:last).map(&:to_i)

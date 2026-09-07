@@ -1,21 +1,14 @@
 <%# locals: (palette:, url:, submit:, with_swatch:, source: nil) %>
-<%= form_with model: palette, url: url, class: "form" do |form| %>
+<%= its_swiss_form_with model: palette, url: url do |form| %>
   <%= render "its_swiss/shared/errors", record: palette %>
 
   <% if source %>
     <%= hidden_field_tag :from, source.id %>
   <% end %>
 
-  <div class="field">
-    <%= form.label :name, "Name" %>
-    <%= form.text_field :name, autocomplete: "off" %>
-  </div>
-
-  <div class="field">
-    <%= form.label :tag_list, "Tags" %>
-    <%= form.text_field :tag_list, value: palette.tag_list, autocomplete: "off" %>
-    <p class="hint">Comma separated. Tags are how palettes are found: an "active" palette is one tagged <code>active</code>.</p>
-  </div>
+  <%= form.text_field :name, label: "Name", autocomplete: "off" %>
+  <%= form.text_field :tag_list, label: "Tags", value: palette.tag_list, autocomplete: "off",
+        hint: safe_join([ "Comma separated. Tags are how palettes are found: an \"active\" palette is one tagged ", tag.code("active"), "." ]) %>
 
   <% if source %>
     <fieldset class="swatch-entry">
@@ -53,5 +46,5 @@
     </fieldset>
   <% end %>
 
-  <%= form.submit submit, class: "button button--primary" %>
+  <%= form.submit submit %>
 <% end %>

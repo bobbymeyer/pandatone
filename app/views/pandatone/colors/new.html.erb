@@ -1,15 +1,8 @@
-<% content_for :title, "New color" %>
+<%= page_head "New color", lede: "It joins the library on its own. Put it in a palette whenever you like." %>
 
-<header class="page-head">
-  <h1 class="page-title">New color</h1>
-  <p class="lede">
-    It joins the library on its own. Put it in a palette whenever you like.
-  </p>
-</header>
-
-<%= form_with url: colors_path, class: "form" do %>
+<%= its_swiss_form_with url: colors_path do |form| %>
   <%= render "its_swiss/shared/errors", record: @color %>
   <%= render "pandatone/shared/similar_swatch", similar: @similar, color: @color if @similar %>
   <%= render "pandatone/shared/swatch_fields", color: @color.persisted? ? @color : nil %>
-  <%= submit_tag @similar ? "Create anyway" : "Create color", name: nil, class: "button button--primary" %>
+  <%= form.submit @similar ? "Create anyway" : "Create color" %>
 <% end %>

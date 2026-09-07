@@ -67,6 +67,49 @@ indexes, the swatch row. Pandatone looked its best in Archivo with the accent
 at `#e30613` and the greys warmed to `--value-chroma: 0.006; --value-hue: 95`,
 and a host may set those; the engine will not set them for it.
 
+**The script.** its-swiss pins two Stimulus controllers from its engine, and
+the host registers them once, in its `controllers/index.js`:
+`its-swiss-clipboard` for a hex that copies itself and `its-swiss-live-search`
+for the search on both indexes. The engine's own controller registers itself
+from a module its layout imports; the host adds nothing to its importmap.
+
+## Dressing something in a palette
+
+Another tool composes in value — a pattern of ranked slots, a badge of ranked
+slots — and asks Pandatone what those values are wearing. `Pandatone::Dresser`
+is how it asks, and everything it needs to hold the answer:
+
+- `Dresser::Catalog` — every palette, fetched once from `Dresser.source` and
+  filtered locally. With no `PANDATONE_URL` the source is the Pandatone in
+  the same process, through its public methods; with one, that Pandatone over
+  HTTP with `PANDATONE_TOKEN`.
+- `Dresser::Palette` and `Dresser::Color` — the wire format read back, each
+  colour measured with `Dresser::Luminance` (OKLab's L) so a palette ranks
+  lightest first: slot 0 is the ground.
+- `Dresser::Colorway`, `Dresser::Snapshot`, `Dresser::Rule` — concerns for the
+  consumer's own records. Choosing a palette takes a snapshot; a slot resolves
+  by a rule over it — by rank, or to a position in the palette; a thing that
+  outgrows its palette invalidates the colorway without losing it.
+- `Dresser::Drift` — whether the palette has moved since, as a sentence.
+  Reported, never applied.
+- `Dresser::Dressing` — the controller's three lines: the catalogue, a palette
+  out of it, the drift report.
+- `pandatone/dresser/picker`, `pandatone/dresser/actions` and the helpers
+  `palette_strip`, `slot_swatch`, `rule_in_words`; `pandatone/dresser.css`
+  beside the consumer's own stylesheets.
+
+```ruby
+class Stripeclub::Colorway < ApplicationRecord
+  include Pandatone::Dresser::Colorway
+  belongs_to :pattern
+  has_many :rules, class_name: "ValueRule", dependent: :destroy
+  delegate :slot_count, to: :pattern
+end
+```
+
+A consumer keeps its own tables and its own kinds of rule; what it takes from
+here is the part every consumer had written twice.
+
 ## Calling it from Ruby
 
 The same questions the API answers, as methods, with plain data back — the

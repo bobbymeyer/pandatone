@@ -3,6 +3,42 @@
 Semver. The API is versioned separately, under its own path, and is not
 what this file numbers.
 
+## 0.2.0 — 2026-09-07
+
+### Added
+
+- **The palette dresser.** `Pandatone::Dresser` is the consumer's side of
+  Pandatone: a catalogue of palettes read in the wire format, each colour
+  measured for how light it looks so a palette ranks paper to ink; a
+  snapshot taken at the moment a palette is chosen; a rule per slot over
+  that snapshot rather than a hex; and drift, asked for and reported, never
+  applied. Stripeclub wrote it first and Badger copied it, and a pattern
+  that appears in two consumers belongs to the thing they consume. A
+  consumer includes `Dresser::Colorway`, `Dresser::Snapshot` and
+  `Dresser::Rule` in its own records, mixes `Dresser::Dressing` into its
+  controller, and renders the picker and the swatches with
+  `pandatone/dresser/*` and the helpers `palette_strip`, `slot_swatch`
+  and `rule_in_words`. `pandatone/dresser.css` goes beside the consumer's
+  own stylesheets. With no `PANDATONE_URL` the Pandatone in the same process
+  answers through its public methods; with one, that Pandatone answers over
+  HTTP.
+
+### Changed
+
+- **Set on its-swiss 0.8.** The page head, the filter block, the card list
+  and the live search are the library's now, and the engine's own copies
+  are gone: `page_head` on every page, `search_form` and `filter_register`
+  on the two indexes and the library picker, `.cards` under them. The
+  choice in force carries `aria-current` rather than `.tag.active`. The
+  host registers `its-swiss-live-search` beside the clipboard; the engine
+  no longer ships a live search controller of its own.
+- **Every form is written by the library's builder**, so a refused field is
+  refused where it stands, with the label, the hint and the error wired to
+  the control. The swatch entry row is written under its own `swatch`
+  scope, whatever record the form around it is for.
+- `--baseline` is `--swatch-step`: half a space unit, a third of a line, and
+  not a baseline. `--register-label` is the library's `--filter-label`.
+
 ## 0.1.0 — 2026-09-04
 
 Pandatone becomes a Rails engine. Everything that knows what a swatch is

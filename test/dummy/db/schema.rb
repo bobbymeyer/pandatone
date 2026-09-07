@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_04_200003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_07_100001) do
   create_table "pandatone_colors", force: :cascade do |t|
     t.integer "b", null: false
     t.decimal "c", precision: 5, scale: 1, null: false
@@ -48,6 +48,45 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_04_200003) do
     t.index "LOWER(name)", name: "index_pandatone_palettes_on_lower_name", unique: true
   end
 
+  create_table "wearer_colorways", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "palette_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "wearer_id", null: false
+    t.index ["wearer_id"], name: "index_wearer_colorways_on_wearer_id"
+  end
+
+  create_table "wearer_palette_snapshots", force: :cascade do |t|
+    t.json "colors", default: [], null: false
+    t.integer "colorway_id", null: false
+    t.datetime "created_at", null: false
+    t.string "palette_name"
+    t.datetime "taken_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["colorway_id"], name: "index_wearer_palette_snapshots_on_colorway_id", unique: true
+  end
+
+  create_table "wearer_rules", force: :cascade do |t|
+    t.integer "colorway_id", null: false
+    t.datetime "created_at", null: false
+    t.string "kind", default: "auto_value_match", null: false
+    t.integer "rank", null: false
+    t.json "settings", default: {}, null: false
+    t.datetime "updated_at", null: false
+    t.index ["colorway_id", "rank"], name: "index_wearer_rules_on_colorway_id_and_rank", unique: true
+    t.index ["colorway_id"], name: "index_wearer_rules_on_colorway_id"
+  end
+
+  create_table "wearers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.integer "slot_count", default: 2, null: false
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "pandatone_palette_colors", "pandatone_colors", column: "color_id"
   add_foreign_key "pandatone_palette_colors", "pandatone_palettes", column: "palette_id"
+  add_foreign_key "wearer_colorways", "wearers"
+  add_foreign_key "wearer_palette_snapshots", "wearer_colorways", column: "colorway_id"
+  add_foreign_key "wearer_rules", "wearer_colorways", column: "colorway_id"
 end

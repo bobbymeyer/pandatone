@@ -63,13 +63,15 @@ module Pandatone
       assert_in_delta width_of(".filters"), width_of(".color-list"), 1
     end
 
-    test "the page head stops short of the right edge" do
+    # The page head is the library's and runs the field like every other
+    # tool's: the title takes the measure and the actions sit at the far
+    # edge, which is where they are on every page of every tool.
+    test "the page head runs the field the filters run" do
       needs_a_browser
 
       visit palettes_path
 
-      assert width_of(".page-head") < width_of(".filters"),
-        "the head should span four fields against the filter bar's six"
+      assert_in_delta width_of(".page-head"), width_of(".filters"), 1
     end
 
     private

@@ -1,0 +1,67 @@
+/* The dresser's own components, for a consumer's pages: a palette on the
+   ladder, a slot's swatch, and the picker's sections. Linked by the consumer
+   beside its own stylesheets, so its pages get them; unlayered, like theirs,
+   so they win over the library where the two meet. */
+
+/* --- A palette on the ladder --------------------------------------------
+   Its colours in luminance rank, drawn as the greys of their own lightness.
+   Colour belongs in the preview; what a palette is for here is the spread of
+   its values, and hues hide that. */
+.palette-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.palette-strip li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.palette-swatch {
+  display: block;
+  width: var(--space-4);
+  height: var(--space-4);
+  border: var(--rule-hair) solid var(--rule-strong);
+}
+
+.palette-swatch__name {
+  font-size: var(--size-1);
+  color: var(--ink-quiet);
+  max-width: 6rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* --- A slot's swatch -----------------------------------------------------
+   A slot bound to its rank shows the colour it resolves to. A slot bound to a
+   rule is hatched, because its rank has stopped deciding anything and a
+   swatch still showing one would be showing something the colorway no longer
+   reads. Never the only signal: every table using these names the rule in
+   words beside it. */
+.slot-swatch {
+  display: inline-block;
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--rule-hair) solid var(--rule-strong);
+  vertical-align: baseline;
+  margin-inline-end: var(--space-1);
+}
+
+.slot-swatch--ruled {
+  background: var(--paper);
+  background-image: repeating-linear-gradient(45deg, var(--ink-quiet) 0 1px, transparent 1px 4px);
+}
+
+/* --- The picker ----------------------------------------------------------
+   Each section of it is a section: a line above its heading, and a line
+   after it before whatever follows. */
+.palettes { margin-block-end: var(--line); }
+
+.palettes h2 {
+  font-size: var(--size-2);
+  line-height: var(--line);
+  margin-block: var(--line) 0;
+}

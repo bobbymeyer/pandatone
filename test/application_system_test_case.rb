@@ -153,7 +153,7 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
   def sort_by(label, leading:, list: ".color-list", name: ".color-card__name")
     within("[data-filter=sort]") { click_on label }
 
-    assert_selector "[data-filter=sort] .tag.active", text: label, exact_text: true
+    assert_selector "[data-filter=sort] a[aria-current]", text: label, exact_text: true
     assert_selector "#{list} > li:first-child #{name}", text: leading, exact_text: true
   end
 

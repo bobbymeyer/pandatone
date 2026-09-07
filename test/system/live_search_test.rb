@@ -10,21 +10,21 @@ module Pandatone
     test "the palette search is wired to a frame on the page" do
       visit palettes_path
 
-      assert_live_search_wired ".filter-form"
+      assert_live_search_wired ".filters form"
       assert_selector "turbo-frame#palettes .palette-list"
     end
 
     test "the color search is wired to a frame on the page" do
       visit colors_path
 
-      assert_live_search_wired ".filter-form"
+      assert_live_search_wired ".filters form"
       assert_selector "turbo-frame#colors .color-list"
     end
 
     test "the library search is wired to a frame on the page" do
       visit new_palette_color_path(palettes(:press), source: "library")
 
-      assert_live_search_wired ".library-picker .filter-form"
+      assert_live_search_wired ".library-picker .filters form"
       assert_selector "turbo-frame#library .color-list"
     end
 
@@ -37,9 +37,9 @@ module Pandatone
 
       visit palettes_path
 
-      assert_no_selector ".filter-form input[type=submit]"
+      assert_no_selector ".filters form input[type=submit]"
       # Hidden, not gone: without JavaScript it is the only way to search.
-      assert_selector ".filter-form input[type=submit]", visible: :all
+      assert_selector ".filters form input[type=submit]", visible: :all
     end
 
     test "each search still submits without javascript" do
@@ -82,8 +82,8 @@ module Pandatone
       def assert_live_search_wired(selector)
         form = find(selector, visible: :all)
 
-        assert_equal "live-search", form["data-controller"]
-        assert_includes form["data-action"].to_s, "live-search#search"
+        assert_equal "its-swiss-live-search", form["data-controller"]
+        assert_includes form["data-action"].to_s, "its-swiss-live-search#search"
 
         frame = form["data-turbo-frame"]
         assert frame.present?, "#{selector} does not target a frame"
