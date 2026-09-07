@@ -3,6 +3,22 @@
 Semver. The API is versioned separately, under its own path, and is not
 what this file numbers.
 
+## 0.3.0 — 2026-09-07
+
+A day of use. On its-swiss 0.9.
+
+### Changed
+
+- **The palette page has two surfaces.** Swatches, and Export, named under
+  the title; what is done daily — adding a swatch, exporting — is reached
+  from the head. The export links, once last on the page, are a surface of
+  their own with a line on where each format goes.
+
+- **The dresser says each thing once.** What the picker and its two lists
+  mean is behind one mark, opened when it is asked for; the snapshot's date
+  is metadata and set as such. The chosen filter is in the weight, in ink:
+  the accent is the host's, for where you are on the site.
+
 ## 0.2.0 — 2026-09-07
 
 ### Added

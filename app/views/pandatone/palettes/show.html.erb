@@ -1,4 +1,8 @@
-<%= page_head @palette.name do %>
+<%# One page, two surfaces: the swatches, and how the palette leaves. What
+    is done daily — adding a swatch, exporting — is reached from the head. %>
+<%= page_head @palette.name,
+      sections: [ [ "Swatches", palette_path(@palette), @section == "swatches" ],
+                  [ "Export", palette_path(@palette, section: "export"), @section == "export" ] ] do %>
   <%= link_to "Add a swatch", new_palette_color_path(@palette), class: "button button--primary" %>
   <%= link_to "Edit palette", edit_palette_path(@palette), class: "button" %>
   <%# Not "duplicate": the one thing it will not make is a copy. %>
@@ -8,6 +12,25 @@
         data: { turbo_confirm: "Delete #{@palette.name} and its swatch order? The colors stay in the library." } %>
 <% end %>
 
+<% if @section == "export" %>
+  <%# Two formats, because between them they cover where these colors
+      actually go: a design tool, and a stylesheet. %>
+  <table class="table export">
+    <thead>
+      <tr><th scope="col">File</th><th scope="col">Goes to</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><%= link_to "ASE", palette_path(@palette, format: :ase), class: "link-quiet" %></td>
+        <td>A design tool. Adobe Swatch Exchange: the swatches in order, named as they are here.</td>
+      </tr>
+      <tr>
+        <td><%= link_to "CSS variables", palette_path(@palette, format: :css), class: "link-quiet" %></td>
+        <td>A stylesheet. One custom property per swatch, on <code>:root</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+<% else %>
 <%= turbo_frame_tag "palette_tags" do %>
   <div class="inline-edit">
     <p class="tags"><%= @palette.tags.any? ? tag_links(@palette.tags) { |tag| palettes_path(tag: tag) } : "Untagged" %></p>
@@ -86,15 +109,4 @@
     </div>
   </section>
 <% end %>
-
-<%# Last on the page, because it is the one thing here that takes the palette
-    somewhere else rather than changing it. Two formats, because between them
-    they cover where these colors actually go: a design tool, and a
-    stylesheet. %>
-<div class="export">
-  <span class="export__label">Export</span>
-  <ul class="link-list">
-    <li><%= link_to "ASE", palette_path(@palette, format: :ase), class: "link-quiet" %></li>
-    <li><%= link_to "CSS variables", palette_path(@palette, format: :css), class: "link-quiet" %></li>
-  </ul>
-</div>
+<% end %>

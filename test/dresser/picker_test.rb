@@ -45,7 +45,7 @@ module Pandatone
 
       assert_select "form[action='/drift'] button", text: "Check for drift"
       assert_select "form[action='/remove'] button", text: "Take off"
-      assert_select ".hint", text: /Taken/
+      assert_select ".micro", text: /Taken/
     end
   end
 end

@@ -15,7 +15,12 @@ module Pandatone
       @total = Palette.count
     end
 
+    # The page's two surfaces: the swatches, and how the palette leaves.
+    SECTIONS = %w[ swatches export ].freeze
+
     def show
+      @section = SECTIONS.include?(params[:section]) ? params[:section] : "swatches"
+
       respond_to do |format|
         format.html
         format.ase { send_palette(@palette, :ase) }

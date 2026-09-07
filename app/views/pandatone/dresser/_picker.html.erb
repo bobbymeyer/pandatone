@@ -13,11 +13,9 @@
     or leave both unset for the one in this application, and try again.
   </p>
 <% else %>
-  <p class="hint measure">
-    Every palette Pandatone has, shown as the greys of its own lightness. The preview is
-    where colour belongs; what a palette is for here is how its values are spread, and six
-    hues shouting at each other is the one thing that hides it.
-  </p>
+  <%= explain "Every palette Pandatone has, shown as the greys of its own lightness. The preview is " \
+        "where colour belongs; what a palette is for here is how its values are spread, and six " \
+        "hues shouting at each other is the one thing that hides it." %>
 
   <%= render "pandatone/dresser/palettes", palettes: serving, slot_count: slot_count, dress_url: dress_url,
         heading: "Can dress #{noun}", note: "#{pluralize(slot_count, "slot")}, so at least that many colours." %>
