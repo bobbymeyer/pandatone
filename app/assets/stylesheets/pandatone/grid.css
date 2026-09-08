@@ -14,8 +14,8 @@
    fields. */
 
 main.grid {
-  row-gap: var(--space-5);
-  padding-block: var(--space-5) var(--space-13);
+  row-gap: var(--line-2);
+  padding-block: var(--line-2) var(--line-4);
   align-content: start;
 }
 

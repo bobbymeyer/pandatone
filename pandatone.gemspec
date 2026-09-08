@@ -33,7 +33,7 @@ Gem::Specification.new do |spec|
   # The typographic style every screen is set in. Declared here rather than
   # taken from the host on faith, so the engine renders the same anywhere it
   # is mounted. Bundler resolves the host's copy and this one to a single gem.
-  spec.add_dependency "its-swiss", "~> 0.9"
+  spec.add_dependency "its-swiss", "~> 1.0"
   spec.add_dependency "propshaft", ">= 1.0", "< 3"
   spec.add_dependency "importmap-rails", ">= 2.0", "< 4"
   spec.add_dependency "turbo-rails", ">= 2.0", "< 3"
