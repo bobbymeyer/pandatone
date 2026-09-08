@@ -1,5 +1,8 @@
 # Changelog
 
+Semver. The API is versioned separately, under its own path, and is not
+what this file numbers.
+
 ## Unreleased
 
 ### Changed
@@ -8,9 +11,6 @@
   the day its-swiss reached 1.0, in this gemspec and two others, to accept a
   library we had just released ourselves. `>= 1.0` says which API this was
   written against and lets a new major arrive with everything else.
-
-Semver. The API is versioned separately, under its own path, and is not
-what this file numbers.
 
 ## 0.4.0 — 2026-09-08
 
