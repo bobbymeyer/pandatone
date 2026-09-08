@@ -20,12 +20,21 @@ swatch is, and nothing that does not.
 ## Mounting it
 
 ```ruby
-# Gemfile — not on RubyGems; taken from the tag
-gem "pandatone", github: "bobbymeyer/pandatone", tag: "v0.1.0"
+# Gemfile — not on RubyGems; taken from its main branch
+gem "pandatone", github: "bobbymeyer/pandatone", branch: "main"
 
 # config/routes.rb
 mount Pandatone::Engine, at: "/pandatone"
 ```
+
+No tag. A tag cannot exist until the change that needs it has merged, so
+pinning one costs a re-pin on every move; the host's `Gemfile.lock` records
+the revision Bundler resolved, and that is what pins a deploy. `bundle update
+pandatone` moves it, and the lock's diff is the record of when. Name the
+branch rather than leaving the ref off: with no ref, Bundler resolves
+whatever the cached clone's HEAD happens to be. Releases are still numbered
+in `CHANGELOG.md`, and the gemspec's constraints are what a host resolves
+against.
 
 Then `bin/rails db:migrate`: the engine's migrations run with the host's
 rather than being copied into it. Its tables are prefixed `pandatone_`. It is
@@ -67,10 +76,10 @@ indexes, the swatch row. Pandatone looked its best in Archivo with the accent
 at `#e30613` and the greys warmed to `--value-chroma: 0.006; --value-hue: 95`,
 and a host may set those; the engine will not set them for it.
 
-**The script.** its-swiss pins two Stimulus controllers from its engine, and
-the host registers them once, in its `controllers/index.js`:
-`its-swiss-clipboard` for a hex that copies itself and `its-swiss-live-search`
-for the search on both indexes. The engine's own controller registers itself
+**The script.** its-swiss registers its own two controllers from the module
+its shell imports — `its-swiss-clipboard` for a hex that copies itself and
+`its-swiss-live-search` for the search on both indexes — so a host registers
+nothing for it. The engine's own controller registers itself the same way,
 from a module its layout imports; the host adds nothing to its importmap.
 
 ## Dressing something in a palette
