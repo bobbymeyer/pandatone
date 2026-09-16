@@ -2,6 +2,11 @@
 
 palette management for robots
 
+> **Archived.** Pandatone was an attempt to create a small, sharp tool used
+> that could be easily integrated to help manage consistent color usage across
+> projects. It got heavy, fast. I learned a lot, but ultimately decided this
+> was not the way to solve this particular set of problems.
+
 A palette library as a Rails engine: named, tagged colors and the palettes
 that hold them, with a versioned JSON API and a Ruby interface, so other tools
 can ask two questions — give me the colors of the palette tagged `active`, and
